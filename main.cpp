@@ -7,6 +7,10 @@ class Character_Stats {
     int Mana;
 public:
     Character_Stats(float Health_, float Speed_, int Mana_) : Health(Health_), Speed(Speed_), Mana(Mana_) {}
+    friend std::ostream & operator<<(std::ostream & out, const Character_Stats & object) {
+        out<<object.Health<<" "<<object.Speed<<" "<<object.Mana;
+        return out;
+    }
 
 };
 
@@ -17,6 +21,10 @@ class Tool {
 public:
     Tool(const std::string& name_, float Damage_, float Cooldown_, int Critical_Chance_)
         : Name(name_), Damage(Damage_), Cooldown(Cooldown_), Critical_Chance(Critical_Chance_) {}
+    friend std::ostream & operator<<(std::ostream & out, const Tool & object) {
+        out<<object.Name<<" "<<object.Damage<<" "<<object.Cooldown<<" "<<object.Critical_Chance;
+        return out;
+    }
     float DamageCalculation() {
         int Chance = rand() % 100;
         if (Chance < Critical_Chance) {
@@ -34,6 +42,10 @@ public:
     explicit Character(const std::string& name_) : Name(name_) {}
     Character(const Character& other)
         : Name(other.Name), Stats(other.Stats), Weapon(other.Weapon) {}
+    friend std::ostream & operator<<(std::ostream & out, const Character & object) {
+        out<<object.Name;
+        return out;
+    }
     ~Character() {
         std::cout << Name << " Destroyed\n";
     }
@@ -50,6 +62,10 @@ class Enviroment_Object {
     float Health;
 public:
     Enviroment_Object(bool isDestructable_, float Health_) : isDestructable(isDestructable_), Health(Health_) {}
+    friend std::ostream & operator<<(std::ostream & out, const Enviroment_Object & object) {
+        out<<object.isDestructable<<" "<<object.Health;
+        return out;
+    }
 };
 
 

@@ -1,12 +1,10 @@
-# Nu primesc notă pentru că nu am pus titlu și descriere
+# Wukong
 
-### Folosiți template-ul corespunzător grupei voastre!
+### Descriere
+Wukong este un joc top-down action adventure despre o maimuță care dorește să găsească comoara dintr-un ținut uitat ca să o adauge la colecția sa. Folosește-te de bățul extensibil al maimuței pentru a dezlănțui atacuri de rază de acțiune scurtă sau lungă pentru a distruge inamici sau obiecte care îți stau în cale. Încarcă bara de putere la maxim atacând inamici pentru a declanșa unul dintre cele două atacuri speciale, laserul cu putere devastatoarea sau schimbarea temporară a atacurilor rapide cu rază de acțiune scurtă
+în atacuri cu rază de acțiune lungă. Utilizează tot arsenalul de abilități ale personajului pentru a îndeplini misiunea.
 
-| Laborant  | Link template                                |
-|-----------|----------------------------------------------|
-| Dragoș B  | https://github.com/Ionnier/oop-template      |
-| Tiberiu M | https://github.com/MaximTiberiu/oop-template |
-| Marius MC | https://github.com/mcmarius/oop-template     |
+Inspirație: [The Legend of Zelda: The Minish Cap](https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_The_Minish_Cap), [Dragon Ball Z: The Legacy of Goku](https://en.wikipedia.org/wiki/Dragon_Ball_Z:_The_Legacy_of_Goku)
 
 ### Important!
 

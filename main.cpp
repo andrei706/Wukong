@@ -1,24 +1,40 @@
 #include <iostream>
 #include <array>
 #include <string>
+#include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
+#include <SFML/System.hpp>
 
 class Character_Stats {
-    float Health, Speed;
+    float MaxHealth, Health, Speed;
     int Mana;
+
 public:
-    Character_Stats(float Health_, float Speed_, int Mana_)
-        : Health(Health_), Speed(Speed_), Mana(Mana_) {}
+
+    explicit Character_Stats(float MaxHealth_ = 10, float Speed_ = 6, int Mana_ = 5)
+        : MaxHealth(MaxHealth_), Speed(Speed_), Mana(Mana_) {
+        Health = MaxHealth;
+    }
     friend std::ostream & operator<<(std::ostream & out, const Character_Stats & object) {
-        out<<object.Health<<" "<<object.Speed<<" "<<object.Mana;
+        out<<object.MaxHealth<<" "<<object.Speed<<" "<<object.Mana;
         return out;
     }
 
+    int ReduceHealth(float DamagePoints) {
+        if (Health - DamagePoints <= 0) {
+            Health = 0;
+            return 0; //Alive state
+        }
+        Health -= DamagePoints;
+        return 1;
+    }
 };
 
 class Tool {
     std::string Name;
     float Damage, Cooldown;
     int Critical_Chance;
+
 public:
     Tool(const std::string& name_, float Damage_, float Cooldown_, int Critical_Chance_)
         : Name(name_), Damage(Damage_), Cooldown(Cooldown_), Critical_Chance(Critical_Chance_) {}
@@ -26,7 +42,8 @@ public:
         out<<object.Name<<" "<<object.Damage<<" "<<object.Cooldown<<" "<<object.Critical_Chance;
         return out;
     }
-    float DamageCalculation() const {
+
+    [[nodiscard]] float DamageCalculation() const {
         int Chance = rand() % 100;
         if (Chance < Critical_Chance) {
             return (float)Damage + 0.5 * Damage;
@@ -35,27 +52,43 @@ public:
     }
 };
 
-class Character {
+class Enemy {
     std::string Name;
     Character_Stats Stats{10, 5, 5 };
     Tool Weapon{"Sword", 3, 0.6f, 10};
 public:
-    explicit Character(const std::string& name_) : Name(name_) {}
-    Character(const Character& other)
+
+    explicit Enemy(const std::string& name_) : Name(name_) {}
+    Enemy(const Enemy& other)
         : Name(other.Name), Stats(other.Stats), Weapon(other.Weapon) {}
-    friend std::ostream & operator<<(std::ostream & out, const Character & object) {
-        out<<object.Name;
-        return out;
-    }
-    ~Character() {
+    ~Enemy() {
         std::cout << Name << " Destroyed\n";
     }
-    Character& operator=(const Character& other) {
+    friend std::ostream & operator<<(std::ostream & out, const Enemy & object) {
+        out<<object.Name<<"\n"<<object.Stats<<"\n"<<object.Weapon;
+        return out;
+    }
+
+    void TakeDamage (float Damage_Points) {
+        Stats.ReduceHealth(Damage_Points);
+    }
+    void AssignWeapon (const Tool& other) {
+        Weapon = other;
+    }
+    void AssignStats (const Character_Stats& other) {
+        Stats = other;
+    }
+    Enemy& operator=(const Enemy& other) {
         Name = other.Name;
         Stats = other.Stats;
         Weapon = other.Weapon;
         return *this;
     }
+};
+
+class Player {
+    int Exp;
+    Character_Stats Stats{10, 6, 5};
 };
 
 class Enviroment_Object {
@@ -73,6 +106,20 @@ public:
 
 int main() {
     srand(time(0));
+
+    sf::Window window;
+    window.create(sf::VideoMode({800, 600}), "Wukong");
+    window.setFramerateLimit(60);
+
+    //Main loop
+    while (window.isOpen()) {
+        while (const std::optional event = window.pollEvent())
+        {
+            if (event->is<sf::Event::Closed>())
+                window.close();
+
+        }
+    }
 
     return 0;
 }

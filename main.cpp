@@ -1,5 +1,6 @@
 #include <iostream>
 #include <array>
+#include <vector>
 #include <string>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -86,9 +87,41 @@ public:
     }
 };
 
-class Player {
-    int Exp;
-    Character_Stats Stats{10, 6, 5};
+class Player_Class {
+    int Experience, Gauge = 0;
+    bool Invincibility = 0;
+    sf::Time InvincibilityTime = sf::seconds(0.4);
+    Character_Stats Stats{30, 6, 0};
+    Tool
+        PoleShortRange{"Pool Short Range", 1, 0.4, 2},
+        PoleLongRange{"Pole Long Range", 4, 2, 10};
+
+    sf::RectangleShape Sprite;
+
+private:
+    //trebuie regandita, probabil fac frame based verification event
+    // void MakeInvincible(sf::Time Interval) {
+    //     Invincibility = true;
+    //     sf::Clock clock;
+    //     sf::Time elapsed1 = clock.getElapsedTime();
+    //     sf::Time elapsed2 = clock.getElapsedTime();
+    //     while (elapsed2 - elapsed1 < Interval) {
+    //         elapsed2 = clock.getElapsedTime();
+    //     }
+    //     Invincibility = false;
+    // }
+
+public:
+    Player_Class(int Experience_) : Experience(Experience_) {
+        Sprite.setSize(sf::Vector2f(50.f, 50.f));
+        Sprite.setFillColor(sf::Color::Blue);
+        Sprite.setPosition({100.f, 100.f});
+    };
+
+    void Show_Sprite(sf::RenderWindow& window) {
+        window.draw(Sprite);
+    }
+
 };
 
 class Enviroment_Object {
@@ -103,23 +136,42 @@ public:
     }
 };
 
+class Game {
+    sf::RenderWindow& window;
+    Player_Class &player;
+
+public:
+    Game(sf::RenderWindow& window_, Player_Class& player_) : window(window_), player(player_) {}
+
+    void WindowRendering() {
+        window.setFramerateLimit(60);
+        while (window.isOpen()) {
+            while (const std::optional event = window.pollEvent())
+            {
+                if (event->is<sf::Event::Closed>())
+                    window.close();
+
+            }
+            window.clear(sf::Color::Black);
+
+            //here we draw
+            //window.draw(player->Sprite);
+            player.Show_Sprite(window);
+
+            window.display();
+        }
+    }
+};
 
 int main() {
     srand(time(0));
 
-    sf::Window window;
+    sf::RenderWindow window;
     window.create(sf::VideoMode({800, 600}), "Wukong");
-    window.setFramerateLimit(60);
 
-    //Main loop
-    while (window.isOpen()) {
-        while (const std::optional event = window.pollEvent())
-        {
-            if (event->is<sf::Event::Closed>())
-                window.close();
-
-        }
-    }
+    Player_Class Player{1};
+    Game myGame{window, Player};
+    myGame.WindowRendering();
 
     return 0;
 }

@@ -15,9 +15,19 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+include(FetchContent)
+
 include(cmake/Options.cmake)
 include(cmake/CompilerFlags.cmake)
 include(cmake/CopyHelper.cmake)
+
+FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG        3.0.x # <which tag/branch @ <some_date>>
+        GIT_SHALLOW    1
+)
+FetchContent_MakeAvailable(SFML)
 
 ###############################################################################
 
@@ -50,6 +60,14 @@ include(cmake/CopyHelper.cmake)
 # NOTE: update executable name in .github/workflows/cmake.yml:25 when changing name here
 add_executable(${MAIN_EXECUTABLE_NAME}
     main.cpp
+)
+
+target_link_libraries(${MAIN_EXECUTABLE_NAME}
+        PRIVATE
+            SFML::Graphics
+            SFML::Window
+            SFML::System
+            # SFML::Audio
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

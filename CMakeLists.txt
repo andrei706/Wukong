@@ -75,7 +75,7 @@ target_link_libraries(${MAIN_EXECUTABLE_NAME}
             SFML::Graphics
             SFML::Window
             SFML::System
-            # SFML::Audio
+            SFML::Audio
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

@@ -1,0 +1,10 @@
+Zombie
+20
+3
+0
+Sword
+Ghoul
+25
+4
+0
+Punch

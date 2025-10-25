@@ -1,5 +1,7 @@
 #include <iostream>
+#include <fstream>
 #include <array>
+#include <cmath>
 #include <vector>
 #include <string>
 #include <SFML/Graphics.hpp>
@@ -19,6 +21,9 @@ public:
     friend std::ostream & operator<<(std::ostream & out, const Character_Stats & object) {
         out<<object.MaxHealth<<" "<<object.Speed<<" "<<object.Mana;
         return out;
+    }
+    [[nodiscard]] float GetSpeed() const {
+        return Speed;
     }
 
     int ReduceHealth(float DamagePoints) {
@@ -44,6 +49,10 @@ public:
         return out;
     }
 
+    std::string NameGetter() {
+        return Name;
+    }
+
     [[nodiscard]] float DamageCalculation() const {
         int Chance = rand() % 100;
         if (Chance < Critical_Chance) {
@@ -57,6 +66,8 @@ class Enemy {
     std::string Name;
     Character_Stats Stats{10, 5, 5 };
     Tool Weapon{"Sword", 3, 0.6f, 10};
+
+    sf::Vector2f Position = {100.f, 100.f};
 public:
 
     explicit Enemy(const std::string& name_) : Name(name_) {}
@@ -90,13 +101,15 @@ public:
 class Player_Class {
     int Experience, Gauge = 0;
     bool Invincibility = 0;
-    sf::Time InvincibilityTime = sf::seconds(0.4f);
-    Character_Stats Stats{30, 6, 0};
+    Character_Stats Stats{30, 15, 0};
     Tool
         PoleShortRange{"Pool Short Range", 1, 0.4f, 2},
         PoleLongRange{"Pole Long Range", 4, 2, 10};
 
     sf::RectangleShape Sprite;
+    sf::Vector2f Position = {100.f, 100.f};
+    sf::Vector2f Size = {50.f, 50.f};
+    sf::Time InvincibilityTime = sf::seconds(0.4f);
 
 private:
     //trebuie regandita, probabil fac frame based verification event
@@ -113,20 +126,43 @@ private:
 
 public:
     Player_Class(int Experience_) : Experience(Experience_) {
-        Sprite.setSize(sf::Vector2f(50.f, 50.f));
+
+        Sprite.setSize(Size);
+        Sprite.setOrigin({Size.x / 2, Size.y / 2});
         Sprite.setFillColor(sf::Color::Blue);
-        Sprite.setPosition({100.f, 100.f});
+        Sprite.setPosition(Position);
+
         Gauge = 0;
         Invincibility = 0;
         Experience = 0;
     };
 
-    void Show_Sprite(sf::RenderWindow& window) {
+    void ShowSprite(sf::RenderWindow& window) {
         window.draw(Sprite);
     }
 
-    void Add_Experience(int Value) {
+    void AddExperience(int Value) {
         Experience += Value;
+    }
+
+    void HandleMovement(float deltaTime = 0.16) {
+        sf::Vector2f movement(0.f, 0.f);
+        float speed = Stats.GetSpeed();
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+            movement.y -= speed * deltaTime;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+            movement.y += speed * deltaTime;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+            movement.x -= speed * deltaTime;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+            movement.x += speed * deltaTime;
+
+        Sprite.move(movement);
+    }
+
+    sf::RectangleShape& GetSprite() {
+        return Sprite;
     }
 };
 
@@ -142,12 +178,67 @@ public:
     }
 };
 
-class Game {
+class Game_Class {
     sf::RenderWindow& window;
     Player_Class &player;
 
+    std::vector<Enemy> EnemyList, SpawnedEnemies;
+    std::vector<Tool> ToolList;
+
+private:
+    void RenderEntities(sf::RenderWindow& window) {
+        player.ShowSprite(window);
+    }
+
+    void ReadData() {
+        //Eventual fisierele txt vor fi inlocuite cu json-uri
+        std::ifstream File1("data/EnemyList.txt");
+        std::ifstream File2("data/ToolList.txt");
+
+        std::string Name, WeaponName;
+        float Damage, Cooldown;
+        int Critical_Chance;
+        while (File2 >> WeaponName >> Damage >> Cooldown >> Critical_Chance) {
+            Tool WeaponAux{WeaponName, Damage, Cooldown, Critical_Chance};
+            ToolList.push_back(WeaponAux);
+        }
+        File2.close();
+
+        float MaxHealth, Speed;
+        int Mana;
+        while (File1 >> Name >> MaxHealth >> Speed >> Mana >> WeaponName) {
+            Enemy EnemyAux{Name};
+            Character_Stats StatsAux{MaxHealth, Speed, Mana};
+            EnemyAux.AssignStats(StatsAux);
+            for (auto Weapon : ToolList)
+                if (Weapon.NameGetter() == WeaponName) {
+                    EnemyAux.AssignWeapon(Weapon);
+                    break;
+                }
+            EnemyList.push_back(EnemyAux);
+        }
+        File1.close();
+
+    }
+
+    void PlayerBehavoir() {
+        player.HandleMovement();
+
+        //Mouse orientation
+        sf::Vector2i MousePos = sf::Mouse::getPosition(window);
+        sf::Vector2f MouseWorldPos = sf::Vector2f(MousePos.x, MousePos.y);
+        sf::Vector2f PlayerPosition = player.GetSprite().getPosition();
+        sf::Vector2f diff = MouseWorldPos - PlayerPosition;
+
+        float radians = std::atan2(diff.y, diff.x);
+        float angleDegrees = radians * 180.f / 3.14;
+        player.GetSprite().setRotation(sf::degrees(angleDegrees));
+    }
+
 public:
-    Game(sf::RenderWindow& window_, Player_Class& player_) : window(window_), player(player_) {}
+    Game_Class(sf::RenderWindow& window_, Player_Class& player_) : window(window_), player(player_) {
+        ReadData();
+    }
 
     void WindowRendering() {
         window.setFramerateLimit(60);
@@ -158,12 +249,12 @@ public:
                     window.close();
 
             }
+
+            PlayerBehavoir();
+
+            //Rendering
             window.clear(sf::Color::Black);
-
-            //here we draw
-            //window.draw(player->Sprite);
-            player.Show_Sprite(window);
-
+            RenderEntities(window);
             window.display();
         }
     }
@@ -176,8 +267,8 @@ int main() {
     window.create(sf::VideoMode({800, 600}), "Wukong");
 
     Player_Class Player{1};
-    Game myGame{window, Player};
-    myGame.WindowRendering();
+    Game_Class Game{window, Player};
+    Game.WindowRendering();
 
     return 0;
 }

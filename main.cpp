@@ -19,7 +19,7 @@ public:
         Health = MaxHealth;
     }
     friend std::ostream & operator<<(std::ostream & out, const Character_Stats & object) {
-        out<<object.MaxHealth<<" "<<object.Speed<<" "<<object.Mana;
+        out<<object.MaxHealth<<" "<<object.Health<<" "<<object.Speed<<" "<<object.Mana;
         return out;
     }
     [[nodiscard]] float GetSpeed() const {
@@ -54,6 +54,7 @@ public:
     }
 
     [[nodiscard]] float DamageCalculation() const {
+        srand(time(NULL));
         int Chance = rand() % 100;
         if (Chance < Critical_Chance) {
             return (float)Damage + 0.5 * Damage;
@@ -86,6 +87,12 @@ public:
         return out;
     }
 
+    sf::RectangleShape& GetSprite() {
+        return Sprite;
+    }
+    float GetDamage() {
+        return Weapon.DamageCalculation();
+    }
     void TakeDamage (float Damage_Points) {
         Stats.ReduceHealth(Damage_Points);
     }
@@ -108,6 +115,7 @@ public:
         return *this;
     }
 
+
     void ShowSprite(sf::RenderWindow& window) {
         window.draw(Sprite);
     }
@@ -124,7 +132,8 @@ class Player_Class {
     sf::RectangleShape Sprite;
     sf::Vector2f Position = {100.f, 100.f};
     sf::Vector2f Size = {50.f, 50.f};
-    sf::Time InvincibilityTime = sf::seconds(0.4f);
+    sf::Time InvincibilityTime = sf::seconds(1.0f);
+    sf::Clock ClockInvincibilityTime;
 
 private:
     //trebuie regandita, probabil fac frame based verification event
@@ -138,6 +147,17 @@ private:
     //     }
     //     Invincibility = false;
     // }
+    bool MakeInvincibile() {
+        if (Invincibility == 1) {
+            if (ClockInvincibilityTime.getElapsedTime() >= InvincibilityTime) {
+                Invincibility = 0;
+            }
+            return 1;
+        }
+        ClockInvincibilityTime.restart();
+        Invincibility = 1;
+        return 0;
+    }
 
 public:
     Player_Class(int Experience_) : Experience(Experience_) {
@@ -161,7 +181,16 @@ public:
         Experience += Value;
     }
 
+    void TakeDamage(float Value) {
+        if (!MakeInvincibile()) {
+            Stats.ReduceHealth(Value);
+            std::cout<<Stats<<"\n";
+        }
+    }
+
     void HandleActions(sf::RenderWindow &window, float deltaTime = 0.16) {
+
+        //Movement
         sf::Vector2f movement(0.f, 0.f);
         float speed = Stats.GetSpeed();
 
@@ -250,7 +279,19 @@ private:
     }
 
     void EventHandler() {
+        //Collision Verification
+        //Between Player and Enemy
+        sf::FloatRect intersection;
+        sf::FloatRect PlayerBounds = player.GetSprite().getGlobalBounds();
+        for (auto &i : SpawnedEnemies) {
+            sf::FloatRect EnemyBounds = i.GetSprite().getGlobalBounds();
 
+            if (EnemyBounds.findIntersection(PlayerBounds)) {
+                player.TakeDamage(i.GetDamage());
+            }
+        }
+
+        //Player Event
         player.HandleActions(window);
 
     }
@@ -269,7 +310,7 @@ private:
             EventHandler();
 
             //Rendering
-            window.clear(sf::Color::Black);
+            window.clear(sf::Color::White);
             RenderEntities();
             window.display();
         }
@@ -289,7 +330,6 @@ public:
 };
 
 int main() {
-    srand(time(0));
 
     sf::RenderWindow window;
     window.create(sf::VideoMode({800, 600}), "Wukong");

@@ -118,12 +118,16 @@ public:
         Sprite.setPosition({100.f, 100.f});
         Gauge = 0;
         Invincibility = 0;
+        Experience = 0;
     };
 
     void Show_Sprite(sf::RenderWindow& window) {
         window.draw(Sprite);
     }
 
+    void Add_Experience(int Value) {
+        Experience += Value;
+    }
 };
 
 class Enviroment_Object {

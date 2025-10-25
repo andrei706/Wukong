@@ -90,10 +90,10 @@ public:
 class Player_Class {
     int Experience, Gauge = 0;
     bool Invincibility = 0;
-    sf::Time InvincibilityTime = sf::seconds(0.4);
+    sf::Time InvincibilityTime = sf::seconds(0.4f);
     Character_Stats Stats{30, 6, 0};
     Tool
-        PoleShortRange{"Pool Short Range", 1, 0.4, 2},
+        PoleShortRange{"Pool Short Range", 1, 0.4f, 2},
         PoleLongRange{"Pole Long Range", 4, 2, 10};
 
     sf::RectangleShape Sprite;
@@ -116,6 +116,8 @@ public:
         Sprite.setSize(sf::Vector2f(50.f, 50.f));
         Sprite.setFillColor(sf::Color::Blue);
         Sprite.setPosition({100.f, 100.f});
+        Gauge = 0;
+        Invincibility = 0;
     };
 
     void Show_Sprite(sf::RenderWindow& window) {

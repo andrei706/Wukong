@@ -141,7 +141,7 @@ jobs:
             cxx: g++-12
             # renovate: depName=ubuntu
             name: "Valgrind: Ubuntu 22.04 GCC 12"
-            # cmake_flags:
+            cmake_flags: -DBUILD_SHARED_LIBS=FALSE
             cmake_generator: Ninja
             # This env runs valgrind
             runs_valgrind: true

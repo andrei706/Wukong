@@ -14,11 +14,15 @@ runs:
           libxrandr-dev \
           libxcursor-dev \
           libxi-dev \
-          libglu1-mesa-dev \
           libudev-dev \
           libopenal-dev \
+          libvorbis-dev \
           libogg-dev \
-          libvorbis-dev
+          libflac-dev \
+          libjpeg-dev \
+          libgl1-mesa-dev \
+          libfreetype6-dev \
+          libsndfile1-dev
         # https://github.com/llvm/llvm-project/issues/78354
         sudo sysctl vm.mmap_rnd_bits=28
 

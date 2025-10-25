@@ -281,7 +281,6 @@ private:
     void EventHandler() {
         //Collision Verification
         //Between Player and Enemy
-        sf::FloatRect intersection;
         sf::FloatRect PlayerBounds = player.GetSprite().getGlobalBounds();
         for (auto &i : SpawnedEnemies) {
             sf::FloatRect EnemyBounds = i.GetSprite().getGlobalBounds();

@@ -16,7 +16,8 @@ runs:
           libxi-dev \
           libglu1-mesa-dev \
           libudev-dev \
-          libopenal-dev
+          libopenal-dev \
+          libogg-dev
         # https://github.com/llvm/llvm-project/issues/78354
         sudo sysctl vm.mmap_rnd_bits=28
 

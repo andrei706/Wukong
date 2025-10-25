@@ -67,12 +67,17 @@ class Enemy {
     Character_Stats Stats{10, 5, 5 };
     Tool Weapon{"Sword", 3, 0.6f, 10};
 
-    sf::Vector2f Position = {100.f, 100.f};
+    sf::RectangleShape Sprite;
+    sf::Vector2f Position = {200.f, 100.f};
 public:
 
-    explicit Enemy(const std::string& name_) : Name(name_) {}
+    explicit Enemy(const std::string& name_) : Name(name_) {
+        Sprite.setFillColor(sf::Color::Red);
+        Sprite.setPosition(Position);
+        Sprite.setSize({50, 50});
+    }
     Enemy(const Enemy& other)
-        : Name(other.Name), Stats(other.Stats), Weapon(other.Weapon) {}
+        : Name(other.Name), Stats(other.Stats), Weapon(other.Weapon), Sprite(other.Sprite) {}
     ~Enemy() {
         std::cout << Name << " Destroyed\n";
     }
@@ -90,11 +95,21 @@ public:
     void AssignStats (const Character_Stats& other) {
         Stats = other;
     }
+    void SetPosition(float x, float y) {
+        Position.x = x;
+        Position.y = y;
+        Sprite.setPosition(Position);
+    }
     Enemy& operator=(const Enemy& other) {
         Name = other.Name;
         Stats = other.Stats;
         Weapon = other.Weapon;
+        Sprite = other.Sprite;
         return *this;
+    }
+
+    void ShowSprite(sf::RenderWindow& window) {
+        window.draw(Sprite);
     }
 };
 
@@ -132,6 +147,7 @@ public:
         Sprite.setFillColor(sf::Color::Blue);
         Sprite.setPosition(Position);
 
+
         Gauge = 0;
         Invincibility = 0;
         Experience = 0;
@@ -145,7 +161,7 @@ public:
         Experience += Value;
     }
 
-    void HandleMovement(float deltaTime = 0.16) {
+    void HandleActions(sf::RenderWindow &window, float deltaTime = 0.16) {
         sf::Vector2f movement(0.f, 0.f);
         float speed = Stats.GetSpeed();
 
@@ -159,6 +175,15 @@ public:
             movement.x += speed * deltaTime;
 
         Sprite.move(movement);
+
+        sf::Vector2i MousePos = sf::Mouse::getPosition(window);
+        sf::Vector2f MouseWorldPos = sf::Vector2f(MousePos.x, MousePos.y);
+        sf::Vector2f PlayerPosition = Sprite.getPosition();
+        sf::Vector2f diff = MouseWorldPos - PlayerPosition;
+
+        float radians = std::atan2(diff.y, diff.x);
+        float angleDegrees = radians * 180.f / 3.14;
+        Sprite.setRotation(sf::degrees(angleDegrees));
     }
 
     sf::RectangleShape& GetSprite() {
@@ -186,8 +211,11 @@ class Game_Class {
     std::vector<Tool> ToolList;
 
 private:
-    void RenderEntities(sf::RenderWindow& window) {
+    void RenderEntities() {
         player.ShowSprite(window);
+        for (auto &i : SpawnedEnemies) {
+            i.ShowSprite(window);
+        }
     }
 
     void ReadData() {
@@ -210,7 +238,7 @@ private:
             Enemy EnemyAux{Name};
             Character_Stats StatsAux{MaxHealth, Speed, Mana};
             EnemyAux.AssignStats(StatsAux);
-            for (auto Weapon : ToolList)
+            for (auto &Weapon : ToolList)
                 if (Weapon.NameGetter() == WeaponName) {
                     EnemyAux.AssignWeapon(Weapon);
                     break;
@@ -221,23 +249,10 @@ private:
 
     }
 
-    void PlayerBehavoir() {
-        player.HandleMovement();
+    void EventHandler() {
 
-        //Mouse orientation
-        sf::Vector2i MousePos = sf::Mouse::getPosition(window);
-        sf::Vector2f MouseWorldPos = sf::Vector2f(MousePos.x, MousePos.y);
-        sf::Vector2f PlayerPosition = player.GetSprite().getPosition();
-        sf::Vector2f diff = MouseWorldPos - PlayerPosition;
+        player.HandleActions(window);
 
-        float radians = std::atan2(diff.y, diff.x);
-        float angleDegrees = radians * 180.f / 3.14;
-        player.GetSprite().setRotation(sf::degrees(angleDegrees));
-    }
-
-public:
-    Game_Class(sf::RenderWindow& window_, Player_Class& player_) : window(window_), player(player_) {
-        ReadData();
     }
 
     void WindowRendering() {
@@ -250,14 +265,26 @@ public:
 
             }
 
-            PlayerBehavoir();
+            EventHandler();
 
             //Rendering
             window.clear(sf::Color::Black);
-            RenderEntities(window);
+            RenderEntities();
             window.display();
         }
     }
+
+public:
+    Game_Class(sf::RenderWindow& window_, Player_Class& player_) : window(window_), player(player_) {}
+
+    void Setup() {
+        ReadData();
+        SpawnedEnemies.insert(SpawnedEnemies.begin(), {EnemyList[0], EnemyList[1]});
+        SpawnedEnemies[0].SetPosition(500, 200);
+        SpawnedEnemies[1].SetPosition(500, 300);
+        WindowRendering();
+    }
+
 };
 
 int main() {
@@ -268,7 +295,7 @@ int main() {
 
     Player_Class Player{1};
     Game_Class Game{window, Player};
-    Game.WindowRendering();
+    Game.Setup();
 
     return 0;
 }

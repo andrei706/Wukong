@@ -17,7 +17,8 @@ runs:
           libglu1-mesa-dev \
           libudev-dev \
           libopenal-dev \
-          libogg-dev
+          libogg-dev \
+          libvorbis-dev
         # https://github.com/llvm/llvm-project/issues/78354
         sudo sysctl vm.mmap_rnd_bits=28
 

@@ -15,11 +15,16 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-include(FetchContent)
-
 include(cmake/Options.cmake)
 include(cmake/CompilerFlags.cmake)
 include(cmake/CopyHelper.cmake)
+
+include(FetchContent)
+
+set(FETCHCONTENT_QUIET OFF)
+set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
+
+set(SFML_WARNINGS_AS_ERRORS OFF)
 
 FetchContent_Declare(
         SFML
@@ -53,7 +58,10 @@ FetchContent_MakeAvailable(SFML)
 
 # external dependencies with find_package
 
-# find_package(Threads REQUIRED)
+find_package(Threads REQUIRED)
+if(UNIX)
+    find_package(x11)
+endif()
 
 ###############################################################################
 

@@ -256,6 +256,7 @@ private:
     }
 
     void WindowRendering() {
+        window.setVerticalSyncEnabled(false);
         window.setFramerateLimit(60);
         while (window.isOpen()) {
             while (const std::optional event = window.pollEvent())

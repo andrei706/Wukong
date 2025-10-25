@@ -193,12 +193,6 @@ jobs:
         # renovate: datasource=github-tags depName=actions/checkout versioning=loose
         uses: actions/checkout@v5.0.0
 
-      - name: Install X11 dependencies for SFML
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt update
-          sudo apt install -y libxrandr-dev libxcursor-dev libxi-dev libglu1-mesa-dev
-
       - name: Set timestamp, zip name, repo visibility
         env:
           GH_TOKEN: ${{ github.token }}

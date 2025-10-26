@@ -229,14 +229,14 @@ public:
 };
 
 class GUI_TextLabel {
-    std::string Name;
-    bool Status = 1;
-
     sf::Font TextFont;
     sf::Text TextValue;
     sf::Vector2f Position = {100.f, 100.f};
+
+    std::string Name;
+    bool Status = 1;
 public:
-    GUI_TextLabel(sf::Text TextValue_,std::string Name_ = "TextLabel",  std::string FontPath = "data/fonts/arial.ttf", int TextSize = 10, sf::Color TextColor = sf::Color::Black)
+    explicit GUI_TextLabel(sf::Text TextValue_,std::string Name_ = "TextLabel",  std::string FontPath = "data/fonts/arial.ttf", int TextSize = 10, sf::Color TextColor = sf::Color::Black)
     : TextValue(TextValue_), Name(Name_){
         if (!TextFont.openFromFile(FontPath)) {
             std::cout<<"Error: Font not found for Text Label, must give the path to font_name.ttf.";

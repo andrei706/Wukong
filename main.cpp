@@ -26,7 +26,7 @@ public:
     [[nodiscard]] float GetSpeed() const {
         return Speed;
     }
-    int ReduceHealth(float DamagePoints) {
+    bool ReduceHealth(float DamagePoints) {
         if (Health - DamagePoints <= 0) {
             Health = 0;
             return 0; //Alive state
@@ -52,6 +52,10 @@ public:
         return out;
     }
 
+    float GetCooldown() const {
+        return Cooldown;
+    }
+
     std::string NameGetter() {
         return Name;
     }
@@ -70,6 +74,7 @@ class Enemy {
     std::string Name;
     Character_Stats Stats{10, 5, 5 };
     Tool Weapon{"Sword", 3, 0.6f, 10};
+    bool Damaged = 0; //Daca a si-a primit damage de la atacul player-ului cu sabia sau nu
 
     sf::RectangleShape Sprite;
     sf::Vector2f Position = {200.f, 100.f};
@@ -96,8 +101,14 @@ public:
     float GetDamage() {
         return Weapon.DamageCalculation();
     }
-    void TakeDamage (float Damage_Points) {
-        Stats.ReduceHealth(Damage_Points);
+    void ChangeDamagedStatus() {
+        Damaged = !Damaged;
+    }
+    bool GetDamagedStatus() const {
+        return Damaged;
+    }
+    bool TakeDamage (float Damage_Points) {
+        return Stats.ReduceHealth(Damage_Points);
     }
     void AssignWeapon (const Tool& other) {
         Weapon = other;
@@ -124,13 +135,47 @@ public:
     }
 };
 
+class Attack_Hitbox {
+    sf::RectangleShape Sprite;
+    sf::Vector2f Position = {100.f, 100.f};
+    sf::Angle Rotation;
+    sf::Vector2f Size = {100, 20};
+
+public:
+    Attack_Hitbox(sf::Vector2f Position_, sf::Angle Angle_, sf::Vector2f Size_ = {100, 20}) : Position(Position_), Rotation(Angle_), Size(Size_) {
+        Sprite.setSize(Size_);
+        Sprite.setOrigin({Size_.x / 2, Size_.y / 2});
+        Sprite.setPosition(Position_);
+        Sprite.setRotation(Angle_);
+
+        Sprite.setFillColor(sf::Color::Red);
+
+    }
+
+    sf::RectangleShape GetSprite() {
+        return Sprite;
+    }
+
+    void OffsetObject(sf::Vector2f OffsetPosition) {
+        Sprite.setPosition(Position + OffsetPosition);
+    }
+
+    void ShowSprite(sf::RenderWindow& window) {
+        window.draw(Sprite);
+    }
+
+
+};
+
 class Player_Class {
     int Experience, Gauge = 0;
-    bool Invincibility = 0;
-    Character_Stats Stats{30, 15, 0};
+    bool Invincibility = 0, inAttack = 0;
+    Character_Stats Stats{30, 2, 0};
     Tool
         PoleShortRange{"Pool Short Range", 1, 0.4f, 2},
         PoleLongRange{"Pole Long Range", 4, 2, 10};
+
+    std::vector<Attack_Hitbox> AttackHitboxes;
 
     sf::RectangleShape Sprite;
     sf::Vector2f Position = {100.f, 100.f};
@@ -188,23 +233,50 @@ public:
         }
     }
 
-    void HandleActions(sf::RenderWindow &window, float deltaTime = 0.16) {
+    float GetDamage() const {
+        return PoleShortRange.DamageCalculation();
+    }
+
+    std::vector<Attack_Hitbox> GetHitboxes() {
+        return AttackHitboxes;
+    }
+
+    float HandleAttack() {
+        inAttack = 0;
+        AttackHitboxes.clear();
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
+            inAttack = 1;
+            float Range = 30;
+            sf::Angle SpriteAngle = Sprite.getRotation();
+            sf::Vector2f Offset{Range*std::cos(SpriteAngle.asDegrees()), Range*std::sin(SpriteAngle.asDegrees())};
+            sf::Vector2f HitboxPosition = Sprite.getPosition();
+            Attack_Hitbox Entity{HitboxPosition, Sprite.getRotation()};
+            AttackHitboxes.push_back(Entity);
+            return PoleShortRange.GetCooldown();
+        }
+        return 0.0f;
+    }
+
+    void HandleMovement(sf::RenderWindow &window, float deltaTime = 0.016, float deltaTimeMultiplier = 62.5) {
+        if (inAttack)
+            return;
 
         //Movement
         sf::Vector2f movement(0.f, 0.f);
         float speed = Stats.GetSpeed();
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
-            movement.y -= speed * deltaTime;
+            movement.y -= speed * deltaTime * deltaTimeMultiplier;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
-            movement.y += speed * deltaTime;
+            movement.y += speed * deltaTime * deltaTimeMultiplier;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-            movement.x -= speed * deltaTime;
+            movement.x -= speed * deltaTime * deltaTimeMultiplier;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-            movement.x += speed * deltaTime;
+            movement.x += speed * deltaTime * deltaTimeMultiplier;
 
         Sprite.move(movement);
 
+        //Character Rotation
         sf::Vector2i MousePos = sf::Mouse::getPosition(window);
         sf::Vector2f MouseWorldPos = sf::Vector2f(MousePos.x, MousePos.y);
         sf::Vector2f PlayerPosition = Sprite.getPosition();
@@ -246,6 +318,10 @@ public:
         TextValue.setFillColor(TextColor);
     }
 
+    friend std::ostream & operator<<(std::ostream & out, const GUI_TextLabel & object) {
+        out<<object.Name<<"\nStatus: "<<object.Status;
+    }
+
     void SetText(std::string TextValue_) {
         TextValue.setString(TextValue_);
     }
@@ -281,14 +357,22 @@ public:
     void ShowSprite(sf::RenderWindow& window) {
         window.draw(TextValue);
     }
+
 };
+
 
 class Game_Class {
     sf::RenderWindow& window;
+    float dt = 0.f;
+    float dtMultiplier = 62.5f;
     Player_Class &player;
+
+    sf::Clock GameClock, ActionClock;
+    float ActionCooldown;
 
     std::vector<Enemy> EnemyList, SpawnedEnemies;
     std::vector<Tool> ToolList;
+    std::vector<Attack_Hitbox> PlayerAttackHitbox;
     std::vector<GUI_TextLabel> TextLabelList;
 
 private:
@@ -297,6 +381,10 @@ private:
         player.ShowSprite(window);
         //Render Enemies
         for (auto &i : SpawnedEnemies) {
+            i.ShowSprite(window);
+        }
+        //Render Hitboxes
+        for (auto &i : PlayerAttackHitbox) {
             i.ShowSprite(window);
         }
         //Render GUI
@@ -357,9 +445,43 @@ private:
             }
         }
 
-        //Player Events
-        player.HandleActions(window);
+        //Player Events Functions and Actions
+        sf::Time ActionDurationTime = ActionClock.getElapsedTime();
+        if (ActionCooldown) {
+            if (ActionDurationTime < sf::seconds(ActionCooldown)) {
+                //Verify if enemies are touching the player hitbox
+                for (auto &i : SpawnedEnemies) {
+                    for (auto &j : PlayerAttackHitbox) {
+                        if (i.GetSprite().getGlobalBounds().findIntersection(j.GetSprite().getGlobalBounds())) {
+                            if (!i.GetDamagedStatus()) {
+                                std::cout<<"Damaged!\n";
+                                bool isDead = i.TakeDamage(player.GetDamage());
+                                if (!isDead) {
+                                    std::cout<<"Enemy has no health left!\n";
+                                }
+                                i.ChangeDamagedStatus();
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                ActionClock.restart();
+                ActionCooldown = 0;
+            }
+        }
+        else {
+            for (auto &i : SpawnedEnemies) {
+                if (i.GetDamagedStatus()) {
+                    i.ChangeDamagedStatus();
+                }
+            }
+            ActionCooldown = player.HandleAttack();
+        }
+        PlayerAttackHitbox = player.GetHitboxes();
+        player.HandleMovement(window, dt, dtMultiplier);
 
+        //Update Interface Functions
         UpdateHealthbar();
     }
 
@@ -374,6 +496,7 @@ private:
 
             }
 
+            dt = GameClock.restart().asSeconds();
             EventHandler();
 
             //Rendering
@@ -386,8 +509,21 @@ private:
 public:
     Game_Class(sf::RenderWindow& window_, Player_Class& player_) : window(window_), player(player_) {}
 
+    friend std::ostream & operator<<(std::ostream & out, const Game_Class & object) {
+        out<<object.dt<<"\n"<<object.dtMultiplier<<"\n";
+        for (auto &i : object.EnemyList) {
+            out<<i<<"\n";
+        }
+        for (auto &i : object.ToolList) {
+            out<<i<<"\n";
+        }
+        return out;
+    }
+
     void Setup() {
+        ActionClock.start();
         ReadData();
+
         SpawnedEnemies.insert(SpawnedEnemies.begin(), {EnemyList[0], EnemyList[1]});
         SpawnedEnemies[0].SetPosition(500, 200);
         SpawnedEnemies[1].SetPosition(500, 300);

@@ -211,6 +211,11 @@ public:
         Experience = 0;
     };
 
+    friend std::ostream & operator<<(std::ostream & out, const Player_Class & object) {
+        out<<object.Experience<<"\n"<<object.Gauge<<"\n"<<object.inAttack<<object.Invincibility;
+        return out;
+    }
+
     void ShowSprite(sf::RenderWindow& window) {
         window.draw(Sprite);
     }
@@ -320,6 +325,7 @@ public:
 
     friend std::ostream & operator<<(std::ostream & out, const GUI_TextLabel & object) {
         out<<object.Name<<"\nStatus: "<<object.Status;
+        return out;
     }
 
     void SetText(std::string TextValue_) {

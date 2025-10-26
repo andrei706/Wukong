@@ -22,10 +22,10 @@ public:
         out<<object.MaxHealth<<" "<<object.Health<<" "<<object.Speed<<" "<<object.Mana;
         return out;
     }
+
     [[nodiscard]] float GetSpeed() const {
         return Speed;
     }
-
     int ReduceHealth(float DamagePoints) {
         if (Health - DamagePoints <= 0) {
             Health = 0;
@@ -33,6 +33,9 @@ public:
         }
         Health -= DamagePoints;
         return 1;
+    }
+    float GetHealth() const {
+        return Health;
     }
 };
 
@@ -132,21 +135,11 @@ class Player_Class {
     sf::RectangleShape Sprite;
     sf::Vector2f Position = {100.f, 100.f};
     sf::Vector2f Size = {50.f, 50.f};
+
     sf::Time InvincibilityTime = sf::seconds(1.0f);
     sf::Clock ClockInvincibilityTime;
 
 private:
-    //trebuie regandita, probabil fac frame based verification event
-    // void MakeInvincible(sf::Time Interval) {
-    //     Invincibility = true;
-    //     sf::Clock clock;
-    //     sf::Time elapsed1 = clock.getElapsedTime();
-    //     sf::Time elapsed2 = clock.getElapsedTime();
-    //     while (elapsed2 - elapsed1 < Interval) {
-    //         elapsed2 = clock.getElapsedTime();
-    //     }
-    //     Invincibility = false;
-    // }
     bool MakeInvincibile() {
         if (Invincibility == 1) {
             if (ClockInvincibilityTime.getElapsedTime() >= InvincibilityTime) {
@@ -177,6 +170,14 @@ public:
         window.draw(Sprite);
     }
 
+    sf::RectangleShape& GetSprite() {
+        return Sprite;
+    }
+
+    float GetHealth() const {
+        return Stats.GetHealth();
+    }
+
     void AddExperience(int Value) {
         Experience += Value;
     }
@@ -184,7 +185,6 @@ public:
     void TakeDamage(float Value) {
         if (!MakeInvincibile()) {
             Stats.ReduceHealth(Value);
-            std::cout<<Stats<<"\n";
         }
     }
 
@@ -214,10 +214,6 @@ public:
         float angleDegrees = radians * 180.f / 3.14;
         Sprite.setRotation(sf::degrees(angleDegrees));
     }
-
-    sf::RectangleShape& GetSprite() {
-        return Sprite;
-    }
 };
 
 class Enviroment_Object {
@@ -232,18 +228,81 @@ public:
     }
 };
 
+class GUI_TextLabel {
+    std::string Name;
+    bool Status = 1;
+
+    sf::Font TextFont;
+    sf::Text TextValue;
+    sf::Vector2f Position = {100.f, 100.f};
+public:
+    GUI_TextLabel(sf::Text TextValue_,std::string Name_ = "TextLabel",  std::string FontPath = "data/fonts/arial.ttf", int TextSize = 10, sf::Color TextColor = sf::Color::Black)
+    : TextValue(TextValue_), Name(Name_){
+        if (!TextFont.openFromFile(FontPath)) {
+            std::cout<<"Error: Font not found for Text Label, must give the path to font_name.ttf.";
+        }
+        TextValue.setFont(TextFont);
+        TextValue.setCharacterSize(TextSize);
+        TextValue.setFillColor(TextColor);
+    }
+
+    void SetText(std::string TextValue_) {
+        TextValue.setString(TextValue_);
+    }
+
+    void SetPosition(sf::Vector2f Position_) {
+        Position = Position_;
+    }
+
+    void SetColor(sf::Color TextColor) {
+        TextValue.setFillColor(TextColor);
+    }
+
+    void SetSize(int Size_) {
+        TextValue.setCharacterSize(Size_);
+    }
+
+    void SetName(std::string Name_) {
+        Name = Name_;
+    }
+
+    std::string GetName() {
+        return Name;
+    }
+
+    bool GetStatus() {
+        return Status;
+    }
+
+    void ToggleActive() {
+        Status = !Status;
+    }
+
+    void ShowSprite(sf::RenderWindow& window) {
+        window.draw(TextValue);
+    }
+};
+
 class Game_Class {
     sf::RenderWindow& window;
     Player_Class &player;
 
     std::vector<Enemy> EnemyList, SpawnedEnemies;
     std::vector<Tool> ToolList;
+    std::vector<GUI_TextLabel> TextLabelList;
 
 private:
     void RenderEntities() {
+        //Render Player
         player.ShowSprite(window);
+        //Render Enemies
         for (auto &i : SpawnedEnemies) {
             i.ShowSprite(window);
+        }
+        //Render GUI
+        for (auto &i : TextLabelList) {
+            if (i.GetStatus())
+                i.ShowSprite(window);
         }
     }
 
@@ -278,6 +337,14 @@ private:
 
     }
 
+    void UpdateHealthbar() {
+        for (auto &i : TextLabelList) {
+            if (i.GetName() == "Health") {
+                i.SetText("Health: " + std::to_string(player.GetHealth()));
+            }
+        }
+    }
+
     void EventHandler() {
         //Collision Verification
         //Between Player and Enemy
@@ -290,9 +357,10 @@ private:
             }
         }
 
-        //Player Event
+        //Player Events
         player.HandleActions(window);
 
+        UpdateHealthbar();
     }
 
     void WindowRendering() {
@@ -323,6 +391,13 @@ public:
         SpawnedEnemies.insert(SpawnedEnemies.begin(), {EnemyList[0], EnemyList[1]});
         SpawnedEnemies[0].SetPosition(500, 200);
         SpawnedEnemies[1].SetPosition(500, 300);
+
+        sf::Font font("data/fonts/arial.ttf");
+        sf::Text text(font);
+        text.setString("Hello World!");
+        GUI_TextLabel textLabel(text, "Health", "data/fonts/arial.ttf", 20);
+        TextLabelList.push_back(textLabel);
+
         WindowRendering();
     }
 

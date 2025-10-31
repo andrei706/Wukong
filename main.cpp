@@ -8,6 +8,41 @@
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
 
+class Attack_Hitbox {
+    float DamageValue;
+
+    sf::RectangleShape Sprite;
+    sf::Vector2f Size = {100, 20};
+    sf::Vector2f Position = {100.f, 100.f};
+    sf::Angle Rotation;
+
+
+public:
+    Attack_Hitbox(float DamageValue_, sf::Vector2f Size_ = {100, 20}, sf::Vector2f Position_ = {0, 0}, sf::Angle Angle_ = sf::degrees(0))
+    : DamageValue(DamageValue_), Size(Size_), Position(Position_), Rotation(Angle_)  {
+        Sprite.setSize(Size_);
+        Sprite.setOrigin({Size_.x / 2, Size_.y / 2});
+        Sprite.setPosition(Position_);
+        Sprite.setRotation(Angle_);
+
+        Sprite.setFillColor(sf::Color::Red);
+
+    }
+
+    float GetDamageValue() {
+        return DamageValue;
+    }
+
+    sf::FloatRect GetBounds() const {
+        return Sprite.getGlobalBounds();
+    }
+
+    void ShowSprite(sf::RenderWindow& window) {
+        window.draw(Sprite);
+    }
+
+};
+
 class Character_Stats {
     float MaxHealth, Health, Speed;
     int Mana;
@@ -41,23 +76,17 @@ public:
 
 class Tool {
     std::string Name;
-    float Damage, Cooldown;
+    float Damage, Cooldown, Range;
     int Critical_Chance;
 
+    std::vector<Attack_Hitbox> Attacks;
+
 public:
-    Tool(const std::string& name_, float Damage_, float Cooldown_, int Critical_Chance_)
-        : Name(name_), Damage(Damage_), Cooldown(Cooldown_), Critical_Chance(Critical_Chance_) {}
+    Tool(const std::string& name_, float Damage_, float Cooldown_, float Range_ = 10000.0f, int Critical_Chance_ = 0)
+        : Name(name_), Damage(Damage_), Cooldown(Cooldown_), Range(Range_), Critical_Chance(Critical_Chance_) {}
     friend std::ostream & operator<<(std::ostream & out, const Tool & object) {
         out<<object.Name<<" "<<object.Damage<<" "<<object.Cooldown<<" "<<object.Critical_Chance;
         return out;
-    }
-
-    float GetCooldown() const {
-        return Cooldown;
-    }
-
-    std::string NameGetter() {
-        return Name;
     }
 
     [[nodiscard]] float DamageCalculation() const {
@@ -67,6 +96,45 @@ public:
             return (float)Damage + 0.5 * Damage;
         }
         return Damage;
+    }
+
+    float Attack(sf::RectangleShape& Sprite) {
+        float angleDegrees = (float)Sprite.getRotation().asDegrees();
+        float angleRadians = angleDegrees * (3.14 / 180.0);
+
+        sf::Vector2f Offset{
+            Range * std::cos(angleRadians),
+            Range * std::sin(angleRadians)
+        };
+
+        Attack_Hitbox Entity{
+            DamageCalculation(),
+            {30, 100},
+            Sprite.getPosition() + Offset,
+            Sprite.getRotation()
+        };
+
+        Attacks.push_back(Entity);
+
+        return Cooldown;
+    }
+
+    std::string NameGetter() {
+        return Name;
+    }
+
+    std::vector <Attack_Hitbox> GetAttackHitboxes() {
+        return Attacks;
+    }
+
+    void ClearAttacks() {
+        Attacks.clear();
+    }
+
+    void ShowHitboxes(sf::RenderWindow& window) {
+        for (auto & i : Attacks) {
+            i.ShowSprite(window);
+        }
     }
 };
 
@@ -135,45 +203,13 @@ public:
     }
 };
 
-class Attack_Hitbox {
-    sf::RectangleShape Sprite;
-    sf::Vector2f Position = {100.f, 100.f};
-    sf::Angle Rotation;
-    sf::Vector2f Size = {100, 20};
 
-public:
-    Attack_Hitbox(sf::Vector2f Position_, sf::Angle Angle_, sf::Vector2f Size_ = {100, 20}) : Position(Position_), Rotation(Angle_), Size(Size_) {
-        Sprite.setSize(Size_);
-        Sprite.setOrigin({Size_.x / 2, Size_.y / 2});
-        Sprite.setPosition(Position_);
-        Sprite.setRotation(Angle_);
-
-        Sprite.setFillColor(sf::Color::Red);
-
-    }
-
-    sf::RectangleShape GetSprite() {
-        return Sprite;
-    }
-
-    void OffsetObject(sf::Vector2f OffsetPosition) {
-        Sprite.setPosition(Position + OffsetPosition);
-    }
-
-    void ShowSprite(sf::RenderWindow& window) {
-        window.draw(Sprite);
-    }
-
-
-};
 
 class Player_Class {
     int Experience, Gauge = 0;
     bool Invincibility = 0, inAttack = 0;
     Character_Stats Stats{30, 2, 0};
-    Tool
-        PoleShortRange{"Pool Short Range", 1, 0.4f, 2},
-        PoleLongRange{"Pole Long Range", 4, 2, 10};
+    Tool Pole{"Pool", 1, 0.4f, 40, 2};
 
     std::vector<Attack_Hitbox> AttackHitboxes;
 
@@ -198,7 +234,7 @@ private:
     }
 
 public:
-    Player_Class(int Experience_) : Experience(Experience_) {
+    explicit Player_Class(int Experience_) : Experience(Experience_) {
 
         Sprite.setSize(Size);
         Sprite.setOrigin({Size.x / 2, Size.y / 2});
@@ -218,6 +254,7 @@ public:
 
     void ShowSprite(sf::RenderWindow& window) {
         window.draw(Sprite);
+        Pole.ShowHitboxes(window);
     }
 
     sf::RectangleShape& GetSprite() {
@@ -239,25 +276,19 @@ public:
     }
 
     float GetDamage() const {
-        return PoleShortRange.DamageCalculation();
+        return Pole.DamageCalculation();
     }
 
     std::vector<Attack_Hitbox> GetHitboxes() {
-        return AttackHitboxes;
+        return Pole.GetAttackHitboxes();
     }
 
     float HandleAttack() {
         inAttack = 0;
-        AttackHitboxes.clear();
+        Pole.ClearAttacks();
         if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
             inAttack = 1;
-            float Range = 30;
-            sf::Angle SpriteAngle = Sprite.getRotation();
-            sf::Vector2f Offset{Range*std::cos(SpriteAngle.asDegrees()), Range*std::sin(SpriteAngle.asDegrees())};
-            sf::Vector2f HitboxPosition = Sprite.getPosition();
-            Attack_Hitbox Entity{HitboxPosition, Sprite.getRotation()};
-            AttackHitboxes.push_back(Entity);
-            return PoleShortRange.GetCooldown();
+            return Pole.Attack(Sprite);
         }
         return 0.0f;
     }
@@ -281,14 +312,13 @@ public:
 
         Sprite.move(movement);
 
-        //Character Rotation
         sf::Vector2i MousePos = sf::Mouse::getPosition(window);
         sf::Vector2f MouseWorldPos = sf::Vector2f(MousePos.x, MousePos.y);
         sf::Vector2f PlayerPosition = Sprite.getPosition();
         sf::Vector2f diff = MouseWorldPos - PlayerPosition;
 
         float radians = std::atan2(diff.y, diff.x);
-        float angleDegrees = radians * 180.f / 3.14;
+        float angleDegrees = radians * 180.f / 3.14f;
         Sprite.setRotation(sf::degrees(angleDegrees));
     }
 };
@@ -374,7 +404,7 @@ class Game_Class {
     Player_Class &player;
 
     sf::Clock GameClock, ActionClock;
-    float ActionCooldown;
+    float ActionCooldown = 0;
 
     std::vector<Enemy> EnemyList, SpawnedEnemies;
     std::vector<Tool> ToolList;
@@ -409,7 +439,7 @@ private:
         float Damage, Cooldown;
         int Critical_Chance;
         while (File2 >> WeaponName >> Damage >> Cooldown >> Critical_Chance) {
-            Tool WeaponAux{WeaponName, Damage, Cooldown, Critical_Chance};
+            Tool WeaponAux{WeaponName, Damage, Cooldown, 20.0f, Critical_Chance};
             ToolList.push_back(WeaponAux);
         }
         File2.close();
@@ -453,12 +483,20 @@ private:
 
         //Player Events Functions and Actions
         sf::Time ActionDurationTime = ActionClock.getElapsedTime();
-        if (ActionCooldown) {
+        if (!ActionCooldown) {
+            for (auto &i : SpawnedEnemies) {
+                if (i.GetDamagedStatus()) {
+                    i.ChangeDamagedStatus();
+                }
+            }
+            ActionCooldown = player.HandleAttack();
+        }
+        else {
             if (ActionDurationTime < sf::seconds(ActionCooldown)) {
                 //Verify if enemies are touching the player hitbox
                 for (auto &i : SpawnedEnemies) {
                     for (auto &j : PlayerAttackHitbox) {
-                        if (i.GetSprite().getGlobalBounds().findIntersection(j.GetSprite().getGlobalBounds())) {
+                        if (i.GetSprite().getGlobalBounds().findIntersection(j.GetBounds())) {
                             if (!i.GetDamagedStatus()) {
                                 std::cout<<"Damaged!\n";
                                 bool isDead = i.TakeDamage(player.GetDamage());
@@ -475,14 +513,6 @@ private:
                 ActionClock.restart();
                 ActionCooldown = 0;
             }
-        }
-        else {
-            for (auto &i : SpawnedEnemies) {
-                if (i.GetDamagedStatus()) {
-                    i.ChangeDamagedStatus();
-                }
-            }
-            ActionCooldown = player.HandleAttack();
         }
         PlayerAttackHitbox = player.GetHitboxes();
         player.HandleMovement(window, dt, dtMultiplier);

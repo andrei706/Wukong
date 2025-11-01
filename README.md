@@ -8,7 +8,7 @@ Inspirație: [The Legend of Zelda: The Minish Cap](https://en.wikipedia.org/wiki
 
 ### Caracteristicile implementate până acum (v0.1.0)
 - Player și Enemy movement
-- Un atac simplu care are hitbox-ul fix în fața player-ului
+- Un atac simplu care are hitbox-ul unde este orientat mouse-ul
 - Condiții temporare de câștig (dacă mor toți inamicii) sau pierdere (dacă numai ai viață)
 - Interfață grafică folosind SFML
 

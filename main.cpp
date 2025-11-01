@@ -167,6 +167,7 @@ public:
         Stats = other.Stats;
         Weapon = other.Weapon;
         Sprite = other.Sprite;
+        Experience = other.Experience;
         return *this;
     }
 

@@ -576,6 +576,7 @@ private:
                 if (i.GetName() == "LoseText" && i.GetStatus() == false) {
                     i.ToggleActive();
                     PlayerLost = true;
+                    player.ClearAttackHitboxes();
                 }
             }
         }

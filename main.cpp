@@ -90,7 +90,7 @@ public:
         : Name(name_), Damage(Damage_), Cooldown(Cooldown_), Range(Range_), Critical_Chance(Critical_Chance_) {}
     friend std::ostream & operator<<(std::ostream & out, const Tool & object) {
         out<<object.Name<<" "<<object.Damage<<" "<<object.Range<<" "<<object.Cooldown<<" "<<object.Critical_Chance<<"\n";
-        for (auto & i : object.Attacks) {
+        for (const auto & i : object.Attacks) {
             out<<i;
         }
         return out;

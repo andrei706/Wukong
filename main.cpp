@@ -16,7 +16,6 @@ class Attack_Hitbox {
     sf::Vector2f Position = {100.f, 100.f};
     sf::Angle Rotation;
 
-
 public:
     explicit Attack_Hitbox(float DamageValue_, sf::Vector2f Size_ = {100, 20}, sf::Vector2f Position_ = {0, 0}, sf::Angle Angle_ = sf::degrees(0))
     : DamageValue(DamageValue_), Size(Size_), Position(Position_), Rotation(Angle_)  {
@@ -123,7 +122,7 @@ public:
         return Name;
     }
 
-    const std::vector <Attack_Hitbox>& GetAttackHitboxes() const {
+    [[nodiscard]] const std::vector <Attack_Hitbox>& GetAttackHitboxes() const {
         return Attacks;
     }
 
@@ -143,6 +142,7 @@ class Enemy {
     Character_Stats Stats{10, 5, 5 };
     Tool Weapon{"Sword", 3, 0.6f, 10};
     bool Damaged = false; //Daca a si-a primit damage de la atacul player-ului cu sabia sau nu
+    int Experience = 5;
 
     sf::RectangleShape Sprite;
     sf::Vector2f Position = {200.f, 100.f};
@@ -181,6 +181,9 @@ public:
     }
     float GetDamage() {
         return Weapon.DamageCalculation();
+    }
+    int GetExperience() const {
+        return Experience;
     }
     bool TakeDamage (float Damage_Points) {
         return Stats.ReduceHealth(Damage_Points);
@@ -254,17 +257,15 @@ private:
     }
 
 public:
-    explicit Player_Class(int Experience_) : Experience(Experience_) {
+    explicit Player_Class(int Experience_ = 0, float InvincibilityTime_ = 1.0f) : Experience(Experience_), InvincibilityTime(sf::seconds(InvincibilityTime_)) {
 
         Sprite.setSize(Size);
         Sprite.setOrigin({Size.x / 2, Size.y / 2});
         Sprite.setFillColor(sf::Color::Blue);
         Sprite.setPosition(Position);
 
-
         Gauge = 0;
-        Invincibility = 0;
-        Experience = 0;
+        Invincibility = false;
     };
 
     friend std::ostream & operator<<(std::ostream & out, const Player_Class & object) {
@@ -348,6 +349,7 @@ public:
     }
 };
 
+//unused for now
 class Enviroment_Object {
     bool isDestructable;
     float Health;
@@ -368,7 +370,7 @@ class GUI_TextLabel {
     std::string Name;
     bool Status = true;
 public:
-    explicit GUI_TextLabel(sf::Text TextValue_,std::string Name_ = "TextLabel",  std::string FontPath = "data/fonts/arial.ttf", int TextSize = 10, sf::Color TextColor = sf::Color::Black)
+    explicit GUI_TextLabel(sf::Text TextValue_,const std::string& Name_ = "TextLabel",  const std::string& FontPath = "data/fonts/arial.ttf", int TextSize = 10, sf::Color TextColor = sf::Color::Black)
     : TextValue(TextValue_), Name(Name_){
         if (!TextFont.openFromFile(FontPath)) {
             std::cout<<"Error: Font not found for Text Label, must give the path to font_name.ttf.";
@@ -404,7 +406,7 @@ public:
         Name = Name_;
     }
 
-    std::string GetName() {
+    const std::string& GetName() const {
         return Name;
     }
 
@@ -526,7 +528,7 @@ private:
         else {
             if (ActionDurationTime < sf::seconds(ActionCooldown)) {
                 //Verify if enemies are touching the player hitbox
-                for (auto it = SpawnedEnemies.begin(); it != SpawnedEnemies.end(); /* No increment here */) {
+                for (auto it = SpawnedEnemies.begin(); it != SpawnedEnemies.end();) {
                     auto& i = *it;
                     bool EnemyWasDeleted = false;
                     for (auto &j : PlayerAttackHitbox) {
@@ -535,6 +537,7 @@ private:
                                 std::cout<<"Damaged!\n";
                                 bool isDead = i.TakeDamage(j.GetDamageValue());
                                 if (!isDead) {
+                                    player.AddExperience(i.GetExperience());
                                     it = SpawnedEnemies.erase(it);
                                     EnemyWasDeleted = true;
                                     std::cout<<"Enemy has no health left!\n";
@@ -659,7 +662,7 @@ int main() {
     sf::RenderWindow window;
     window.create(sf::VideoMode({800, 600}), "Wukong");
 
-    Player_Class Player{1};
+    Player_Class Player{1, 1.0f};
     Game_Class Game{window, Player};
     Game.Setup();
 

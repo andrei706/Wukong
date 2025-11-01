@@ -18,18 +18,18 @@ class Attack_Hitbox {
 
 
 public:
-    Attack_Hitbox(float DamageValue_, sf::Vector2f Size_ = {100, 20}, sf::Vector2f Position_ = {0, 0}, sf::Angle Angle_ = sf::degrees(0))
+    explicit Attack_Hitbox(float DamageValue_, sf::Vector2f Size_ = {100, 20}, sf::Vector2f Position_ = {0, 0}, sf::Angle Angle_ = sf::degrees(0))
     : DamageValue(DamageValue_), Size(Size_), Position(Position_), Rotation(Angle_)  {
         Sprite.setSize(Size_);
         Sprite.setOrigin({Size_.x / 2, Size_.y / 2});
         Sprite.setPosition(Position_);
         Sprite.setRotation(Angle_);
 
-        Sprite.setFillColor(sf::Color::Red);
+        Sprite.setFillColor(sf::Color::Magenta);
 
     }
 
-    float GetDamageValue() {
+    float GetDamageValue() const {
         return DamageValue;
     }
 
@@ -64,12 +64,12 @@ public:
     bool ReduceHealth(float DamagePoints) {
         if (Health - DamagePoints <= 0) {
             Health = 0;
-            return 0; //Alive state
+            return false; //Alive state
         }
         Health -= DamagePoints;
-        return 1;
+        return true;
     }
-    float GetHealth() const {
+    [[nodiscard]] float GetHealth() const {
         return Health;
     }
 };
@@ -90,7 +90,7 @@ public:
     }
 
     [[nodiscard]] float DamageCalculation() const {
-        srand(time(NULL));
+        srand(time(nullptr));
         int Chance = rand() % 100;
         if (Chance < Critical_Chance) {
             return (float)Damage + 0.5 * Damage;
@@ -119,11 +119,11 @@ public:
         return Cooldown;
     }
 
-    std::string NameGetter() {
+    const std::string& GetName() {
         return Name;
     }
 
-    std::vector <Attack_Hitbox> GetAttackHitboxes() {
+    const std::vector <Attack_Hitbox>& GetAttackHitboxes() const {
         return Attacks;
     }
 
@@ -142,7 +142,7 @@ class Enemy {
     std::string Name;
     Character_Stats Stats{10, 5, 5 };
     Tool Weapon{"Sword", 3, 0.6f, 10};
-    bool Damaged = 0; //Daca a si-a primit damage de la atacul player-ului cu sabia sau nu
+    bool Damaged = false; //Daca a si-a primit damage de la atacul player-ului cu sabia sau nu
 
     sf::RectangleShape Sprite;
     sf::Vector2f Position = {200.f, 100.f};
@@ -162,18 +162,25 @@ public:
         out<<object.Name<<"\n"<<object.Stats<<"\n"<<object.Weapon;
         return out;
     }
-
-    sf::RectangleShape& GetSprite() {
-        return Sprite;
+    Enemy& operator=(const Enemy& other) {
+        Name = other.Name;
+        Stats = other.Stats;
+        Weapon = other.Weapon;
+        Sprite = other.Sprite;
+        return *this;
     }
-    float GetDamage() {
-        return Weapon.DamageCalculation();
+
+    sf::FloatRect GetEnemyHitbox() {
+        return Sprite.getGlobalBounds();
     }
     void ChangeDamagedStatus() {
         Damaged = !Damaged;
     }
     bool GetDamagedStatus() const {
         return Damaged;
+    }
+    float GetDamage() {
+        return Weapon.DamageCalculation();
     }
     bool TakeDamage (float Damage_Points) {
         return Stats.ReduceHealth(Damage_Points);
@@ -189,29 +196,43 @@ public:
         Position.y = y;
         Sprite.setPosition(Position);
     }
-    Enemy& operator=(const Enemy& other) {
-        Name = other.Name;
-        Stats = other.Stats;
-        Weapon = other.Weapon;
-        Sprite = other.Sprite;
-        return *this;
-    }
-
-
     void ShowSprite(sf::RenderWindow& window) {
         window.draw(Sprite);
     }
+
+
+    void HandleMovement(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier) {
+
+        sf::Vector2f direction = PlayerPosition - Sprite.getPosition();
+        float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+        if (distance > 65.0f) {
+
+            sf::Vector2f unitDirection = direction / distance;
+            float speed = Stats.GetSpeed()/2.0f;
+            if (Damaged) {
+                speed /= 3.0f;
+            }
+            sf::Vector2f movement = unitDirection * speed * deltaTime * deltaTimeMultiplier;
+
+            Sprite.move(movement);
+            float radians = std::atan2(direction.y, direction.x);
+            float angleDegrees = radians * 180.f / 3.14f;
+            Sprite.setRotation(sf::degrees(angleDegrees));
+        }
+
+    }
+
+
+
 };
 
 
 
 class Player_Class {
     int Experience, Gauge = 0;
-    bool Invincibility = 0, inAttack = 0;
+    bool Invincibility = false, inAttack = false;
     Character_Stats Stats{30, 2, 0};
-    Tool Pole{"Pool", 1, 0.4f, 40, 2};
-
-    std::vector<Attack_Hitbox> AttackHitboxes;
+    Tool Pole{"Pool", 5, 0.4f, 40, 2};
 
     sf::RectangleShape Sprite;
     sf::Vector2f Position = {100.f, 100.f};
@@ -224,13 +245,13 @@ private:
     bool MakeInvincibile() {
         if (Invincibility == 1) {
             if (ClockInvincibilityTime.getElapsedTime() >= InvincibilityTime) {
-                Invincibility = 0;
+                Invincibility = false;
             }
-            return 1;
+            return true;
         }
         ClockInvincibilityTime.restart();
-        Invincibility = 1;
-        return 0;
+        Invincibility = true;
+        return false;
     }
 
 public:
@@ -261,6 +282,10 @@ public:
         return Sprite;
     }
 
+    sf::Vector2f GetPosition() {
+        return Sprite.getPosition();
+    }
+
     float GetHealth() const {
         return Stats.GetHealth();
     }
@@ -275,19 +300,20 @@ public:
         }
     }
 
-    float GetDamage() const {
-        return Pole.DamageCalculation();
-    }
-
     std::vector<Attack_Hitbox> GetHitboxes() {
         return Pole.GetAttackHitboxes();
     }
 
+    void ClearAttackHitboxes() {
+        Pole.ClearAttacks();
+        inAttack = false;
+    }
+
     float HandleAttack() {
-        inAttack = 0;
+        inAttack = false;
         Pole.ClearAttacks();
         if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
-            inAttack = 1;
+            inAttack = true;
             return Pole.Attack(Sprite);
         }
         return 0.0f;
@@ -341,7 +367,7 @@ class GUI_TextLabel {
     sf::Vector2f Position = {100.f, 100.f};
 
     std::string Name;
-    bool Status = 1;
+    bool Status = true;
 public:
     explicit GUI_TextLabel(sf::Text TextValue_,std::string Name_ = "TextLabel",  std::string FontPath = "data/fonts/arial.ttf", int TextSize = 10, sf::Color TextColor = sf::Color::Black)
     : TextValue(TextValue_), Name(Name_){
@@ -354,7 +380,7 @@ public:
     }
 
     friend std::ostream & operator<<(std::ostream & out, const GUI_TextLabel & object) {
-        out<<object.Name<<"\nStatus: "<<object.Status;
+        out<<object.Name<<"\nStatus: "<<object.Status<<"\n";
         return out;
     }
 
@@ -364,6 +390,7 @@ public:
 
     void SetPosition(sf::Vector2f Position_) {
         Position = Position_;
+        TextValue.setPosition(Position_);
     }
 
     void SetColor(sf::Color TextColor) {
@@ -374,7 +401,7 @@ public:
         TextValue.setCharacterSize(Size_);
     }
 
-    void SetName(std::string Name_) {
+    void SetName(const std::string & Name_) {
         Name = Name_;
     }
 
@@ -411,10 +438,13 @@ class Game_Class {
     std::vector<Attack_Hitbox> PlayerAttackHitbox;
     std::vector<GUI_TextLabel> TextLabelList;
 
+    bool PlayerLost = false;
+
 private:
     void RenderEntities() {
         //Render Player
-        player.ShowSprite(window);
+        if (!PlayerLost)
+            player.ShowSprite(window);
         //Render Enemies
         for (auto &i : SpawnedEnemies) {
             i.ShowSprite(window);
@@ -451,7 +481,7 @@ private:
             Character_Stats StatsAux{MaxHealth, Speed, Mana};
             EnemyAux.AssignStats(StatsAux);
             for (auto &Weapon : ToolList)
-                if (Weapon.NameGetter() == WeaponName) {
+                if (Weapon.GetName() == WeaponName) {
                     EnemyAux.AssignWeapon(Weapon);
                     break;
                 }
@@ -474,7 +504,7 @@ private:
         //Between Player and Enemy
         sf::FloatRect PlayerBounds = player.GetSprite().getGlobalBounds();
         for (auto &i : SpawnedEnemies) {
-            sf::FloatRect EnemyBounds = i.GetSprite().getGlobalBounds();
+            sf::FloatRect EnemyBounds = i.GetEnemyHitbox();
 
             if (EnemyBounds.findIntersection(PlayerBounds)) {
                 player.TakeDamage(i.GetDamage());
@@ -489,36 +519,67 @@ private:
                     i.ChangeDamagedStatus();
                 }
             }
-            ActionCooldown = player.HandleAttack();
+            ActionCooldown = player.HandleAttack(); //Returneaza cat dureaza attackul
+            if (ActionCooldown > 0.0f) {
+                ActionClock.restart();
+            }
         }
         else {
             if (ActionDurationTime < sf::seconds(ActionCooldown)) {
                 //Verify if enemies are touching the player hitbox
-                for (auto &i : SpawnedEnemies) {
+                for (auto it = SpawnedEnemies.begin(); it != SpawnedEnemies.end(); /* No increment here */) {
+                    auto& i = *it;
+                    bool EnemyWasDeleted = false;
                     for (auto &j : PlayerAttackHitbox) {
-                        if (i.GetSprite().getGlobalBounds().findIntersection(j.GetBounds())) {
+                        if (i.GetEnemyHitbox().findIntersection(j.GetBounds())) {
                             if (!i.GetDamagedStatus()) {
                                 std::cout<<"Damaged!\n";
-                                bool isDead = i.TakeDamage(player.GetDamage());
+                                bool isDead = i.TakeDamage(j.GetDamageValue());
                                 if (!isDead) {
+                                    it = SpawnedEnemies.erase(it);
+                                    EnemyWasDeleted = true;
                                     std::cout<<"Enemy has no health left!\n";
                                 }
                                 i.ChangeDamagedStatus();
                             }
                         }
                     }
+                    if (!EnemyWasDeleted)
+                        ++it;
                 }
             }
             else {
-                ActionClock.restart();
-                ActionCooldown = 0;
+                if (ActionDurationTime > sf::seconds(ActionCooldown) + sf::seconds(0.1f))
+                    ActionCooldown = 0;
+                player.ClearAttackHitboxes();
             }
         }
         PlayerAttackHitbox = player.GetHitboxes();
         player.HandleMovement(window, dt, dtMultiplier);
+        for (auto &i : SpawnedEnemies) {
+            i.HandleMovement(player.GetPosition(), dt, dtMultiplier);
+        }
 
-        //Update Interface Functions
+
+        //Update GUI
         UpdateHealthbar();
+
+        //Win Conditions
+        if (SpawnedEnemies.empty()) {
+            for (auto &i : TextLabelList) {
+                if (i.GetName() == "WinText" && i.GetStatus() == false) {
+                    i.ToggleActive();
+                }
+            }
+        }
+        if (player.GetHealth() == 0) {
+            for (auto &i : TextLabelList) {
+                if (i.GetName() == "LoseText" && i.GetStatus() == false) {
+                    i.ToggleActive();
+                    PlayerLost = true;
+                }
+            }
+        }
     }
 
     void WindowRendering() {
@@ -533,7 +594,10 @@ private:
             }
 
             dt = GameClock.restart().asSeconds();
-            EventHandler();
+            dtMultiplier = 1/dt;
+
+            if (!PlayerLost)
+                EventHandler();
 
             //Rendering
             window.clear(sf::Color::White);
@@ -547,10 +611,10 @@ public:
 
     friend std::ostream & operator<<(std::ostream & out, const Game_Class & object) {
         out<<object.dt<<"\n"<<object.dtMultiplier<<"\n";
-        for (auto &i : object.EnemyList) {
+        for (const auto &i : object.EnemyList) {
             out<<i<<"\n";
         }
-        for (auto &i : object.ToolList) {
+        for (const auto &i : object.ToolList) {
             out<<i<<"\n";
         }
         return out;
@@ -568,6 +632,21 @@ public:
         sf::Text text(font);
         text.setString("Hello World!");
         GUI_TextLabel textLabel(text, "Health", "data/fonts/arial.ttf", 20);
+        TextLabelList.push_back(textLabel);
+
+        textLabel.SetText("You won!");
+        textLabel.SetName("WinText");
+        textLabel.SetColor(sf::Color::Yellow);
+        textLabel.SetPosition({0, 200});
+        textLabel.SetSize(50);
+        textLabel.ToggleActive();
+        TextLabelList.push_back(textLabel);
+
+        textLabel.SetText("You lost!");
+        textLabel.SetName("LoseText");
+        textLabel.SetColor(sf::Color::Red);
+        textLabel.SetPosition({0, 200});
+        textLabel.SetSize(50);
         TextLabelList.push_back(textLabel);
 
         WindowRendering();

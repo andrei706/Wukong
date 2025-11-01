@@ -5,6 +5,6 @@ Zombie
 Sword
 Ghoul
 25
-4
+3
 0
 Punch

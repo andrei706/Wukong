@@ -28,6 +28,11 @@ public:
 
     }
 
+    friend std::ostream & operator<<(std::ostream & out, const Attack_Hitbox & object) {
+        out<<object.DamageValue<<"\n";
+        return out;
+    }
+
     float GetDamageValue() const {
         return DamageValue;
     }
@@ -84,7 +89,10 @@ public:
     Tool(const std::string& name_, float Damage_, float Cooldown_, float Range_ = 10000.0f, int Critical_Chance_ = 0)
         : Name(name_), Damage(Damage_), Cooldown(Cooldown_), Range(Range_), Critical_Chance(Critical_Chance_) {}
     friend std::ostream & operator<<(std::ostream & out, const Tool & object) {
-        out<<object.Name<<" "<<object.Damage<<" "<<object.Cooldown<<" "<<object.Critical_Chance;
+        out<<object.Name<<" "<<object.Damage<<" "<<object.Range<<" "<<object.Cooldown<<" "<<object.Critical_Chance<<"\n";
+        for (auto & i : object.Attacks) {
+            out<<i;
+        }
         return out;
     }
 
@@ -224,18 +232,13 @@ public:
         }
 
     }
-
-
-
 };
-
-
 
 class Player_Class {
     int Experience, Gauge = 0;
     bool Invincibility = false, inAttack = false;
     Character_Stats Stats{30, 2, 0};
-    Tool Pole{"Pool", 5, 0.4f, 40, 2};
+    Tool Pole{"Pole", 5, 0.4f, 40, 2};
 
     sf::RectangleShape Sprite;
     sf::Vector2f Position = {100.f, 100.f};
@@ -270,7 +273,7 @@ public:
     };
 
     friend std::ostream & operator<<(std::ostream & out, const Player_Class & object) {
-        out<<object.Experience<<"\n"<<object.Gauge<<"\n"<<object.inAttack<<object.Invincibility;
+        out<<object.Experience<<"\n"<<object.Gauge<<"\n"<<object.inAttack<<"\n"<<object.Invincibility<<object.Pole;
         return out;
     }
 

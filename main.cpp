@@ -105,8 +105,8 @@ public:
         return Damage;
     }
 
-    float Attack(sf::RectangleShape& Sprite) {
-        float angleDegrees = (float)Sprite.getRotation().asDegrees();
+    float Attack(const sf::RectangleShape &Sprite, sf::Angle Degrees) {
+        float angleDegrees = (float)Degrees.asDegrees();
         float angleRadians = angleDegrees * (3.14 / 180.0);
 
         sf::Vector2f Offset{
@@ -118,7 +118,7 @@ public:
             DamageCalculation(),
             {30, 100},
             Sprite.getPosition() + Offset,
-            Sprite.getRotation()
+            Degrees
         };
 
         Attacks.push_back(Entity);
@@ -216,19 +216,19 @@ public:
     void HandleMovement(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier) {
         sf::Vector2f direction = PlayerPosition - Sprite.getPosition();
         float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-        if (distance > 65.0f) {
+        if (distance > 50.0f) {
 
             sf::Vector2f unitDirection = direction / distance;
-            float speed = Stats.GetSpeed()/2.0f;
-            if (Damaged) {
-                speed /= 3.0f;
-            }
+            float speed = Stats.GetSpeed();
+            // if (Damaged) {
+            //     speed /= 2.0f;
+            // }
             sf::Vector2f movement = unitDirection * speed * deltaTime * deltaTimeMultiplier;
 
             Sprite.move(movement);
-            float radians = std::atan2(direction.y, direction.x);
-            float angleDegrees = radians * 180.f / 3.14f;
-            Sprite.setRotation(sf::degrees(angleDegrees));
+            // float radians = std::atan2(direction.y, direction.x);
+            // float angleDegrees = radians * 180.f / 3.14f;
+            // Sprite.setRotation(sf::degrees(angleDegrees));
         }
 
     }
@@ -243,6 +243,7 @@ class Player_Class {
     sf::RectangleShape Sprite;
     sf::Vector2f Position = {100.f, 100.f};
     sf::Vector2f Size = {50.f, 50.f};
+    sf::Angle Rotation;
 
     sf::Time InvincibilityTime = sf::seconds(1.0f);
     sf::Clock ClockInvincibilityTime;
@@ -318,7 +319,7 @@ public:
         Pole.ClearAttacks();
         if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
             inAttack = true;
-            return Pole.Attack(Sprite);
+            return Pole.Attack(Sprite, Rotation);
         }
         return 0.0f;
     }
@@ -349,7 +350,8 @@ public:
 
         float radians = std::atan2(diff.y, diff.x);
         float angleDegrees = radians * 180.f / 3.14f;
-        Sprite.setRotation(sf::degrees(angleDegrees));
+        //Sprite.setRotation(sf::degrees(angleDegrees));
+        Rotation = sf::degrees(angleDegrees);
     }
 };
 
@@ -534,23 +536,25 @@ private:
                 //Verify if enemies are touching the player hitbox
                 for (auto it = SpawnedEnemies.begin(); it != SpawnedEnemies.end();) {
                     auto& i = *it;
-                    bool EnemyWasDeleted = false;
+                    bool EnemyWasKilled = false;
                     for (auto &j : PlayerAttackHitbox) {
                         if (i.GetEnemyHitbox().findIntersection(j.GetBounds())) {
                             if (!i.GetDamagedStatus()) {
                                 std::cout<<"Damaged!\n";
                                 bool isDead = i.TakeDamage(j.GetDamageValue());
+                                i.ChangeDamagedStatus();
+
                                 if (!isDead) {
                                     player.AddExperience(i.GetExperience());
                                     it = SpawnedEnemies.erase(it);
-                                    EnemyWasDeleted = true;
+                                    EnemyWasKilled = true;
                                     std::cout<<"Enemy has no health left!\n";
+                                    break;
                                 }
-                                i.ChangeDamagedStatus();
                             }
                         }
                     }
-                    if (!EnemyWasDeleted)
+                    if (!EnemyWasKilled)
                         ++it;
                 }
             }

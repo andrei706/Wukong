@@ -216,7 +216,7 @@ public:
     void HandleMovement(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier) {
         sf::Vector2f direction = PlayerPosition - Sprite.getPosition();
         float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-        if (distance > 50.0f) {
+        if (distance > 25.0f) {
 
             sf::Vector2f unitDirection = direction / distance;
             float speed = Stats.GetSpeed();

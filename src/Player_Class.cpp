@@ -72,7 +72,8 @@ float Player_Class::HandleAttack(Key_Manager& KeyManager) {
         }
     }
     else
-        KeyManager.ToggleActivation("LeftMouseButton");
+        if (KeyManager.CheckButton("LeftMouseButton"))
+            KeyManager.ToggleActivation("LeftMouseButton");
     return 0.0f;
 }
 

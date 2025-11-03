@@ -8,7 +8,7 @@ void Game_Class::RenderEntities() const {
     //Render Enemies
     for (const auto &i : SpawnedEnemies) {
         i.ShowSprite(window);
-        //i.RenderHitboxes(window);
+        i.RenderHitboxes(window);
     }
     //Render Hitboxes
     for (const auto &i : PlayerAttackHitbox) {
@@ -179,7 +179,8 @@ void Game_Class::WindowRendering() {
             }
         }
         else
-            KeyManager.ToggleActivation("Escape");
+            if (KeyManager.CheckButton("Escape"))
+                KeyManager.ToggleActivation("Escape");
 
         if (!PlayerLost && !isPaused)
             EventHandler();

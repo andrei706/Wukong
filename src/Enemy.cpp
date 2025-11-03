@@ -74,8 +74,8 @@ void Enemy::RenderHitboxes(sf::RenderWindow &window) const {
 void Enemy::HandleMovement(const sf::Vector2f &PlayerPosition, float deltaTime, float deltaTimeMultiplier) {
     sf::Vector2f direction = PlayerPosition - Sprite.getPosition();
     float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-    float radians = std::atan2(direction.y, direction.x);
-    float angleDegrees = radians * 180.f / 3.14f;
+    // float radians = std::atan2(direction.y, direction.x);
+    // float angleDegrees = radians * 180.f / 3.14f;
 
     if (distance > 5.0f) {
 
@@ -92,6 +92,8 @@ void Enemy::HandleMovement(const sf::Vector2f &PlayerPosition, float deltaTime, 
         // Sprite.setRotation(sf::degrees(angleDegrees));
     }
     else {
+        float radians = std::atan2(direction.y, direction.x);
+        float angleDegrees = radians * 180.f / 3.14f;
         if (ActionClock.getElapsedTime() > sf::seconds(Weapon.GetCooldown())) {
             Weapon.Attack(Sprite, sf::degrees(angleDegrees));
             ActionClock.restart();

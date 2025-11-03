@@ -58,6 +58,22 @@ endif()
 # NOTE: update executable name in .github/workflows/cmake.yml:25 when changing name here
 add_executable(${MAIN_EXECUTABLE_NAME}
     main.cpp
+        src/Attack_Hitbox.cpp
+        src/Attack_Hitbox.h
+        src/Game_Class.cpp
+        src/Game_Class.h
+        src/Character_Stats.cpp
+        src/Character_Stats.h
+        src/Tool.cpp
+        src/Tool.h
+        src/Enemy.cpp
+        src/Enemy.h
+        src/Player_Class.cpp
+        src/Player_Class.h
+        src/GUI_TextLabel.cpp
+        src/GUI_TextLabel.h
+        src/Enviroment_Object.cpp
+        src/Enviroment_Object.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

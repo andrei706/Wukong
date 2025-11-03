@@ -3,8 +3,8 @@
 #define OOP_ATTACK_HITBOX_H
 #include <iostream>
 
-#include "SFML/Graphics.hpp"
-#include "SFML/System.hpp"
+#include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
 
 
 class Attack_Hitbox {

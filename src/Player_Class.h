@@ -4,6 +4,7 @@
 #define OOP_PLAYER_CLASS_H
 #include "Character_Stats.h"
 #include "Tool.h"
+#include "Key_Manager.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -37,7 +38,7 @@ public:
     void TakeDamage(float Value);
     std::vector<Attack_Hitbox> GetHitboxes() const;
     void ClearAttackHitboxes();
-    float HandleAttack();
+    float HandleAttack(Key_Manager& KeyManager);
     void HandleMovement(sf::RenderWindow &window, float deltaTime = 0.016, float deltaTimeMultiplier = 62.5);
 };
 

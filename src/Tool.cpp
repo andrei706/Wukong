@@ -34,6 +34,10 @@ float Tool::Attack(const sf::RectangleShape &Sprite, sf::Angle Degrees) {
     return Cooldown;
 }
 
+float Tool::GetCooldown() const {
+    return Cooldown;
+}
+
 const std::string & Tool::GetName() {
     return Name;
 }

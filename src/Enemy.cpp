@@ -6,6 +6,7 @@ Enemy::Enemy(const std::string &name_): Name(name_) {
     Sprite.setFillColor(sf::Color::Red);
     Sprite.setPosition(Position);
     Sprite.setSize({50, 50});
+    ActionClock.start();
 }
 
 Enemy::Enemy(const Enemy &other)
@@ -66,22 +67,35 @@ void Enemy::ShowSprite(sf::RenderWindow &window) const {
     window.draw(Sprite);
 }
 
+void Enemy::RenderHitboxes(sf::RenderWindow &window) const {
+    Weapon.ShowHitboxes(window);
+}
+
 void Enemy::HandleMovement(const sf::Vector2f &PlayerPosition, float deltaTime, float deltaTimeMultiplier) {
     sf::Vector2f direction = PlayerPosition - Sprite.getPosition();
     float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-    if (distance > 25.0f) {
+    float radians = std::atan2(direction.y, direction.x);
+    float angleDegrees = radians * 180.f / 3.14f;
+
+    if (distance > 5.0f) {
 
         sf::Vector2f unitDirection = direction / distance;
         float speed = Stats.GetSpeed();
-        // if (Damaged) {
-        //     speed /= 2.0f;
-        // }
+
+        if (Damaged) {
+            speed /= 10.0f;
+        }
         sf::Vector2f movement = unitDirection * speed * deltaTime * deltaTimeMultiplier;
 
         Sprite.move(movement);
-        // float radians = std::atan2(direction.y, direction.x);
-        // float angleDegrees = radians * 180.f / 3.14f;
+
         // Sprite.setRotation(sf::degrees(angleDegrees));
+    }
+    else {
+        if (ActionClock.getElapsedTime() > sf::seconds(Weapon.GetCooldown())) {
+            Weapon.Attack(Sprite, sf::degrees(angleDegrees));
+            ActionClock.restart();
+        }
     }
 
 }

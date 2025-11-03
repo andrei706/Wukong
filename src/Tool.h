@@ -31,6 +31,8 @@ public:
     void ClearAttacks();
 
     void ShowHitboxes(sf::RenderWindow& window) const;
+
+    float GetCooldown() const;
 };
 
 

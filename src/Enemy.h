@@ -18,6 +18,7 @@ class Enemy {
 
     sf::RectangleShape Sprite;
     sf::Vector2f Position = {200.f, 100.f};
+    sf::Clock ActionClock;
 public:
 
     explicit Enemy(const std::string& name_);
@@ -50,6 +51,7 @@ public:
 
     void ShowSprite(sf::RenderWindow& window) const;
 
+    void RenderHitboxes(sf::RenderWindow& window) const;
 
     void HandleMovement(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier);
 };

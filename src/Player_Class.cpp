@@ -61,13 +61,18 @@ void Player_Class::ClearAttackHitboxes() {
     inAttack = false;
 }
 
-float Player_Class::HandleAttack() {
+float Player_Class::HandleAttack(Key_Manager& KeyManager) {
     inAttack = false;
     Pole.ClearAttacks();
     if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
-        inAttack = true;
-        return Pole.Attack(Sprite, Rotation);
+        if (!KeyManager.CheckButton("LeftMouseButton")) {
+            inAttack = true;
+            KeyManager.ToggleActivation("LeftMouseButton");
+            return Pole.Attack(Sprite, Rotation);
+        }
     }
+    else
+        KeyManager.ToggleActivation("LeftMouseButton");
     return 0.0f;
 }
 

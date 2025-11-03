@@ -3,6 +3,7 @@
 #include "Player_Class.h"
 #include "Enemy.h"
 #include "GUI_TextLabel.h"
+#include "Key_Manager.h"
 
 #include <iostream>
 #include <fstream>
@@ -14,7 +15,9 @@ class Game_Class {
     sf::RenderWindow& window;
     float dt = 0.f;
     float dtMultiplier = 62.5f;
+    bool isPaused = false;
     Player_Class &player;
+    Key_Manager KeyManager;
 
     sf::Clock GameClock, ActionClock;
     float ActionCooldown = 0;

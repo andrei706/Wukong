@@ -1,5 +1,4 @@
 
-
 #include "Game_Class.h"
 
 void Game_Class::RenderEntities() const {
@@ -9,6 +8,7 @@ void Game_Class::RenderEntities() const {
     //Render Enemies
     for (const auto &i : SpawnedEnemies) {
         i.ShowSprite(window);
+        //i.RenderHitboxes(window);
     }
     //Render Hitboxes
     for (const auto &i : PlayerAttackHitbox) {
@@ -80,7 +80,7 @@ void Game_Class::EventHandler() {
                 i.ChangeDamagedStatus();
             }
         }
-        ActionCooldown = player.HandleAttack(); //Returneaza cat dureaza attackul
+        ActionCooldown = player.HandleAttack(KeyManager); //Returneaza cat dureaza attackul
         if (ActionCooldown > 0.0f) {
             ActionClock.restart();
         }
@@ -155,13 +155,33 @@ void Game_Class::WindowRendering() {
         {
             if (event->is<sf::Event::Closed>())
                 window.close();
+            // else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
+            // {
+            //     if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
+            //         if (!KeyManager.CheckButton("Escape")) {
+            //             KeyManager.ToggleActivation("Escape");
+            //             isPaused = !isPaused;
+            //         }
+            //     }
+            //     else
+            //         KeyManager.ToggleActivation("Escape");
+            // }
 
         }
 
         dt = GameClock.restart().asSeconds();
         dtMultiplier = 1/dt;
 
-        if (!PlayerLost)
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) {
+            if (!KeyManager.CheckButton("Escape")) {
+                KeyManager.ToggleActivation("Escape");
+                isPaused = !isPaused;
+            }
+        }
+        else
+            KeyManager.ToggleActivation("Escape");
+
+        if (!PlayerLost && !isPaused)
             EventHandler();
 
         //Rendering

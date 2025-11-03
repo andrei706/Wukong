@@ -7,15 +7,15 @@ void Game_Class::RenderEntities() const {
     if (!PlayerLost)
         player.ShowSprite(window);
     //Render Enemies
-    for (auto &i : SpawnedEnemies) {
+    for (const auto &i : SpawnedEnemies) {
         i.ShowSprite(window);
     }
     //Render Hitboxes
-    for (auto &i : PlayerAttackHitbox) {
+    for (const auto &i : PlayerAttackHitbox) {
         i.ShowSprite(window);
     }
     //Render GUI
-    for (auto &i : TextLabelList) {
+    for (const auto &i : TextLabelList) {
         if (i.GetStatus())
             i.ShowSprite(window);
     }

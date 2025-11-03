@@ -47,7 +47,7 @@ void Tool::ClearAttacks() {
 }
 
 void Tool::ShowHitboxes(sf::RenderWindow &window) const {
-    for (auto & i : Attacks) {
+    for (const auto & i : Attacks) {
         i.ShowSprite(window);
     }
 }

@@ -19,6 +19,9 @@ void Game_Class::RenderEntities() const {
         if (i.GetStatus())
             i.ShowSprite(window);
     }
+    for (const auto &i : ButtonList) {
+        i.ShowSprite(window);
+    }
 }
 
 void Game_Class::ReadData() {
@@ -61,6 +64,13 @@ void Game_Class::UpdateHealthbar() {
 }
 
 void Game_Class::EventHandler() {
+    //Test Events
+    // for (auto &i : ButtonList) {
+    //     if (i.isClicked(sf::Mouse::getPosition(window), KeyManager)) {
+    //         std::cout<<"Clicked!\n";
+    //     };
+    // }
+
     //Collision Verification
     //Between Player and Enemy
     sf::FloatRect PlayerBounds = player.GetSprite().getGlobalBounds();
@@ -145,6 +155,8 @@ void Game_Class::EventHandler() {
             }
         }
     }
+
+
 }
 
 void Game_Class::WindowRendering() {
@@ -172,15 +184,9 @@ void Game_Class::WindowRendering() {
         dt = GameClock.restart().asSeconds();
         dtMultiplier = 1/dt;
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) {
-            if (!KeyManager.CheckButton("Escape")) {
-                KeyManager.ToggleActivation("Escape");
-                isPaused = !isPaused;
-            }
+        if (KeyManager.CheckInput("Escape")) {
+            isPaused = !isPaused;
         }
-        else
-            if (KeyManager.CheckButton("Escape"))
-                KeyManager.ToggleActivation("Escape");
 
         if (!PlayerLost && !isPaused)
             EventHandler();
@@ -202,10 +208,10 @@ void Game_Class::Setup() {
     SpawnedEnemies[0].SetPosition(500, 200);
     SpawnedEnemies[1].SetPosition(500, 300);
 
-    sf::Font font("data/fonts/arial.ttf");
+    sf::Font font("data/fonts/Tiny5-Regular.ttf");
     sf::Text text(font);
     text.setString("Hello World!");
-    GUI_TextLabel textLabel(text, "Health", "data/fonts/arial.ttf", 20);
+    GUI_TextLabel textLabel(text, "Health", "data/fonts/Tiny5-Regular.ttf", 20);
     TextLabelList.push_back(textLabel);
 
     textLabel.SetText("You won!");
@@ -222,6 +228,11 @@ void Game_Class::Setup() {
     textLabel.SetPosition({0, 200});
     textLabel.SetSize(50);
     TextLabelList.push_back(textLabel);
+
+    sf::Texture Texture("data/textures/buttons/default_texture.jpeg");
+    sf::Sprite Sprite(Texture);
+    GUI_Button Test_Button(Sprite, "Test");
+    ButtonList.push_back(Test_Button);
 
     WindowRendering();
 }

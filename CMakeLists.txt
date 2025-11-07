@@ -76,6 +76,8 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         src/Enviroment_Object.h
         src/Key_Manager.cpp
         src/Key_Manager.h
+        src/GUI_Button.cpp
+        src/GUI_Button.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

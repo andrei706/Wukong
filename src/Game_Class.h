@@ -3,6 +3,7 @@
 #include "Player_Class.h"
 #include "Enemy.h"
 #include "GUI_TextLabel.h"
+#include "GUI_Button.h"
 #include "Key_Manager.h"
 
 #include <iostream>
@@ -26,6 +27,7 @@ class Game_Class {
     std::vector<Tool> ToolList;
     std::vector<Attack_Hitbox> PlayerAttackHitbox;
     std::vector<GUI_TextLabel> TextLabelList;
+    std::vector<GUI_Button> ButtonList;
 
     bool PlayerLost = false;
 

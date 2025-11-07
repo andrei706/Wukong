@@ -25,6 +25,27 @@ void Key_Manager::ToggleActivation(const std::string &KeyName) {
     else std::cerr << "Invalid Button";
 }
 
+bool Key_Manager::CheckKeyPressed(const std::string &KeyName) const {
+    if (KeyName == "LeftMouseButton" && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
+        return true;
+    if (KeyName == "Escape" && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
+        return true;
+    return false;
+}
+
+bool Key_Manager::CheckInput(const std::string &input) {
+    if (CheckKeyPressed(input)) {
+        if (!CheckButton(input)) {
+            ToggleActivation(input);
+            return true;
+        }
+    }
+    else
+        if (CheckButton(input))
+            ToggleActivation(input);
+    return false;
+}
+
 std::ostream & operator<<(std::ostream &os, const Key_Manager &obj) {
     return os
            << "ActionButton: " << obj.ActionButton

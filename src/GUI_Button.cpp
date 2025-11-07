@@ -19,7 +19,7 @@ GUI_Button::GUI_Button(std::string Name_, const std::string &TexturePath_, sf::V
     InitialSize.y = (float)Texture.getSize().y;
 }
 
-std::string const GUI_Button::GetName() const {
+std::string& GUI_Button::GetName() const {
     return Name;
 }
 

@@ -25,7 +25,7 @@ public:
         sf::Vector2f InitialSize_ = {200.f, 80.f}
         );
 
-    std::string const GetName() const;
+    std::string& GetName() const;
 
     void ShowSprite(sf::RenderWindow& window) const;
 

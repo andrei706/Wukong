@@ -6,6 +6,7 @@ Enemy::Enemy(const std::string &name_): Name(name_) {
     Sprite.setFillColor(sf::Color::Red);
     Sprite.setPosition(Position);
     Sprite.setSize({50, 50});
+    Sprite.setOrigin({25, 25});
     ActionClock.start();
 }
 
@@ -77,7 +78,7 @@ void Enemy::HandleMovement(const sf::Vector2f &PlayerPosition, float deltaTime, 
     // float radians = std::atan2(direction.y, direction.x);
     // float angleDegrees = radians * 180.f / 3.14f;
 
-    if (distance > 5.0f) {
+    if (distance > 25.0f) {
 
         sf::Vector2f unitDirection = direction / distance;
         float speed = Stats.GetSpeed();

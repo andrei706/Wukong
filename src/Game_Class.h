@@ -27,14 +27,17 @@ class Game_Class {
     std::vector<Tool> ToolList;
     std::vector<Attack_Hitbox> PlayerAttackHitbox;
     std::vector<GUI_TextLabel> TextLabelList;
-    std::vector<GUI_Button> ButtonList;
+    std::vector<GUI_Button> PauseButtonList;
 
     bool PlayerLost = false;
 
 private:
+
     void RenderEntities() const;
     void ReadData();
     void UpdateHealthbar();
+    void Replay();
+    void PauseHandler();
     void EventHandler();
     void WindowRendering();
 

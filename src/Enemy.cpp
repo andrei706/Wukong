@@ -67,9 +67,9 @@ void Enemy::ShowSprite(sf::RenderWindow &window) const {
     window.draw(Sprite);
 }
 
-void Enemy::RenderHitboxes(sf::RenderWindow &window) const {
-    Weapon.ShowHitboxes(window);
-}
+// void Enemy::RenderHitboxes(sf::RenderWindow &window) const {
+//     Weapon.ShowHitboxes(window);
+// }
 
 void Enemy::HandleMovement(const sf::Vector2f &PlayerPosition, float deltaTime, float deltaTimeMultiplier) {
     sf::Vector2f direction = PlayerPosition - Sprite.getPosition();

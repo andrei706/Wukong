@@ -12,19 +12,26 @@
 class GUI_Button {
     std::string Name;
     sf::Texture Texture;
-    sf::Sprite Sprite;
+    sf::RectangleShape Sprite;
     sf::Vector2f InitialPosition = {100.f, 100.f};
     sf::Vector2f InitialSize;
 
 public:
     // Constructor takes string by value (cleaner for small strings)
-    explicit GUI_Button(sf::Sprite Sprite_, std::string Name_ = "ButtonGUI", const std::string& TexturePath_ = "data/textures/buttons/default_texture.jpeg");
+    explicit GUI_Button(
+        std::string Name_ = "ButtonGUI",
+        const std::string& TexturePath_ = "data/textures/buttons/default_texture.jpeg",
+        sf::Vector2f InitialPosition_ = {500.f, 500.f},
+        sf::Vector2f InitialSize_ = {200.f, 80.f}
+        );
+
+    std::string GetName() const;
 
     void ShowSprite(sf::RenderWindow& window) const;
 
     sf::FloatRect getBounds() const;
 
-    bool isClicked(sf::Vector2i mousePos, Key_Manager KeyManager) const;
+    bool isClicked(sf::Vector2i mousePos, Key_Manager & KeyManager);
 };
 
 

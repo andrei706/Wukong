@@ -18,6 +18,14 @@ bool Character_Stats::ReduceHealth(float DamagePoints) {
     return true;
 }
 
+void Character_Stats::RestoreHealth(float HealthPoints) {
+    if (Health + HealthPoints >= MaxHealth) {
+        Health = MaxHealth;
+        return;
+    }
+    Health += HealthPoints;
+}
+
 float Character_Stats::GetHealth() const {
     return Health;
 }

@@ -8,7 +8,7 @@ void Game_Class::RenderEntities() const {
     //Render Enemies
     for (const auto &i : SpawnedEnemies) {
         i.ShowSprite(window);
-        i.RenderHitboxes(window);
+        //i.RenderHitboxes(window);
     }
     //Render Hitboxes
     for (const auto &i : PlayerAttackHitbox) {
@@ -19,9 +19,14 @@ void Game_Class::RenderEntities() const {
         if (i.GetStatus())
             i.ShowSprite(window);
     }
-    for (const auto &i : ButtonList) {
-        i.ShowSprite(window);
-    }
+    if (isPaused || PlayerLost)
+        for (const auto &i : PauseButtonList) {
+            if (i.GetName() == "Resume" && PlayerLost == true) {
+                continue;
+            }
+            i.ShowSprite(window);
+        }
+
 }
 
 void Game_Class::ReadData() {
@@ -63,13 +68,41 @@ void Game_Class::UpdateHealthbar() {
     }
 }
 
+void Game_Class::Replay() {
+    SpawnedEnemies.clear();
+    SpawnedEnemies.insert(SpawnedEnemies.begin(), {EnemyList[0], EnemyList[1]});
+    SpawnedEnemies[0].SetPosition(500, 200);
+    SpawnedEnemies[1].SetPosition(500, 300);
+    PlayerLost = false;
+    player.RestoreHealth(999999999.9f);
+    player.SetPosition({100, 100});
+    for (auto &i : TextLabelList) {
+        if (i.GetName() == "WinText" && i.GetStatus()) {
+            i.ToggleActive();
+        }
+        if (i.GetName() == "LoseText" && i.GetStatus()) {
+            i.ToggleActive();
+        }
+    }
+    isPaused = false;
+}
+
+void Game_Class::PauseHandler() {
+    for (auto &i : PauseButtonList) {
+        if (i.isClicked(sf::Mouse::getPosition(window), KeyManager)) {
+            if (i.GetName() == "Exit")
+                window.close();
+            if (i.GetName() == "Resume")
+                isPaused = false;
+            if (i.GetName() == "Replay")
+                Replay();
+        }
+    }
+}
+
 void Game_Class::EventHandler() {
     //Test Events
-    // for (auto &i : ButtonList) {
-    //     if (i.isClicked(sf::Mouse::getPosition(window), KeyManager)) {
-    //         std::cout<<"Clicked!\n";
-    //     };
-    // }
+
 
     //Collision Verification
     //Between Player and Enemy
@@ -187,6 +220,8 @@ void Game_Class::WindowRendering() {
         if (KeyManager.CheckInput("Escape")) {
             isPaused = !isPaused;
         }
+        if (isPaused || PlayerLost)
+            PauseHandler();
 
         if (!PlayerLost && !isPaused)
             EventHandler();
@@ -229,10 +264,12 @@ void Game_Class::Setup() {
     textLabel.SetSize(50);
     TextLabelList.push_back(textLabel);
 
-    sf::Texture Texture("data/textures/buttons/default_texture.jpeg");
-    sf::Sprite Sprite(Texture);
-    GUI_Button Test_Button(Sprite, "Test");
-    ButtonList.push_back(Test_Button);
+    GUI_Button Button1("Resume", "data/textures/buttons/Resume_Button.png", {550, 500});
+    PauseButtonList.push_back(Button1);
+    GUI_Button Button2("Replay", "data/textures/buttons/Replay_Button.png", {300, 500});
+    PauseButtonList.push_back(Button2);
+    GUI_Button Button3("Exit", "data/textures/buttons/Exit_Button.png", {25, 500});
+    PauseButtonList.push_back(Button3);
 
     WindowRendering();
 }

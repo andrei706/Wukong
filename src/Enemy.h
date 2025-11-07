@@ -51,7 +51,7 @@ public:
 
     void ShowSprite(sf::RenderWindow& window) const;
 
-    void RenderHitboxes(sf::RenderWindow& window) const;
+    //void RenderHitboxes(sf::RenderWindow& window) const;
 
     void HandleMovement(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier);
 };

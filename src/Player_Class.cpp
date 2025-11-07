@@ -30,6 +30,11 @@ void Player_Class::ShowSprite(sf::RenderWindow &window) const {
     Pole.ShowHitboxes(window);
 }
 
+void Player_Class::SetPosition(sf::Vector2f position) {
+    Sprite.setPosition(position);
+    Position = position;
+}
+
 sf::RectangleShape & Player_Class::GetSprite() {
     return Sprite;
 }
@@ -50,6 +55,10 @@ void Player_Class::TakeDamage(float Value) {
     if (!MakeInvincibile()) {
         Stats.ReduceHealth(Value);
     }
+}
+
+void Player_Class::RestoreHealth(float Value) {
+    Stats.RestoreHealth(Value);
 }
 
 std::vector<Attack_Hitbox> Player_Class::GetHitboxes() const {

@@ -17,6 +17,7 @@ public:
     [[nodiscard]] float GetHealth() const;
     bool ReduceHealth(float DamagePoints);
 
+    void RestoreHealth(float HealthPoints);
 };
 
 

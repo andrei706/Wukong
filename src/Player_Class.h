@@ -31,11 +31,15 @@ public:
     explicit Player_Class(int Experience_ = 0, float InvincibilityTime_ = 1.0f);
     friend std::ostream & operator<<(std::ostream & out, const Player_Class & object);
     void ShowSprite(sf::RenderWindow& window) const;
+    void SetPosition(sf::Vector2f position);
     sf::RectangleShape& GetSprite();
     sf::Vector2f GetPosition() const;
     float GetHealth() const;
     void AddExperience(int Value);
     void TakeDamage(float Value);
+
+    void RestoreHealth(float Value);
+
     std::vector<Attack_Hitbox> GetHitboxes() const;
     void ClearAttackHitboxes();
     float HandleAttack(Key_Manager& KeyManager);

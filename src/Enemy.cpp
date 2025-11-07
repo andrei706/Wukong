@@ -92,9 +92,10 @@ void Enemy::HandleMovement(const sf::Vector2f &PlayerPosition, float deltaTime, 
         // Sprite.setRotation(sf::degrees(angleDegrees));
     }
     else {
-        float radians = std::atan2(direction.y, direction.x);
-        float angleDegrees = radians * 180.f / 3.14f;
+
         if (ActionClock.getElapsedTime() > sf::seconds(Weapon.GetCooldown())) {
+            float radians = std::atan2(direction.y, direction.x);
+            float angleDegrees = radians * 180.f / 3.14f;
             Weapon.Attack(Sprite, sf::degrees(angleDegrees));
             ActionClock.restart();
         }

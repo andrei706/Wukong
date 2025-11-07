@@ -19,9 +19,10 @@ GUI_Button::GUI_Button(std::string Name_, const std::string &TexturePath_, sf::V
     InitialSize.y = (float)Texture.getSize().y;
 }
 
-std::string GUI_Button::GetName() const {
+std::string const GUI_Button::GetName() const {
     return Name;
 }
+
 
 void GUI_Button::ShowSprite(sf::RenderWindow &window) const {
     window.draw(Sprite);

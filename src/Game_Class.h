@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <nlohmann/json.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
@@ -19,6 +20,9 @@ class Game_Class {
     bool isPaused = false;
     Player_Class &player;
     Key_Manager KeyManager;
+
+    sf::Vector2f windowSize = window.getDefaultView().getSize();
+    sf::View view;
 
     sf::Clock GameClock, ActionClock;
     float ActionCooldown = 0;
@@ -38,6 +42,9 @@ private:
     void UpdateHealthbar();
     void Replay();
     void PauseHandler();
+
+    void AdjustView(sf::RenderWindow &window, unsigned int newWidth, unsigned int newHeight);
+
     void EventHandler();
     void WindowRendering();
 

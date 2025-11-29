@@ -31,7 +31,7 @@ public:
 
     sf::FloatRect getBounds() const;
 
-    bool isClicked(sf::Vector2i mousePos, Key_Manager & KeyManager);
+    bool isClicked(sf::Vector2f mousePos, Key_Manager & KeyManager);
 };
 
 

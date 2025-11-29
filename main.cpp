@@ -10,7 +10,7 @@
 int main() {
 
     sf::RenderWindow window;
-    window.create(sf::VideoMode({800, 600}), "Wukong");
+    window.create(sf::VideoMode({1600, 900}), "Wukong");
 
     Player_Class Player{1, 1.0f};
     Game_Class Game{window, Player};

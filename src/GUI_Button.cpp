@@ -32,14 +32,13 @@ sf::FloatRect GUI_Button::getBounds() const {
     return Sprite.getGlobalBounds();
 }
 
-bool GUI_Button::isClicked(sf::Vector2i mousePos, Key_Manager & KeyManager) {
-    sf::Vector2f floatMousePos = static_cast<sf::Vector2f>(mousePos); //Converteste din sf::vector2i in sf::vector2f pentru verificare
-    if (getBounds().contains(floatMousePos)) {
+bool GUI_Button::isClicked(sf::Vector2f mousePos, Key_Manager & KeyManager) {
+    if (getBounds().contains(mousePos)) {
         Sprite.setFillColor(sf::Color(128, 128, 128));
     }
     else
         Sprite.setFillColor(sf::Color(255, 255, 255));
-    if ( getBounds().contains(floatMousePos) && KeyManager.CheckInput("LeftMouseButton")) {
+    if ( getBounds().contains(mousePos) && KeyManager.CheckInput("LeftMouseButton")) {
         Sprite.setFillColor(sf::Color(255, 255, 255));
         return true;
     }

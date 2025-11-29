@@ -66,6 +66,7 @@ void Enemy::SetPosition(float x, float y) {
 
 void Enemy::ShowSprite(sf::RenderWindow &window) const {
     window.draw(Sprite);
+    AttackWarning.ShowSprite(window);
 }
 
 // void Enemy::RenderHitboxes(sf::RenderWindow &window) const {
@@ -77,31 +78,63 @@ void Enemy::HandleMovement(const sf::Vector2f &PlayerPosition, float deltaTime, 
     float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
     // float radians = std::atan2(direction.y, direction.x);
     // float angleDegrees = radians * 180.f / 3.14f;
+    AttackWarning.Update();
+    if (inAttack == false && getAttackReady == false) {
+        if (distance > 25.0f) {
 
-    if (distance > 25.0f) {
+            sf::Vector2f unitDirection = direction / distance;
+            float speed = Stats.GetSpeed();
 
-        sf::Vector2f unitDirection = direction / distance;
-        float speed = Stats.GetSpeed();
+            if (Damaged) {
+                speed /= 10.0f;
+            }
+            sf::Vector2f movement = unitDirection * speed * deltaTime * deltaTimeMultiplier;
 
-        if (Damaged) {
-            speed /= 10.0f;
+            Sprite.move(movement);
+
+            // Sprite.setRotation(sf::degrees(angleDegrees));
         }
-        sf::Vector2f movement = unitDirection * speed * deltaTime * deltaTimeMultiplier;
-
-        Sprite.move(movement);
-
-        // Sprite.setRotation(sf::degrees(angleDegrees));
+        else {
+            HandleAttack(1, direction);
+        }
     }
-    else {
+    HandleAttack(0, direction);
 
-        if (ActionClock.getElapsedTime() > sf::seconds(Weapon.GetCooldown())) {
+}
+
+void Enemy::HandleAttack(bool canAttack, sf::Vector2f direction) {
+    sf::Vector2f TempPosition = Sprite.getPosition();
+    AttackWarning.SetPosition({TempPosition.x, TempPosition.y - 60});
+
+    if (inAttack == true) {
+        if (CooldownClock.getElapsedTime().asSeconds() >= Weapon.GetCooldown()) {
+            std::cout <<"Attack is done! Cooldown finished.\n";
+            inAttack = false;
+        }
+        return;
+    }
+
+    if (getAttackReady == false && canAttack) {
+        AttackWarning.SetVisibility(true, 0.5f);
+        AttackWarningClock.restart();
+        getAttackReady = true;
+        return;
+    }
+
+    if (getAttackReady == true) {
+        if (AttackWarningClock.getElapsedTime().asSeconds() >= 0.5f) {
+            std::cout <<"Started attack! \n";
+
             float radians = std::atan2(direction.y, direction.x);
-            float angleDegrees = radians * 180.f / 3.14f;
+            float angleDegrees = radians * 180.0f / 3.14f;
+
             Weapon.Attack(Sprite, sf::degrees(angleDegrees));
-            ActionClock.restart();
+
+            CooldownClock.restart();
+            inAttack = true;
+            getAttackReady = false;
         }
     }
-
 }
 
 std::ostream & operator<<(std::ostream &out, const Enemy &object) {

@@ -100,7 +100,7 @@ void Player_Class::HandleMovement(sf::RenderWindow &window, float deltaTime, flo
     Sprite.move(movement);
 
     sf::Vector2i MousePos = sf::Mouse::getPosition(window);
-    sf::Vector2f MouseWorldPos = sf::Vector2f(MousePos.x, MousePos.y);
+    sf::Vector2f MouseWorldPos = window.mapPixelToCoords(MousePos);
     sf::Vector2f PlayerPosition = Sprite.getPosition();
     sf::Vector2f diff = MouseWorldPos - PlayerPosition;
 

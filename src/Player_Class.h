@@ -13,7 +13,7 @@
 class Player_Class {
     int Experience, Gauge = 0;
     bool Invincibility = false, inAttack = false;
-    Character_Stats Stats{30, 2, 0};
+    Character_Stats Stats{500, 2, 0};
     Tool Pole{"Pole", 5, 0.4f, 40, 2};
 
     sf::RectangleShape Sprite;

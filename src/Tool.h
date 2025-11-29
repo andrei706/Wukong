@@ -22,8 +22,6 @@ public:
 
     [[nodiscard]] float DamageCalculation() const;
 
-    float Attack(const sf::RectangleShape &Sprite, sf::Angle Degrees);
-
     const std::string& GetName();
 
     [[nodiscard]] const std::vector <Attack_Hitbox>& GetAttackHitboxes() const;
@@ -33,6 +31,8 @@ public:
     void ShowHitboxes(sf::RenderWindow& window) const;
 
     float GetCooldown() const;
+
+    virtual float Attack(const sf::RectangleShape &Sprite, sf::Angle Degrees);
 };
 
 

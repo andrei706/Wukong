@@ -6,7 +6,7 @@ void Game_Class::RenderEntities() const {
     if (!PlayerLost)
         player.ShowSprite(window);
     //Render Enemies
-    for (const auto &i : SpawnedEnemies) {
+    for (auto &i : SpawnedEnemies) {
         i.ShowSprite(window);
         //i.RenderHitboxes(window);
     }
@@ -30,34 +30,67 @@ void Game_Class::RenderEntities() const {
 }
 
 void Game_Class::ReadData() {
-    //Eventual fisierele txt vor fi inlocuite cu json-uri
-    std::ifstream File1("data/EnemyList.txt");
-    std::ifstream File2("data/ToolList.txt");
+    std::ifstream toolFile("data/ToolList.json");
+    if (!toolFile.is_open()) {
+        std::cerr << "Error opening data/ToolList.json\n";
+        return;
+    }
 
-    std::string Name, WeaponName;
-    float Damage, Cooldown;
-    int Critical_Chance;
-    while (File2 >> WeaponName >> Damage >> Cooldown >> Critical_Chance) {
-        Tool WeaponAux{WeaponName, Damage, Cooldown, 20.0f, Critical_Chance};
+    nlohmann::json toolData;
+    try {
+        toolFile >> toolData;
+    } catch (nlohmann::json::parse_error& e) {
+        std::cerr << "JSON Parse Error in ToolList.json: " << e.what() << '\n';
+        return;
+    }
+    toolFile.close();
+
+    for (const auto& tool : toolData) {
+        Tool WeaponAux{
+            tool.at("WeaponName").get<std::string>(),
+            tool.at("Damage").get<float>(),
+            tool.at("Cooldown").get<float>(),
+            20.0f, //Range
+            tool.at("Critical_Chance").get<int>()
+        };
         ToolList.push_back(WeaponAux);
     }
-    File2.close();
 
-    float MaxHealth, Speed;
-    int Mana;
-    while (File1 >> Name >> MaxHealth >> Speed >> Mana >> WeaponName) {
-        Enemy EnemyAux{Name};
-        Character_Stats StatsAux{MaxHealth, Speed, Mana};
+    std::ifstream enemyFile("data/EnemyList.json");
+    if (!enemyFile.is_open()) {
+        std::cerr << "Error opening data/EnemyList.json\n";
+        return;
+    }
+
+    nlohmann::json enemyData;
+    try {
+        enemyFile >> enemyData;
+    } catch (nlohmann::json::parse_error& e) {
+        std::cerr << "JSON Parse Error in EnemyList.json: " << e.what() << '\n';
+        return;
+    }
+    enemyFile.close();
+
+    // The data/EnemyList.json file contains an array of enemies
+    for (const auto& enemy : enemyData) {
+        Enemy EnemyAux{enemy.at("Name").get<std::string>()};
+
+        Character_Stats StatsAux{
+            enemy.at("MaxHealth").get<float>(),
+            enemy.at("Speed").get<float>(),
+            enemy.at("Mana").get<int>()
+        };
         EnemyAux.AssignStats(StatsAux);
-        for (auto &Weapon : ToolList)
+
+        std::string WeaponName = enemy.at("WeaponName").get<std::string>();
+        for (auto &Weapon : ToolList) {
             if (Weapon.GetName() == WeaponName) {
                 EnemyAux.AssignWeapon(Weapon);
                 break;
             }
+        }
         EnemyList.push_back(EnemyAux);
     }
-    File1.close();
-
 }
 
 void Game_Class::UpdateHealthbar() {
@@ -88,16 +121,50 @@ void Game_Class::Replay() {
 }
 
 void Game_Class::PauseHandler() {
+    sf::Vector2i MousePos = sf::Mouse::getPosition(window);
+    sf::Vector2f MouseWorldPos = window.mapPixelToCoords(MousePos);
+
     for (auto &i : PauseButtonList) {
-        if (i.isClicked(sf::Mouse::getPosition(window), KeyManager)) {
+        if (i.isClicked(MouseWorldPos, KeyManager)) {
             if (i.GetName() == "Exit")
                 window.close();
-            if (i.GetName() == "Resume")
+            else if (i.GetName() == "Resume")
                 isPaused = false;
-            if (i.GetName() == "Replay")
+            else if (i.GetName() == "Replay")
                 Replay();
         }
     }
+}
+
+void Game_Class::AdjustView(sf::RenderWindow& window, unsigned int newWidth, unsigned int newHeight) {
+    float targetWidth = 1280.0f;
+    float targetHeight = 720.0f;
+
+    float windowRatio = (float)newWidth / (float)newHeight;
+    float viewRatio = targetWidth / targetHeight;
+
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    float viewportX = 0.0f;
+    float viewportY = 0.0f;
+
+    if (windowRatio > viewRatio) {
+        scaleX = viewRatio / windowRatio;
+        viewportX = (1.0f - scaleX) / 2.0f;
+    } else if (windowRatio < viewRatio) {
+        scaleY = windowRatio / viewRatio;
+        viewportY = (1.0f - scaleY) / 2.0f;
+    }
+
+    sf::Vector2f position(viewportX, viewportY);
+
+    sf::Vector2f size(scaleX, scaleY);
+    sf::FloatRect viewportRect(position, size);
+
+    view.setViewport(viewportRect);
+
+    window.setView(view);
+
 }
 
 void Game_Class::EventHandler() {
@@ -211,6 +278,9 @@ void Game_Class::WindowRendering() {
             //     else
             //         KeyManager.ToggleActivation("Escape");
             // }
+            else if (const auto* resized = event->getIf<sf::Event::Resized>()) {
+                AdjustView(window, resized->size.x, resized->size.y);
+            }
 
         }
 
@@ -233,7 +303,13 @@ void Game_Class::WindowRendering() {
     }
 }
 
-Game_Class::Game_Class(sf::RenderWindow &window_, Player_Class &player_): window(window_), player(player_) {}
+Game_Class::Game_Class(sf::RenderWindow &window_, Player_Class &player_): window(window_), player(player_) {
+    view.setSize({1280.0f, 720.0f});
+
+    view.setCenter({640.0f, 360.0f});
+
+    window.setView(view);
+}
 
 void Game_Class::Setup() {
     ActionClock.start();

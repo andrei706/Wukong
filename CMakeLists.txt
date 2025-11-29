@@ -40,8 +40,14 @@ FetchContent_Declare(
     # GIT_TAG        0fa201c969e48ecc253581c5841ce73f44d42f49 # 3.0.2
     GIT_SHALLOW    1  # works only with branches or tags, not with arbitrary commit hashes
 )
+FetchContent_Declare(
+        json
+        URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
+)
 
 FetchContent_MakeAvailable(SFML)
+FetchContent_MakeAvailable(json)
+
 
 ###############################################################################
 
@@ -78,6 +84,8 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         src/Key_Manager.h
         src/GUI_Button.cpp
         src/GUI_Button.h
+        src/Attack_Warning.cpp
+        src/Attack_Warning.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )
@@ -93,8 +101,10 @@ set_compiler_flags(RUN_SANITIZERS TRUE TARGET_NAMES ${MAIN_EXECUTABLE_NAME})
 # target_include_directories(${MAIN_EXECUTABLE_NAME} SYSTEM PRIVATE ext/<SomeHppLib>/include)
 target_include_directories(${MAIN_EXECUTABLE_NAME} SYSTEM PRIVATE ${SFML_SOURCE_DIR}/include)
 target_link_directories(${MAIN_EXECUTABLE_NAME} PRIVATE ${SFML_BINARY_DIR}/lib)
-target_link_libraries(${MAIN_EXECUTABLE_NAME} PRIVATE SFML::Graphics SFML::Window SFML::System Threads::Threads)
-
+target_link_libraries(${MAIN_EXECUTABLE_NAME}
+        PRIVATE SFML::Graphics SFML::Window SFML::System Threads::Threads
+        PRIVATE nlohmann_json::nlohmann_json
+)
 if(APPLE)
 elseif(UNIX)
     target_link_libraries(${MAIN_EXECUTABLE_NAME} PRIVATE X11)

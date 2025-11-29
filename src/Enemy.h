@@ -5,6 +5,7 @@
 
 #include "Character_Stats.h"
 #include "Tool.h"
+#include "Attack_Warning.h"
 
 #include <string>
 
@@ -13,12 +14,16 @@ class Enemy {
     std::string Name;
     Character_Stats Stats{10, 5, 5 };
     Tool Weapon{"Sword", 3, 0.6f, 10};
+    Attack_Warning AttackWarning;
+
     bool Damaged = false; //Daca a si-a primit damage de la atacul player-ului cu sabia sau nu
+    bool inAttack = false;
+    bool getAttackReady = false;
     int Experience = 5;
 
     sf::RectangleShape Sprite;
     sf::Vector2f Position = {200.f, 100.f};
-    sf::Clock ActionClock;
+    sf::Clock ActionClock, AttackWarningClock, CooldownClock;
 public:
 
     explicit Enemy(const std::string& name_);
@@ -53,7 +58,9 @@ public:
 
     //void RenderHitboxes(sf::RenderWindow& window) const;
 
-    void HandleMovement(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier);
+    virtual void HandleMovement(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier);
+
+    virtual void HandleAttack(bool canAttack, sf::Vector2f direction);
 };
 
 

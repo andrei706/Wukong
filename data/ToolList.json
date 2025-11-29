@@ -1,0 +1,14 @@
+[
+  {
+    "WeaponName": "Sword",
+    "Damage": 4.0,
+    "Cooldown": 0.4,
+    "Critical_Chance": 100
+  },
+  {
+    "WeaponName": "Punch",
+    "Damage": 6.0,
+    "Cooldown": 0.7,
+    "Critical_Chance": 10
+  }
+]

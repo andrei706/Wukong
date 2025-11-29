@@ -1,0 +1,16 @@
+[
+  {
+    "Name": "Zombie",
+    "MaxHealth": 20.0,
+    "Speed": 3.0,
+    "Mana": 0,
+    "WeaponName": "Sword"
+  },
+  {
+    "Name": "Ghoul",
+    "MaxHealth": 25.0,
+    "Speed": 5.0,
+    "Mana": 0,
+    "WeaponName": "Punch"
+  }
+]

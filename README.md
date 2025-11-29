@@ -6,16 +6,18 @@ Wukong este un joc top-down action adventure despre o maimuță care dorește s�
 
 Inspirație: [The Legend of Zelda: The Minish Cap](https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_The_Minish_Cap), [Dragon Ball Z: The Legacy of Goku](https://en.wikipedia.org/wiki/Dragon_Ball_Z:_The_Legacy_of_Goku)
 
-### Caracteristicile implementate până acum (v0.1)
+### Caracteristicile implementate până acum (v0.1.1)
 - Player și Enemy movement
 - Un atac simplu care are hitbox-ul unde este orientat mouse-ul
 - Condiții temporare de câștig (dacă mor toți inamicii) sau pierdere (dacă numai ai viață)
+- Meniu de pauză pentru a da replay și exit
 - Interfață grafică folosind SFML
 
 ### Controls
 - WASD pentru mișcare
 - Left Mouse Button pentru atac
-
+- Esc pentru meniul de pauză
+  
 ### Important!
 
 Aveți voie cu cod generat de modele de limbaj la care nu ați contribuit semnificativ doar dacă documentați riguros acest proces.

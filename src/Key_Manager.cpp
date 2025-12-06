@@ -28,6 +28,8 @@ void Key_Manager::ToggleActivation(const std::string &KeyName) {
 bool Key_Manager::CheckKeyPressed(const std::string &KeyName) const {
     if (KeyName == "LeftMouseButton" && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
         return true;
+    if (KeyName == "RightMouseButton" && sf::Mouse::isButtonPressed(sf::Mouse::Button::Right))
+        return true;
     if (KeyName == "Escape" && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
         return true;
     return false;

@@ -22,14 +22,7 @@ float Tool::Attack(const sf::RectangleShape &Sprite, sf::Angle Degrees) {
         Range * std::sin(angleRadians)
     };
 
-    Attack_Hitbox Entity{
-        DamageCalculation(),
-        {30, 100},
-        Sprite.getPosition() + Offset,
-        Degrees
-    };
-
-    Attacks.push_back(Entity);
+    CreateAttackHitbox(Sprite.getPosition(), Offset, Degrees);
 
     return Cooldown;
 }
@@ -38,11 +31,42 @@ float Tool::GetCooldown() const {
     return Cooldown;
 }
 
+std::shared_ptr<Tool> Tool::clone() const {
+    return std::make_shared<Tool>(*this);
+}
+
+void Tool::Update(float deltaTime) {
+    // Update all attacks first
+    for (auto& attack : Attacks) {
+        attack->Update(deltaTime);
+    }
+
+    // Then remove inactive ones
+    Attacks.erase(
+        std::remove_if(Attacks.begin(), Attacks.end(),
+                       [](const std::shared_ptr<Attack_Hitbox>& attack) {
+                           return !attack->IsActive(); // Assuming you have an IsActive() method
+                       }),
+        Attacks.end()
+    );
+}
+
+void Tool::CreateAttackHitbox(sf::Vector2f Position, sf::Vector2f Offset, sf::Angle Degrees) {
+    auto new_hitbox = std::make_shared<Attack_Hitbox>(
+        DamageCalculation(),
+        sf::Vector2f{30.0f, 100.0f},
+        Position + Offset,
+        Degrees
+    );
+
+    Attacks.push_back(new_hitbox);
+}
+
 const std::string & Tool::GetName() {
     return Name;
 }
 
-const std::vector<Attack_Hitbox> & Tool::GetAttackHitboxes() const {
+const std::vector<std::shared_ptr<Attack_Hitbox>> & Tool::GetAttackHitboxes() const {
     return Attacks;
 }
 
@@ -52,14 +76,14 @@ void Tool::ClearAttacks() {
 
 void Tool::ShowHitboxes(sf::RenderWindow &window) const {
     for (const auto & i : Attacks) {
-        i.ShowSprite(window);
+        i->ShowSprite(window);
     }
 }
 
 std::ostream & operator<<(std::ostream &out, const Tool &object) {
-    out<<object.Name<<" "<<object.Damage<<" "<<object.Range<<" "<<object.Cooldown<<" "<<object.Critical_Chance<<"\n";
-    for (const auto & i : object.Attacks) {
-        out<<i;
-    }
+    object.DisplayInfo(out);
+    // for (const auto & i : object.Attacks) {
+    //     out<<i;
+    // }
     return out;
 }

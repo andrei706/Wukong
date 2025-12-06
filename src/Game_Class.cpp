@@ -7,12 +7,15 @@ void Game_Class::RenderEntities() const {
         player.ShowSprite(window);
     //Render Enemies
     for (auto &i : SpawnedEnemies) {
-        i.ShowSprite(window);
-        //i.RenderHitboxes(window);
+        i->ShowSprite(window);
+
+    }
+    for (auto &i :SpawnedEnemies) {
+        i->RenderHitboxes(window);
     }
     //Render Hitboxes
     for (const auto &i : PlayerAttackHitbox) {
-        i.ShowSprite(window);
+        i->ShowSprite(window);
     }
     //Render GUI
     for (const auto &i : TextLabelList) {
@@ -46,14 +49,18 @@ void Game_Class::ReadData() {
     toolFile.close();
 
     for (const auto& tool : toolData) {
-        Tool WeaponAux{
-            tool.at("WeaponName").get<std::string>(),
-            tool.at("Damage").get<float>(),
-            tool.at("Cooldown").get<float>(),
-            20.0f, //Range
-            tool.at("Critical_Chance").get<int>()
-        };
-        ToolList.push_back(WeaponAux);
+        std::shared_ptr<Tool> toolPtr;
+        if (tool.at("Type").get<std::string>() == "Punch") {
+            toolPtr = std::make_shared<Tool_Punch>(
+                tool.at("WeaponName").get<std::string>(),
+                tool.at("Damage").get<float>(),
+                tool.at("Cooldown").get<float>(),
+                tool.at("Range").get<float>(),
+                tool.at("Critical_Chance").get<int>(),
+                tool.at("PunchRadius").get<float>()
+            );
+            ToolList.push_back(toolPtr);
+        }
     }
 
     std::ifstream enemyFile("data/EnemyList.json");
@@ -71,25 +78,25 @@ void Game_Class::ReadData() {
     }
     enemyFile.close();
 
-    // The data/EnemyList.json file contains an array of enemies
+
     for (const auto& enemy : enemyData) {
-        Enemy EnemyAux{enemy.at("Name").get<std::string>()};
+        auto EnemyAuxPtr = std::make_shared<Enemy>(enemy.at("Name").get<std::string>());
 
         Character_Stats StatsAux{
             enemy.at("MaxHealth").get<float>(),
             enemy.at("Speed").get<float>(),
             enemy.at("Mana").get<int>()
         };
-        EnemyAux.AssignStats(StatsAux);
+        EnemyAuxPtr->AssignStats(StatsAux);
 
         std::string WeaponName = enemy.at("WeaponName").get<std::string>();
         for (auto &Weapon : ToolList) {
-            if (Weapon.GetName() == WeaponName) {
-                EnemyAux.AssignWeapon(Weapon);
+            if (Weapon->GetName() == WeaponName) {
+                EnemyAuxPtr->AssignWeapon(Weapon);
                 break;
             }
         }
-        EnemyList.push_back(EnemyAux);
+        EnemyList.push_back(EnemyAuxPtr);
     }
 }
 
@@ -103,9 +110,10 @@ void Game_Class::UpdateHealthbar() {
 
 void Game_Class::Replay() {
     SpawnedEnemies.clear();
-    SpawnedEnemies.insert(SpawnedEnemies.begin(), {EnemyList[0], EnemyList[1]});
-    SpawnedEnemies[0].SetPosition(500, 200);
-    SpawnedEnemies[1].SetPosition(500, 300);
+    SpawnedEnemies.push_back(EnemyList[0]->clone());
+    SpawnedEnemies.push_back(EnemyList[1]->clone());
+    SpawnedEnemies[0]->SetPosition(500, 200);
+    SpawnedEnemies[1]->SetPosition(500, 300);
     PlayerLost = false;
     player.RestoreHealth(999999999.9f);
     player.SetPosition({100, 100});
@@ -175,19 +183,29 @@ void Game_Class::EventHandler() {
     //Between Player and Enemy
     sf::FloatRect PlayerBounds = player.GetSprite().getGlobalBounds();
     for (auto &i : SpawnedEnemies) {
-        sf::FloatRect EnemyBounds = i.GetEnemyHitbox();
+        sf::FloatRect EnemyBounds = i->GetEnemyHitbox();
 
         if (EnemyBounds.findIntersection(PlayerBounds)) {
-            player.TakeDamage(i.GetDamage());
+            player.TakeDamage(i->GetDamage());
         }
     }
+
+    PlayerAttackHitbox = player.GetHitboxes();
+
+    // for (auto it = PlayerAttackHitbox.begin(); it != PlayerAttackHitbox.end();) {
+    //     auto& attack = *it;
+    //     //std::cout<<'\n'<<"GOT HERE BOYSSS";
+    //     attack->Update(dt);
+    //     //std::cout<<'\n'<<"MEGA KNIGHT";
+    //     ++it;
+    // }
 
     //Player Events Functions and Actions
     sf::Time ActionDurationTime = ActionClock.getElapsedTime();
     if (!ActionCooldown) {
         for (auto &i : SpawnedEnemies) {
-            if (i.GetDamagedStatus()) {
-                i.ChangeDamagedStatus();
+            if (i->GetDamagedStatus()) {
+                i->ChangeDamagedStatus(false, -5.0f);
             }
         }
         ActionCooldown = player.HandleAttack(KeyManager); //Returneaza cat dureaza attackul
@@ -202,14 +220,14 @@ void Game_Class::EventHandler() {
                 auto& i = *it;
                 bool EnemyWasKilled = false;
                 for (auto &j : PlayerAttackHitbox) {
-                    if (i.GetEnemyHitbox().findIntersection(j.GetBounds())) {
-                        if (!i.GetDamagedStatus()) {
+                    if (i->GetEnemyHitbox().findIntersection(j->GetBounds())) {
+                        if (!i->GetDamagedStatus()) {
                             std::cout<<"Damaged!\n";
-                            bool isDead = i.TakeDamage(j.GetDamageValue());
-                            i.ChangeDamagedStatus();
+                            bool isDead = i->TakeDamage(j->GetDamageValue());
+                            i->ChangeDamagedStatus(true, ActionCooldown + 0.1f);
 
                             if (!isDead) {
-                                player.AddExperience(i.GetExperience());
+                                player.AddExperience(i->GetExperience());
                                 it = SpawnedEnemies.erase(it);
                                 EnemyWasKilled = true;
                                 std::cout<<"Enemy has no health left!\n";
@@ -231,7 +249,7 @@ void Game_Class::EventHandler() {
     PlayerAttackHitbox = player.GetHitboxes();
     player.HandleMovement(window, dt, dtMultiplier);
     for (auto &i : SpawnedEnemies) {
-        i.HandleMovement(player.GetPosition(), dt, dtMultiplier);
+        i->Update(player.GetPosition(), dt, dtMultiplier);
     }
 
 
@@ -315,9 +333,10 @@ void Game_Class::Setup() {
     ActionClock.start();
     ReadData();
 
-    SpawnedEnemies.insert(SpawnedEnemies.begin(), {EnemyList[0], EnemyList[1]});
-    SpawnedEnemies[0].SetPosition(500, 200);
-    SpawnedEnemies[1].SetPosition(500, 300);
+    SpawnedEnemies.push_back(EnemyList[0]->clone());
+    SpawnedEnemies.push_back(EnemyList[1]->clone());
+    SpawnedEnemies[0]->SetPosition(500, 200);
+    SpawnedEnemies[1]->SetPosition(500, 300);
 
     sf::Font font("data/fonts/Tiny5-Regular.ttf");
     sf::Text text(font);

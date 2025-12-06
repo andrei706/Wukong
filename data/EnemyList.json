@@ -4,13 +4,13 @@
     "MaxHealth": 20.0,
     "Speed": 3.0,
     "Mana": 0,
-    "WeaponName": "Sword"
+    "WeaponName": "Zombie_Punch"
   },
   {
     "Name": "Ghoul",
     "MaxHealth": 25.0,
     "Speed": 5.0,
     "Mana": 0,
-    "WeaponName": "Punch"
+    "WeaponName": "Ghoul_Punch"
   }
 ]

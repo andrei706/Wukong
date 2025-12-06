@@ -9,13 +9,18 @@
 #include <cmath>
 
 class Tool {
+
+
+protected:
     std::string Name;
     float Damage, Cooldown, Range;
     int Critical_Chance;
 
-    std::vector<Attack_Hitbox> Attacks;
+    std::vector<std::shared_ptr<Attack_Hitbox>> Attacks;
 
 public:
+    virtual ~Tool() = default;
+
     Tool(const std::string& name_, float Damage_, float Cooldown_, float Range_ = 10000.0f, int Critical_Chance_ = 0);
 
     friend std::ostream & operator<<(std::ostream & out, const Tool & object);
@@ -24,7 +29,7 @@ public:
 
     const std::string& GetName();
 
-    [[nodiscard]] const std::vector <Attack_Hitbox>& GetAttackHitboxes() const;
+    [[nodiscard]] const std::vector<std::shared_ptr<Attack_Hitbox>>& GetAttackHitboxes() const;
 
     void ClearAttacks();
 
@@ -32,7 +37,20 @@ public:
 
     float GetCooldown() const;
 
-    virtual float Attack(const sf::RectangleShape &Sprite, sf::Angle Degrees);
+    [[nodiscard]] virtual std::shared_ptr<Tool> clone() const;
+
+    void Update(float deltaTime);
+
+    virtual void CreateAttackHitbox(sf::Vector2f Position, sf::Vector2f Offset, sf::Angle Degrees);
+
+    virtual void DisplayInfo(std::ostream &out) const {
+        out << "Name: " << Name << std::endl
+        << "Damage: " << Damage << std::endl
+        << "Cooldown: " << Cooldown << std::endl
+        << "Range: " << Range << std::endl;
+    };
+
+    float Attack(const sf::RectangleShape &Sprite, sf::Angle Degrees);
 };
 
 

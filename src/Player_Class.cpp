@@ -21,6 +21,8 @@ Player_Class::Player_Class(int Experience_, float InvincibilityTime_): Experienc
     Sprite.setFillColor(sf::Color::Blue);
     Sprite.setPosition(Position);
 
+    RangedCooldown.start();
+
     Gauge = 0;
     Invincibility = false;
 }
@@ -61,32 +63,64 @@ void Player_Class::RestoreHealth(float Value) {
     Stats.RestoreHealth(Value);
 }
 
-std::vector<Attack_Hitbox> Player_Class::GetHitboxes() const {
-    return Pole.GetAttackHitboxes();
+const std::vector<std::shared_ptr<Attack_Hitbox>>& Player_Class::GetHitboxes(){
+    ActiveHitboxes.clear();
+    const auto& pole_hits = Pole.GetAttackHitboxes();
+    ActiveHitboxes.insert(ActiveHitboxes.end(), pole_hits.begin(), pole_hits.end());
+    const auto& blast_hits = Blast.GetAttackHitboxes();
+    ActiveHitboxes.insert(ActiveHitboxes.end(), blast_hits.begin(), blast_hits.end());
+    return ActiveHitboxes;
 }
 
 void Player_Class::ClearAttackHitboxes() {
     Pole.ClearAttacks();
+    ActiveHitboxes.clear();
     inAttack = false;
 }
 
 float Player_Class::HandleAttack(Key_Manager& KeyManager) {
     inAttack = false;
-    Pole.ClearAttacks();
+    SpeedMultiplier = 1.f;
+    float cooldown_time;
+
     if (KeyManager.CheckInput("LeftMouseButton")) {
         inAttack = true;
-        return Pole.Attack(Sprite, Rotation);
+        SpeedMultiplier = 0.f;
+        cooldown_time = Pole.Attack(Sprite, Rotation);
+        const auto& pole_hits = Pole.GetAttackHitboxes();
+        ActiveHitboxes.insert(ActiveHitboxes.end(), pole_hits.begin(), pole_hits.end());
+        return cooldown_time;
+    }
+
+    if (KeyManager.CheckInput("RightMouseButton")) {
+        // Verificarea Cooldown-ului la Distanță (RangedCooldown)
+        if (RangedCooldown.getElapsedTime() > sf::seconds(0.2f)) {
+
+            ActiveHitboxes.clear();
+            inRangedAttack = true;
+            SpeedMultiplier = 0.3f;
+            cooldown_time = Blast.Attack(Sprite, Rotation);
+
+            const auto& blast_hits = Blast.GetAttackHitboxes();
+            ActiveHitboxes.insert(ActiveHitboxes.end(), blast_hits.begin(), blast_hits.end());
+
+            RangedCooldown.restart();
+            return 0.f;
+        }
     }
     return 0.0f;
 }
 
 void Player_Class::HandleMovement(sf::RenderWindow &window, float deltaTime, float deltaTimeMultiplier) {
-    if (inAttack)
+    Pole.Update(deltaTime);
+    Blast.Update(deltaTime);
+
+    if (inAttack && SpeedMultiplier == 0.f)
         return;
 
     //Movement
     sf::Vector2f movement(0.f, 0.f);
-    float speed = Stats.GetSpeed();
+    float speed = Stats.GetSpeed() * SpeedMultiplier;
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
         movement.y -= speed * deltaTime * deltaTimeMultiplier;

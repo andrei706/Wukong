@@ -86,6 +86,12 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         src/GUI_Button.h
         src/Attack_Warning.cpp
         src/Attack_Warning.h
+        src/Tool_Punch.cpp
+        src/Tool_Punch.h
+        src/Attack_Projectile.cpp
+        src/Attack_Projectile.h
+        src/Tool_Ranged.cpp
+        src/Tool_Ranged.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

@@ -12,6 +12,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
+#include <memory>
 
 class Game_Class {
     sf::RenderWindow& window;
@@ -27,9 +28,9 @@ class Game_Class {
     sf::Clock GameClock, ActionClock;
     float ActionCooldown = 0;
 
-    std::vector<Enemy> EnemyList, SpawnedEnemies;
-    std::vector<Tool> ToolList;
-    std::vector<Attack_Hitbox> PlayerAttackHitbox;
+    std::vector<std::shared_ptr<Enemy>> EnemyList, SpawnedEnemies;
+    std::vector<std::shared_ptr<Tool>> ToolList;
+    std::vector<std::shared_ptr<Attack_Hitbox>> PlayerAttackHitbox;
     std::vector<GUI_TextLabel> TextLabelList;
     std::vector<GUI_Button> PauseButtonList;
 

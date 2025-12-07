@@ -5,7 +5,7 @@
 Key_Manager::Key_Manager(bool ActionButton_, bool PauseButton_): ActionButton(ActionButton_), PauseButton(PauseButton_) {}
 
 bool Key_Manager::CheckButton(const std::string &KeyName) const {
-    if (KeyName == "LeftMouseButton" || KeyName == "RightMouseButton") {
+    if (KeyName == "LeftMouseButton" || KeyName == "RightMouseButton" || KeyName == "Space") {
         return ActionButton;
     }
     if (KeyName == "Escape") {
@@ -16,7 +16,7 @@ bool Key_Manager::CheckButton(const std::string &KeyName) const {
 }
 
 void Key_Manager::ToggleActivation(const std::string &KeyName) {
-    if (KeyName == "LeftMouseButton" || KeyName == "RightMouseButton") {
+    if (KeyName == "LeftMouseButton" || KeyName == "RightMouseButton" || KeyName == "Space") {
         ActionButton = !ActionButton;
     }
     else if (KeyName == "Escape") {
@@ -31,6 +31,8 @@ bool Key_Manager::CheckKeyPressed(const std::string &KeyName) const {
     if (KeyName == "RightMouseButton" && sf::Mouse::isButtonPressed(sf::Mouse::Button::Right))
         return true;
     if (KeyName == "Escape" && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape))
+        return true;
+    if (KeyName == "Space" && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
         return true;
     return false;
 }

@@ -2,9 +2,12 @@
 #define OOP_GAME_CLASS_H
 #include "Player_Class.h"
 #include "Enemy.h"
+#include "Enemy_Walker.h"
+#include "Enemy_Ranger.h"
 #include "GUI_TextLabel.h"
 #include "GUI_Button.h"
 #include "Key_Manager.h"
+
 
 #include <iostream>
 #include <fstream>

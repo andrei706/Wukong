@@ -2,6 +2,7 @@
 #ifndef OOP_ATTACK_HITBOX_H
 #define OOP_ATTACK_HITBOX_H
 #include <iostream>
+#include <utility>
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -19,6 +20,8 @@ protected:
 
     float Lifetime;
 
+    std::vector<std::pair<int, int>> Attacked;
+
     bool canDamage = true;
     bool isActive = true;
 public:
@@ -29,7 +32,7 @@ public:
 
     friend std::ostream & operator<<(std::ostream & out, const Attack_Hitbox & object);
 
-    float GetDamageValue() const;
+    float GetDamageValue(int EnemyId);
 
     sf::FloatRect GetBounds() const;
 

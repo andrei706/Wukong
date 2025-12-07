@@ -59,6 +59,13 @@ void Tool::CreateAttackHitbox(sf::Vector2f Position, sf::Vector2f Offset, sf::An
     Attacks.push_back(new_hitbox);
 }
 
+void Tool::DisplayInfo(std::ostream &out) const {
+    out<< std::endl<< "-------------" <<std::endl << "Weapon Name: " << Name << std::endl
+            << "Damage: " << Damage << std::endl
+            << "Cooldown: " << Cooldown << std::endl
+            << "Range: " << Range << std::endl;
+}
+
 const std::string & Tool::GetName() {
     return Name;
 }

@@ -1,8 +1,10 @@
 
 #include "Attack_Hitbox.h"
 
+#include "Enemy.h"
+
 Attack_Hitbox::Attack_Hitbox(float DamageValue_, sf::Vector2f Size_, sf::Vector2f Position_, sf::Angle Angle_, float Lifetime_,
-    std::string TexturePath)
+                             std::string TexturePath)
     : DamageValue(DamageValue_), Size(Size_), Position(Position_), Rotation(Angle_), Lifetime(Lifetime_) {
 
     if (!Texture.loadFromFile(TexturePath)) {
@@ -20,9 +22,17 @@ Attack_Hitbox::Attack_Hitbox(float DamageValue_, sf::Vector2f Size_, sf::Vector2
 
 
 
-float Attack_Hitbox::GetDamageValue() const {
-    if (canDamage)
+float Attack_Hitbox::GetDamageValue(int EnemyId){
+    if (canDamage) {
+        if (EnemyId != -1) {
+            for (auto &i : Attacked) {
+                if (i.first == EnemyId)
+                    return 0;
+            }
+            Attacked.emplace_back(EnemyId, 0.5);
+        }
         return DamageValue;
+    }
     return 0;
 }
 
@@ -46,10 +56,10 @@ void Attack_Hitbox::UpdateBehavior(float deltaTime) {
 
     Sprite.setFillColor(newColor);
 
-    if (Lifetime <= 0) {
-        canDamage = false;
-    }
-    Lifetime -= deltaTime;
+    // if (Lifetime <= 0) {
+    //     canDamage = false;
+    // }
+    // Lifetime -= deltaTime;
 }
 
 std::ostream & operator<<(std::ostream &out, const Attack_Hitbox &object) {

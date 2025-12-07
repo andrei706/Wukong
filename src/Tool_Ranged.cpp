@@ -8,6 +8,10 @@ Tool_Ranged::Tool_Ranged(const std::string &name_, float Damage_, float Cooldown
     ProjectileSpeed(ProjectileSpeed_),
     Lifetime(Lifetime_){}
 
+std::shared_ptr<Tool> Tool_Ranged::clone() const {
+    return std::make_shared<Tool_Ranged>(*this);
+}
+
 void Tool_Ranged::CreateAttackHitbox(sf::Vector2f Position, sf::Vector2f Offset, sf::Angle Degrees) {
     Offset.x = ProjectileSpeed * Offset.x / Range;
     Offset.y = ProjectileSpeed * Offset.y / Range;

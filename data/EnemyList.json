@@ -1,5 +1,6 @@
 [
   {
+    "Type": "Walker",
     "Name": "Zombie",
     "MaxHealth": 20.0,
     "Speed": 3.0,
@@ -7,10 +8,19 @@
     "WeaponName": "Zombie_Punch"
   },
   {
+    "Type": "Walker",
     "Name": "Ghoul",
     "MaxHealth": 25.0,
     "Speed": 5.0,
     "Mana": 0,
     "WeaponName": "Ghoul_Punch"
+  },
+  {
+    "Type": "Ranged",
+    "Name": "Ranger",
+    "MaxHealth": 15.0,
+    "Speed": 2.0,
+    "Mana": 0,
+    "WeaponName": "Ranger_Gun"
   }
 ]

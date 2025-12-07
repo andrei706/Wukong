@@ -108,6 +108,10 @@ float Player_Class::HandleAttack(Key_Manager& KeyManager) {
             return 0.f;
         }
     }
+    if (KeyManager.CheckInput("Space")) {
+        MakeInvincibile();
+
+    }
     return 0.0f;
 }
 

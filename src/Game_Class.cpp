@@ -1,6 +1,8 @@
 
 #include "Game_Class.h"
 
+
+
 void Game_Class::RenderEntities() const {
     //Render Player
     if (!PlayerLost)
@@ -61,6 +63,19 @@ void Game_Class::ReadData() {
             );
             ToolList.push_back(toolPtr);
         }
+        if (tool.at("Type").get<std::string>() == "Ranged") {
+            toolPtr = std::make_shared<Tool_Ranged>(
+            tool.at("WeaponName").get<std::string>(),
+            tool.at("Damage").get<float>(),
+            tool.at("Cooldown").get<float>(),
+            tool.at("Range").get<float>(),
+            tool.at("Critical_Chance").get<int>(),
+            tool.at("ProjectileSize").get<float>(),
+            tool.at("ProjectileSpeed").get<float>(),
+            tool.at("Lifetime").get<float>()
+            );
+            ToolList.push_back(toolPtr);
+        }
     }
 
     std::ifstream enemyFile("data/EnemyList.json");
@@ -80,15 +95,23 @@ void Game_Class::ReadData() {
 
 
     for (const auto& enemy : enemyData) {
-        auto EnemyAuxPtr = std::make_shared<Enemy>(enemy.at("Name").get<std::string>());
+        std::shared_ptr<Enemy> EnemyAuxPtr;
 
         Character_Stats StatsAux{
             enemy.at("MaxHealth").get<float>(),
             enemy.at("Speed").get<float>(),
             enemy.at("Mana").get<int>()
         };
-        EnemyAuxPtr->AssignStats(StatsAux);
 
+        if (enemy.at("Type").get<std::string>() == "Walker") {
+            EnemyAuxPtr = std::make_shared<Enemy_Walker>(enemy.at("Name").get<std::string>());
+            EnemyAuxPtr->AssignStats(StatsAux);
+        }
+
+        if (enemy.at("Type").get<std::string>() == "Ranged") {
+            EnemyAuxPtr = std::make_shared<Enemy_Ranger>(enemy.at("Name").get<std::string>());
+            EnemyAuxPtr->AssignStats(StatsAux);
+        }
         std::string WeaponName = enemy.at("WeaponName").get<std::string>();
         for (auto &Weapon : ToolList) {
             if (Weapon->GetName() == WeaponName) {
@@ -182,11 +205,21 @@ void Game_Class::EventHandler() {
     //Collision Verification
     //Between Player and Enemy
     sf::FloatRect PlayerBounds = player.GetSprite().getGlobalBounds();
-    for (auto &i : SpawnedEnemies) {
-        sf::FloatRect EnemyBounds = i->GetEnemyHitbox();
+    // for (auto &i : SpawnedEnemies) {
+    //     sf::FloatRect EnemyBounds = i->GetEnemyHitbox();
+    //
+    //     if (EnemyBounds.findIntersection(PlayerBounds)) {
+    //         player.TakeDamage(i->GetDamage());
+    //     }
+    // }
 
-        if (EnemyBounds.findIntersection(PlayerBounds)) {
-            player.TakeDamage(i->GetDamage());
+    for (auto &i : SpawnedEnemies) {
+        std::vector<std::shared_ptr<Attack_Hitbox>> EnemyAttackHitbox = i->GetHitboxes();
+
+        for (auto &j : EnemyAttackHitbox) {
+            if (j->GetBounds().findIntersection(PlayerBounds)) {
+                player.TakeDamage(j->GetDamageValue(-1));
+            }
         }
     }
 
@@ -223,7 +256,7 @@ void Game_Class::EventHandler() {
                     if (i->GetEnemyHitbox().findIntersection(j->GetBounds())) {
                         if (!i->GetDamagedStatus()) {
                             std::cout<<"Damaged!\n";
-                            bool isDead = i->TakeDamage(j->GetDamageValue());
+                            bool isDead = i->TakeDamage(j->GetDamageValue(0));
                             i->ChangeDamagedStatus(true, ActionCooldown + 0.1f);
 
                             if (!isDead) {
@@ -323,8 +356,9 @@ void Game_Class::WindowRendering() {
 
 Game_Class::Game_Class(sf::RenderWindow &window_, Player_Class &player_): window(window_), player(player_) {
     view.setSize({1280.0f, 720.0f});
-
     view.setCenter({640.0f, 360.0f});
+
+    //Enemy::id = 0;
 
     window.setView(view);
 }
@@ -334,9 +368,11 @@ void Game_Class::Setup() {
     ReadData();
 
     SpawnedEnemies.push_back(EnemyList[0]->clone());
-    SpawnedEnemies.push_back(EnemyList[1]->clone());
+    SpawnedEnemies.push_back(EnemyList[2]->clone());
     SpawnedEnemies[0]->SetPosition(500, 200);
     SpawnedEnemies[1]->SetPosition(500, 300);
+
+    std::cout<< *SpawnedEnemies[0] << std::endl << *SpawnedEnemies[1];
 
     sf::Font font("data/fonts/Tiny5-Regular.ttf");
     sf::Text text(font);

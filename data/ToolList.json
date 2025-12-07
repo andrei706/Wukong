@@ -12,17 +12,28 @@
     "WeaponName": "Zombie_Punch",
     "Damage": 7.0,
     "Cooldown": 0.7,
-    "Range": 15,
+    "Range": 20,
     "Critical_Chance": 10,
-    "PunchRadius": 30.0
+    "PunchRadius": 60.0
   },
   {
     "Type": "Punch",
     "WeaponName": "Ghoul_Punch",
     "Damage": 12.0,
     "Cooldown": 0.7,
+    "Range": 20,
+    "Critical_Chance": 20,
+    "PunchRadius": 50.0
+  },
+  {
+    "Type": "Ranged",
+    "WeaponName": "Ranger_Gun",
+    "Damage": 3.0,
+    "Cooldown": 1.4,
     "Range": 10,
     "Critical_Chance": 20,
-    "PunchRadius": 40.0
+    "ProjectileSize": 30.0,
+    "ProjectileSpeed": 15.0,
+    "Lifetime": 4.0
   }
 ]

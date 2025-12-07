@@ -92,6 +92,10 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         src/Attack_Projectile.h
         src/Tool_Ranged.cpp
         src/Tool_Ranged.h
+        src/Enemy_Walker.cpp
+        src/Enemy_Walker.h
+        src/Enemy_Ranger.cpp
+        src/Enemy_Ranger.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

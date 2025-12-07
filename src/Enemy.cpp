@@ -2,6 +2,8 @@
 
 #include "Enemy.h"
 
+int Enemy::id = 0;
+
 Enemy::Enemy(const std::string &name_): Name(name_) {
     Sprite.setFillColor(sf::Color::Red);
     Sprite.setPosition(Position);
@@ -9,13 +11,28 @@ Enemy::Enemy(const std::string &name_): Name(name_) {
     Sprite.setOrigin({25, 25});
     ActionClock.start();
     DamagedClock.start();
+
+    LocalId = id;
+    IncreaseID();
 }
 
 Enemy::Enemy(const Enemy &other)
     : Name(other.Name),
       Stats(other.Stats),
-      Weapon(other.Weapon->clone()),
-      Sprite(other.Sprite) {}
+      Weapon(other.Weapon ? other.Weapon->clone() : nullptr),
+      Sprite(other.Sprite),
+      Position(other.Position),
+      Experience(other.Experience),
+      Damaged(other.Damaged),
+      inAttack(other.inAttack),
+      getAttackReady(other.getAttackReady),
+      DamagedTimer(other.DamagedTimer),
+      ActionClock(other.ActionClock),
+      AttackWarningClock(other.AttackWarningClock),
+      CooldownClock(other.CooldownClock),
+      DamagedClock(other.DamagedClock),
+      AttackWarning(other.AttackWarning),   LocalId(other.LocalId) {
+}
 
 Enemy::~Enemy() {
     std::cout << Name << " Destroyed\n";
@@ -26,20 +43,25 @@ std::shared_ptr<Enemy> Enemy::clone() const {
 }
 
 void swap(Enemy &first, Enemy &second) noexcept {
-    std::swap(first.Name, second.Name);
-    std::swap(first.Stats, second.Stats);
-    std::swap(first.Experience, second.Experience);
-    std::swap(first.Sprite, second.Sprite);
-    std::swap(first.Position, second.Position);
-    std::swap(first.Weapon, second.Weapon);
-    std::swap(first.Damaged, second.Damaged);
-    std::swap(first.inAttack, second.inAttack);
-    std::swap(first.getAttackReady, second.getAttackReady);
-    std::swap(first.DamagedTimer, second.DamagedTimer);
-    std::swap(first.ActionClock, second.ActionClock);
-    std::swap(first.AttackWarningClock, second.AttackWarningClock);
-    std::swap(first.CooldownClock, second.CooldownClock);
-    std::swap(first.DamagedClock, second.DamagedClock);
+    using std::swap;
+    swap(first.Name, second.Name);
+    swap(first.Stats, second.Stats);
+    swap(first.Weapon, second.Weapon);
+    swap(first.Sprite, second.Sprite);
+    swap(first.Position, second.Position);
+    swap(first.Experience, second.Experience);
+
+    swap(first.Damaged, second.Damaged);
+    swap(first.inAttack, second.inAttack);
+    swap(first.getAttackReady, second.getAttackReady);
+    swap(first.DamagedTimer, second.DamagedTimer);
+
+    swap(first.ActionClock, second.ActionClock);
+    swap(first.AttackWarningClock, second.AttackWarningClock);
+    swap(first.CooldownClock, second.CooldownClock);
+    swap(first.DamagedClock, second.DamagedClock);
+
+    swap(first.AttackWarning, second.AttackWarning);
 }
 
 Enemy & Enemy::operator=(Enemy other) {
@@ -50,6 +72,11 @@ Enemy & Enemy::operator=(Enemy other) {
 sf::FloatRect Enemy::GetEnemyHitbox() {
     return Sprite.getGlobalBounds();
 }
+
+const std::vector<std::shared_ptr<Attack_Hitbox>> & Enemy::GetHitboxes() {
+    return Weapon->GetAttackHitboxes();
+}
+
 
 void Enemy::ChangeDamagedStatus(bool Value, float Seconds) {
     if (Value && !Damaged) {
@@ -70,6 +97,10 @@ bool Enemy::GetDamagedStatus() const {
 
 float Enemy::GetDamage() const {
     return Weapon->DamageCalculation();
+}
+
+int Enemy::GetLocalId() const {
+    return LocalId;
 }
 
 int Enemy::GetExperience() const {
@@ -139,19 +170,19 @@ void Enemy::HandleActions(const sf::Vector2f &PlayerPosition, float deltaTime, f
             // Sprite.setRotation(sf::degrees(angleDegrees));
         }
         else {
-            HandleMeleeAttack(1, direction);
+            HandleMeleeAttack(1, direction, Weapon);
         }
     }
-    HandleMeleeAttack(0, direction);
+    HandleMeleeAttack(0, direction, Weapon);
 
 }
 
-void Enemy::HandleMeleeAttack(bool canAttack, sf::Vector2f direction) {
+void Enemy::HandleMeleeAttack(bool canAttack, sf::Vector2f direction, std::shared_ptr<Tool> UsedWeapon) {
     sf::Vector2f TempPosition = Sprite.getPosition();
     AttackWarning.SetPosition({TempPosition.x, TempPosition.y - 60});
 
     if (inAttack == true) {
-        if (CooldownClock.getElapsedTime().asSeconds() >= Weapon->GetCooldown()) {
+        if (CooldownClock.getElapsedTime().asSeconds() >= UsedWeapon->GetCooldown()) {
             std::cout <<"Attack is done! Cooldown finished.\n";
             inAttack = false;
         }
@@ -172,7 +203,7 @@ void Enemy::HandleMeleeAttack(bool canAttack, sf::Vector2f direction) {
             float radians = std::atan2(direction.y, direction.x);
             float angleDegrees = radians * 180.0f / 3.14f;
 
-            Weapon->Attack(Sprite, sf::degrees(angleDegrees));
+            UsedWeapon->Attack(Sprite, sf::degrees(angleDegrees));
 
             CooldownClock.restart();
             inAttack = true;
@@ -182,7 +213,7 @@ void Enemy::HandleMeleeAttack(bool canAttack, sf::Vector2f direction) {
 }
 
 std::ostream & operator<<(std::ostream &out, const Enemy &object) {
-    out<<object.Name<<"\n"<<object.Stats<<"\n"<<object.Weapon;
+    object.DisplayInfo(out);
     return out;
 }
 

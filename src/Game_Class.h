@@ -44,7 +44,7 @@ private:
     void Replay();
     void PauseHandler();
 
-    void AdjustView(sf::RenderWindow &window, unsigned int newWidth, unsigned int newHeight);
+    void AdjustView(unsigned int newWidth, unsigned int newHeight);
 
     void EventHandler();
     void WindowRendering();

@@ -144,7 +144,7 @@ void Game_Class::PauseHandler() {
     }
 }
 
-void Game_Class::AdjustView(sf::RenderWindow& window, unsigned int newWidth, unsigned int newHeight) {
+void Game_Class::AdjustView(unsigned int newWidth, unsigned int newHeight) {
     float targetWidth = 1280.0f;
     float targetHeight = 720.0f;
 
@@ -297,7 +297,7 @@ void Game_Class::WindowRendering() {
             //         KeyManager.ToggleActivation("Escape");
             // }
             else if (const auto* resized = event->getIf<sf::Event::Resized>()) {
-                AdjustView(window, resized->size.x, resized->size.y);
+                AdjustView(resized->size.x, resized->size.y);
             }
 
         }

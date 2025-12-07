@@ -99,7 +99,7 @@ float Player_Class::HandleAttack(Key_Manager& KeyManager) {
             ActiveHitboxes.clear();
             inRangedAttack = true;
             SpeedMultiplier = 0.3f;
-            cooldown_time = Blast.Attack(Sprite, Rotation);
+            Blast.Attack(Sprite, Rotation);
 
             const auto& blast_hits = Blast.GetAttackHitboxes();
             ActiveHitboxes.insert(ActiveHitboxes.end(), blast_hits.begin(), blast_hits.end());

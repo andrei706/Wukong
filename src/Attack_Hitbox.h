@@ -9,13 +9,15 @@
 
 class Attack_Hitbox {
 protected:
-    float DamageValue, Lifetime;
+    float DamageValue;
 
     sf::RectangleShape Sprite;
     sf::Vector2f Size = {100, 20};
     sf::Vector2f Position = {100.f, 100.f};
     sf::Angle Rotation;
     sf::Texture Texture;
+
+    float Lifetime;
 
     bool canDamage = true;
     bool isActive = true;

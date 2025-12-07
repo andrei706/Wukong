@@ -6,11 +6,11 @@ void Game_Class::RenderEntities() const {
     if (!PlayerLost)
         player.ShowSprite(window);
     //Render Enemies
-    for (auto &i : SpawnedEnemies) {
+    for (const auto &i : SpawnedEnemies) {
         i->ShowSprite(window);
 
     }
-    for (auto &i :SpawnedEnemies) {
+    for (const auto &i :SpawnedEnemies) {
         i->RenderHitboxes(window);
     }
     //Render Hitboxes

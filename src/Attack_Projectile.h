@@ -7,18 +7,15 @@ class Attack_Projectile : public Attack_Hitbox {
 private:
     sf::Vector2f Velocity;
 public:
-    Attack_Projectile(float DamageValue_,
-                  sf::Vector2f Size_ = {100, 20},
-                  sf::Vector2f Position_ = {0, 0},
-                  sf::Angle Angle_ = sf::degrees(0),
-                  sf::Vector2f Velocity_ = {0.f, 0.f},
-                  float Lifetime_ = 5);
+    explicit Attack_Projectile(float DamageValue_,
+                               sf::Vector2f Size_ = {100, 20},
+                               sf::Vector2f Position_ = {0, 0},
+                               sf::Angle Angle_ = sf::degrees(0),
+                               sf::Vector2f Velocity_ = {0.f, 0.f},
+                               float Lifetime_ = 5);
 
     void UpdateBehavior(float deltaTime) override;
 
-    ~Attack_Projectile() {
-        std::cout << "DESTRUCTOR" << std::endl;
-    };
 
     friend std::ostream & operator<<(std::ostream & out, const Attack_Projectile & object);
 

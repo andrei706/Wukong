@@ -36,19 +36,16 @@ std::shared_ptr<Tool> Tool::clone() const {
 }
 
 void Tool::Update(float deltaTime) {
-    // Update all attacks first
-    for (auto& attack : Attacks) {
+    for (auto it = Attacks.begin(); it != Attacks.end(); ) {
+        auto& attack = *it;
         attack->Update(deltaTime);
-    }
 
-    // Then remove inactive ones
-    Attacks.erase(
-        std::remove_if(Attacks.begin(), Attacks.end(),
-                       [](const std::shared_ptr<Attack_Hitbox>& attack) {
-                           return !attack->IsActive(); // Assuming you have an IsActive() method
-                       }),
-        Attacks.end()
-    );
+        if (!attack->IsActive()) {
+            it = Attacks.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 void Tool::CreateAttackHitbox(sf::Vector2f Position, sf::Vector2f Offset, sf::Angle Degrees) {

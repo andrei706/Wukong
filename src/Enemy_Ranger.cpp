@@ -11,7 +11,7 @@ std::shared_ptr<Enemy> Enemy_Ranger::clone() const {
 
 void Enemy_Ranger::HandleActions(const sf::Vector2f &PlayerPosition, float deltaTime, float deltaTimeMultiplier) {
     sf::Vector2f direction = PlayerPosition - Sprite.getPosition();
-    float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
 
     // Calculăm viteza standard
     float speed = Stats.GetSpeed();
@@ -21,7 +21,7 @@ void Enemy_Ranger::HandleActions(const sf::Vector2f &PlayerPosition, float delta
 
     // Logica de patrulare și fugă
     if (getAttackReady == false) {
-
+        float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
         if (distance < 150.0f && !isFleeing) {
             isFleeing = true;
 

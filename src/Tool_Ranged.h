@@ -11,7 +11,7 @@ public:
     Tool_Ranged(const std::string& name_, float Damage_, float Cooldown_, float Range_ = 1.0f, int Critical_Chance_ = 0,
     float ProjectileSize_ = 30.0f, float ProjectileSpeed_ = 15.0f, float Lifetime_ = 4.0f);
 
-    [[nodiscard]] std::shared_ptr<Tool> clone() const override;;
+    [[nodiscard]] std::shared_ptr<Tool> clone() const override;
 
     void DisplayInfo(std::ostream &out) const override{
         Tool::DisplayInfo(out);

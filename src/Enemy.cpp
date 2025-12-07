@@ -13,26 +13,29 @@ Enemy::Enemy(const std::string &name_): Name(name_) {
     DamagedClock.start();
 
     LocalId = id;
-    IncreaseID();
+    //IncreaseID();
 }
 
 Enemy::Enemy(const Enemy &other)
     : Name(other.Name),
-      Stats(other.Stats),
+      AttackWarning(other.AttackWarning),
+      LocalId(other.LocalId),
       Weapon(other.Weapon ? other.Weapon->clone() : nullptr),
-      Sprite(other.Sprite),
-      Position(other.Position),
-      Experience(other.Experience),
       Damaged(other.Damaged),
       inAttack(other.inAttack),
+      Stats(other.Stats),
       getAttackReady(other.getAttackReady),
+      Experience(other.Experience),
       DamagedTimer(other.DamagedTimer),
+      Sprite(other.Sprite),
+      Position(other.Position),
       ActionClock(other.ActionClock),
       AttackWarningClock(other.AttackWarningClock),
       CooldownClock(other.CooldownClock),
-      DamagedClock(other.DamagedClock),
-      AttackWarning(other.AttackWarning),   LocalId(other.LocalId) {
+      DamagedClock(other.DamagedClock)
+{
 }
+
 
 Enemy::~Enemy() {
     std::cout << Name << " Destroyed\n";
@@ -93,10 +96,6 @@ void Enemy::ChangeDamagedStatus(bool Value, float Seconds) {
 
 bool Enemy::GetDamagedStatus() const {
     return Damaged;
-}
-
-float Enemy::GetDamage() const {
-    return Weapon->DamageCalculation();
 }
 
 int Enemy::GetLocalId() const {

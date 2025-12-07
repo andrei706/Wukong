@@ -4,7 +4,7 @@
 #include "Enemy.h"
 
 Attack_Hitbox::Attack_Hitbox(float DamageValue_, sf::Vector2f Size_, sf::Vector2f Position_, sf::Angle Angle_, float Lifetime_,
-                             std::string TexturePath)
+                             const std::string &TexturePath)
     : DamageValue(DamageValue_), Size(Size_), Position(Position_), Rotation(Angle_), Lifetime(Lifetime_) {
 
     if (!Texture.loadFromFile(TexturePath)) {
@@ -25,7 +25,7 @@ Attack_Hitbox::Attack_Hitbox(float DamageValue_, sf::Vector2f Size_, sf::Vector2
 float Attack_Hitbox::GetDamageValue(int EnemyId){
     if (canDamage) {
         if (EnemyId != -1) {
-            for (auto &i : Attacked) {
+            for (auto const &i : Attacked) {
                 if (i.first == EnemyId)
                     return 0;
             }

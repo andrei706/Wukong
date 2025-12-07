@@ -43,7 +43,7 @@ public:
 
     virtual void CreateAttackHitbox(sf::Vector2f Position, sf::Vector2f Offset, sf::Angle Degrees);
 
-    virtual void DisplayInfo(std::ostream &out) const;;
+    virtual void DisplayInfo(std::ostream &out) const;
 
     float Attack(const sf::RectangleShape &Sprite, sf::Angle Degrees);
 };

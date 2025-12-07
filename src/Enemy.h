@@ -60,8 +60,6 @@ public:
 
     bool GetDamagedStatus() const;
 
-    float GetDamage() const;
-
     int GetLocalId() const;
 
     int GetExperience() const;
@@ -87,16 +85,16 @@ public:
                 << "ID: " << LocalId << std::endl;
     }
 
-    static void InitializeID() {
-        Enemy::id = 0;
-    }
-
-    static void IncreaseID() {
-        Enemy::id++;
-        if (Enemy::id == 2001) {
-            Enemy::id = 0;
-        }
-    }
+    // static void InitializeID() {
+    //     Enemy::id = 0;
+    // }
+    //
+    // static void IncreaseID() {
+    //     Enemy::id++;
+    //     if (Enemy::id == 2001) {
+    //         Enemy::id = 0;
+    //     }
+    // }
 
 
 };

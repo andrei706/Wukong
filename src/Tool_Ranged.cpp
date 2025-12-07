@@ -1,9 +1,9 @@
 
 #include "Tool_Ranged.h"
 
-Tool_Ranged::Tool_Ranged(const std::string &name_, float Damage_, float Cooldown_, float Range_, float Critical_Chance_,
+Tool_Ranged::Tool_Ranged(const std::string &name_, float Damage_, float Cooldown_, float Range_, int Critical_Chance_,
     float ProjectileSize_, float ProjectileSpeed_, float Lifetime_)
-    : Tool(name_, Damage_, Range_, Critical_Chance_),
+    : Tool(name_, Damage_, Cooldown_, Range_, Critical_Chance_),
     ProjectileSize(ProjectileSize_),
     ProjectileSpeed(ProjectileSpeed_),
     Lifetime(Lifetime_){}

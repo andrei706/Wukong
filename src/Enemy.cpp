@@ -83,8 +83,8 @@ bool Enemy::TakeDamage(float Damage_Points) {
 void Enemy::AssignWeapon(const std::shared_ptr<Tool>& toolPtr) {
     Weapon = nullptr;
     Weapon = toolPtr->clone();
-    std::cout << "   Tipul din ToolList: " << typeid(*Weapon).name() << "\n";
-    std::cout<<*Weapon;
+    // std::cout << "   Tipul din ToolList: " << typeid(*Weapon).name() << "\n";
+    // std::cout<<*Weapon;
 }
 
 void Enemy::AssignStats(const Character_Stats &other) {
@@ -118,11 +118,12 @@ void Enemy::Update(const sf::Vector2f& PlayerPosition, float deltaTime, float de
 
 void Enemy::HandleActions(const sf::Vector2f &PlayerPosition, float deltaTime, float deltaTimeMultiplier) {
     sf::Vector2f direction = PlayerPosition - Sprite.getPosition();
-    float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
     // float radians = std::atan2(direction.y, direction.x);
     // float angleDegrees = radians * 180.f / 3.14f;
 
     if (inAttack == false && getAttackReady == false) {
+        float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
         if (distance > 25.0f) {
 
             sf::Vector2f unitDirection = direction / distance;

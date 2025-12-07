@@ -81,9 +81,9 @@ void Player_Class::ClearAttackHitboxes() {
 float Player_Class::HandleAttack(Key_Manager& KeyManager) {
     inAttack = false;
     SpeedMultiplier = 1.f;
-    float cooldown_time;
 
     if (KeyManager.CheckInput("LeftMouseButton")) {
+        float cooldown_time;
         inAttack = true;
         SpeedMultiplier = 0.f;
         cooldown_time = Pole.Attack(Sprite, Rotation);

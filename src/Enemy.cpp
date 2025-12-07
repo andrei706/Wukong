@@ -98,9 +98,9 @@ bool Enemy::GetDamagedStatus() const {
     return Damaged;
 }
 
-int Enemy::GetLocalId() const {
-    return LocalId;
-}
+// int Enemy::GetLocalId() const {
+//     return LocalId;
+// }
 
 int Enemy::GetExperience() const {
     return Experience;

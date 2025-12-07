@@ -60,7 +60,7 @@ public:
 
     bool GetDamagedStatus() const;
 
-    int GetLocalId() const;
+    //int GetLocalId() const;
 
     int GetExperience() const;
 

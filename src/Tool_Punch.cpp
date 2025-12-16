@@ -17,6 +17,7 @@ void Tool_Punch::CreateAttackHitbox(sf::Vector2f Position, sf::Vector2f Offset, 
         Position + Offset,
         Degrees,
         0.3,
+        Cooldown,
         "data/textures/attack_assets/punch_sprite.png"
     );
 

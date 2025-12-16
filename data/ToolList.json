@@ -35,5 +35,16 @@
     "ProjectileSize": 30.0,
     "ProjectileSpeed": 15.0,
     "Lifetime": 4.0
+  },
+  {
+    "Type": "Ranged",
+    "WeaponName": "Machine_Gun",
+    "Damage": 3.0,
+    "Cooldown": 0.2,
+    "Range": 10,
+    "Critical_Chance": 20,
+    "ProjectileSize": 25.0,
+    "ProjectileSpeed": 3.0,
+    "Lifetime": 15.0
   }
 ]

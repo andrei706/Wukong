@@ -3,6 +3,9 @@
 
 Character_Stats::Character_Stats(float MaxHealth_, float Speed_, int Mana_): MaxHealth(MaxHealth_), Speed(Speed_), Mana(Mana_) {
     Health = MaxHealth;
+    if (Speed < 0) throw InvalidDataException("Speed", Speed);
+    if (Mana < 0) throw InvalidDataException("Mana", Mana);
+    if (MaxHealth < 0) throw InvalidDataException("MaxHealth", MaxHealth);
 }
 
 float Character_Stats::GetSpeed() const {

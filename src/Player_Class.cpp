@@ -2,16 +2,28 @@
 
 #include "Player_Class.h"
 
-bool Player_Class::MakeInvincibile() {
-    if (Invincibility == 1) {
+
+
+void Player_Class::UpdateInvincibility() {
+    if (Invincibility) {
+        if (!isDodging) {
+            if ((int)(ClockInvincibilityTime.getElapsedTime().asMilliseconds() / 100) % 2 == 0) {
+                Sprite.setFillColor(sf::Color(100, 100, 255, 100));
+            } else {
+                Sprite.setFillColor(sf::Color::Blue);
+            }
+        }
         if (ClockInvincibilityTime.getElapsedTime() >= InvincibilityTime) {
             Invincibility = false;
+            Sprite.setFillColor(sf::Color::Blue);
         }
-        return true;
     }
-    ClockInvincibilityTime.restart();
+}
+
+void Player_Class::MakeInvincible(float Seconds) {
     Invincibility = true;
-    return false;
+    InvincibilityTime = sf::seconds(Seconds); // Set how long this specific invincibility lasts
+    ClockInvincibilityTime.restart();
 }
 
 Player_Class::Player_Class(int Experience_, float InvincibilityTime_): Experience(Experience_), InvincibilityTime(sf::seconds(InvincibilityTime_)) {
@@ -22,9 +34,12 @@ Player_Class::Player_Class(int Experience_, float InvincibilityTime_): Experienc
     Sprite.setPosition(Position);
 
     RangedCooldown.start();
+    ClockDodgeCooldown.restart();
+    AttackCooldown.start();
+
+    Invincibility = false;
 
     Gauge = 0;
-    Invincibility = false;
 }
 
 void Player_Class::ShowSprite(sf::RenderWindow &window) const {
@@ -54,8 +69,10 @@ void Player_Class::AddExperience(int Value) {
 }
 
 void Player_Class::TakeDamage(float Value) {
-    if (!MakeInvincibile()) {
+    if (!Invincibility) {
+        std::cout<<Value;
         Stats.ReduceHealth(Value);
+        MakeInvincible(0.5f);
     }
 }
 
@@ -78,9 +95,27 @@ void Player_Class::ClearAttackHitboxes() {
     inAttack = false;
 }
 
+void Player_Class::Update(sf::RenderWindow &window, float deltaTime, float deltaTimeMultiplier, Key_Manager &keyManager) {
+    UpdateInvincibility();
+    Pole.Update(deltaTime);
+    Blast.Update(deltaTime);
+    HandleDodge(keyManager);
+    if (InAttackTime < AttackCooldown.getElapsedTime()) {
+        float cooldown = HandleAttack(keyManager);
+        if (cooldown > 0) {
+            InAttackTime = sf::seconds(cooldown);
+            AttackCooldown.restart();
+        }
+    }
+    HandleMovement(window, deltaTime, deltaTimeMultiplier);
+}
+
 float Player_Class::HandleAttack(Key_Manager& KeyManager) {
     inAttack = false;
     SpeedMultiplier = 1.f;
+
+    if (isDodging || inAttack)
+        return 0.0f;
 
     if (KeyManager.CheckInput("LeftMouseButton")) {
         float cooldown_time;
@@ -108,19 +143,23 @@ float Player_Class::HandleAttack(Key_Manager& KeyManager) {
             return 0.f;
         }
     }
-    if (KeyManager.CheckInput("Space")) {
-        MakeInvincibile();
-
-    }
     return 0.0f;
 }
 
 void Player_Class::HandleMovement(sf::RenderWindow &window, float deltaTime, float deltaTimeMultiplier) {
-    Pole.Update(deltaTime);
-    Blast.Update(deltaTime);
 
     if (inAttack && SpeedMultiplier == 0.f)
         return;
+
+    if (isDodging) {
+        if (ClockDodgeDuration.getElapsedTime() >= DodgeDuration) {
+            isDodging = false;
+        } else {
+            sf::Vector2f dashStep = DodgeDirection * DodgeSpeed * deltaTime * deltaTimeMultiplier;
+            Sprite.move(dashStep);
+            return;
+        }
+    }
 
     //Movement
     sf::Vector2f movement(0.f, 0.f);
@@ -146,6 +185,37 @@ void Player_Class::HandleMovement(sf::RenderWindow &window, float deltaTime, flo
     float angleDegrees = radians * 180.f / 3.14f;
     //Sprite.setRotation(sf::degrees(angleDegrees));
     Rotation = sf::degrees(angleDegrees);
+}
+
+void Player_Class::StartDodge(sf::Vector2f inputDirection) {
+    isDodging = true;
+    ClockDodgeDuration.restart();
+    ClockDodgeCooldown.restart();
+
+    if (inputDirection.x != 0 || inputDirection.y != 0) {
+        float length = std::sqrt(inputDirection.x * inputDirection.x + inputDirection.y * inputDirection.y);
+        DodgeDirection = inputDirection / length;
+    }
+    else {
+        float radians = Rotation.asRadians();
+        // float radians = Rotation * 3.14159f / 180.f;
+        DodgeDirection = sf::Vector2f(std::cos(radians), std::sin(radians));
+    }
+    MakeInvincible(DodgeDuration.asSeconds());
+}
+
+void Player_Class::HandleDodge(Key_Manager &keyManager) {
+    if (keyManager.CheckInput("Space")) {
+        MakeInvincible(0.5f);
+        if (ClockDodgeCooldown.getElapsedTime() >= DodgeCooldown && !isDodging) {
+            sf::Vector2f inputDir(0.f, 0.f);
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) inputDir.y -= 1.f;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) inputDir.y += 1.f;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) inputDir.x -= 1.f;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) inputDir.x += 1.f;
+            StartDodge(inputDir);
+        }
+    }
 }
 
 std::ostream & operator<<(std::ostream &out, const Player_Class &object) {

@@ -7,8 +7,9 @@ Attack_Projectile::Attack_Projectile(
     sf::Vector2f Position_,
     sf::Angle Angle_,
     sf::Vector2f Velocity_,
-    float Lifetime_)
-: Attack_Hitbox(DamageValue_, Size_, Position_, Angle_, Lifetime_, "data/textures/attack_assets/projectile_sprite.png"),
+    float Lifetime_,
+    float Cooldown_)
+: Attack_Hitbox(DamageValue_, Size_, Position_, Angle_, Lifetime_, Cooldown_, "data/textures/attack_assets/projectile_sprite.png"),
   Velocity(Velocity_)
 {
     Sprite.setSize(Size_);

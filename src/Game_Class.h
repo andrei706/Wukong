@@ -1,9 +1,11 @@
 #ifndef OOP_GAME_CLASS_H
 #define OOP_GAME_CLASS_H
 #include "Player_Class.h"
+#include "Game_Exceptions.h"
 #include "Enemy.h"
 #include "Enemy_Walker.h"
 #include "Enemy_Ranger.h"
+#include "Enemy_Rotator.h"
 #include "GUI_TextLabel.h"
 #include "GUI_Button.h"
 #include "Key_Manager.h"
@@ -15,6 +17,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
+#include <SFML/System/Exception.hpp>
 #include <memory>
 
 class Game_Class {
@@ -28,8 +31,7 @@ class Game_Class {
     sf::Vector2f windowSize = window.getDefaultView().getSize();
     sf::View view;
 
-    sf::Clock GameClock, ActionClock;
-    float ActionCooldown = 0;
+    sf::Clock GameClock;
 
     std::vector<std::shared_ptr<Enemy>> EnemyList, SpawnedEnemies;
     std::vector<std::shared_ptr<Tool>> ToolList;

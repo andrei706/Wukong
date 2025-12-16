@@ -2,7 +2,9 @@
 
 #ifndef OOP_TOOL_H
 #define OOP_TOOL_H
+
 #include "Attack_Hitbox.h"
+#include "Game_Exceptions.h"
 
 #include <string>
 #include <vector>

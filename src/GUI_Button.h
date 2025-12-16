@@ -3,6 +3,7 @@
 #define OOP_GUI_BUTTON_H
 
 #include "Key_Manager.h"
+#include "Game_Exceptions.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>

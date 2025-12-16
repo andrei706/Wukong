@@ -12,7 +12,8 @@ public:
                                sf::Vector2f Position_ = {0, 0},
                                sf::Angle Angle_ = sf::degrees(0),
                                sf::Vector2f Velocity_ = {0.f, 0.f},
-                               float Lifetime_ = 5);
+                               float Lifetime_ = 5,
+                               float Cooldown_ = 0.5f);
 
     void UpdateBehavior(float deltaTime) override;
 

@@ -6,6 +6,7 @@
 #include "Character_Stats.h"
 #include "Tool.h"
 #include "Attack_Warning.h"
+#include "Game_Exceptions.h"
 
 #include <string>
 #include <memory>
@@ -34,7 +35,7 @@ protected:
     sf::Clock ActionClock, AttackWarningClock, CooldownClock, DamagedClock;
 
     void HandleMeleeAttack(bool canAttack, sf::Vector2f direction, std::shared_ptr<Tool> UsedWeapon);
-    //void HandleRangedAttack(bool canAttack, sf::Vector2f direction, std::shared_ptr<Tool> UsedWeapon, int Burst);
+    void HandleRangedAttack(bool canAttack, sf::Vector2f direction, std::shared_ptr<Tool> UsedWeapon, bool AttackWarningActive);
     virtual void HandleActions(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier);
 public:
 
@@ -60,7 +61,7 @@ public:
 
     bool GetDamagedStatus() const;
 
-    //int GetLocalId() const;
+    int GetLocalId() const;
 
     int GetExperience() const;
 
@@ -78,25 +79,9 @@ public:
 
     void Update(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier);
 
-    void DisplayInfo(std::ostream &out) const {
-        out<<std::endl << "Enemy Name: " << Name << std::endl
-                << "Weapon: " << *Weapon << std::endl
-                << "Stats: " << Stats << std::endl
-                << "ID: " << LocalId << std::endl;
-    }
+    void DisplayInfo(std::ostream &out) const;
 
-    // static void InitializeID() {
-    //     Enemy::id = 0;
-    // }
-    //
-    // static void IncreaseID() {
-    //     Enemy::id++;
-    //     if (Enemy::id == 2001) {
-    //         Enemy::id = 0;
-    //     }
-    // }
-
-
+    static void AssignID(const std::shared_ptr<Enemy> &enemy);
 };
 
 

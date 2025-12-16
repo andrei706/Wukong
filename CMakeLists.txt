@@ -96,6 +96,10 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         src/Enemy_Walker.h
         src/Enemy_Ranger.cpp
         src/Enemy_Ranger.h
+        src/Enemy_Rotator.cpp
+        src/Enemy_Rotator.h
+        src/Game_Exceptions.cpp
+        src/Game_Exceptions.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

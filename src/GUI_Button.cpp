@@ -7,7 +7,7 @@
 GUI_Button::GUI_Button(std::string Name_, const std::string &TexturePath_, sf::Vector2f InitialPosition, sf::Vector2f InitialSize)
     : Name(std::move(Name_)), Texture(TexturePath_) {
     if (!Texture.loadFromFile(TexturePath_)) {
-        std::cerr << "Error: Could not load texture from " << TexturePath_ << std::endl;
+        throw AssetMissingException(TexturePath_);
     }
 
     Sprite.setTexture(&Texture); // texture is a sf::Texture

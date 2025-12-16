@@ -12,14 +12,11 @@ std::shared_ptr<Enemy> Enemy_Ranger::clone() const {
 void Enemy_Ranger::HandleActions(const sf::Vector2f &PlayerPosition, float deltaTime, float deltaTimeMultiplier) {
     sf::Vector2f direction = PlayerPosition - Sprite.getPosition();
 
-
-    // Calculăm viteza standard
     float speed = Stats.GetSpeed();
     if (Damaged) {
         speed /= 2.0f;
     }
 
-    // Logica de patrulare și fugă
     if (getAttackReady == false) {
         float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
         if (distance < 150.0f && !isFleeing) {
@@ -38,7 +35,6 @@ void Enemy_Ranger::HandleActions(const sf::Vector2f &PlayerPosition, float delta
 
         sf::Vector2f movement(0.f, 0.f);
 
-        // A. Mișcarea Orizontală (către TargetX)
         if (std::abs(Sprite.getPosition().x - TargetX) > 5.0f) {
             float dirX = (TargetX > Sprite.getPosition().x) ? 1.0f : -1.0f;
             movement.x = dirX * speed * (isFleeing ? 1.5f : 1.0f);
@@ -65,7 +61,7 @@ Enemy_Ranger & Enemy_Ranger::operator=(Enemy_Ranger other) {
 }
 
 Enemy_Ranger::Enemy_Ranger(const Enemy_Ranger &other)
-    : Enemy(other), // Apelam Copy Ctor-ul din baza!
+    : Enemy(other),
       TargetX(other.TargetX),
       VerticalDirection(other.VerticalDirection),
       isFleeing(other.isFleeing)

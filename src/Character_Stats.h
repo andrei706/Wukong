@@ -3,7 +3,7 @@
 #define OOP_CHARACTER_STATS_H
 
 #include <iostream>
-
+#include "Game_Exceptions.h"
 
 class Character_Stats {
     float MaxHealth, Health, Speed;

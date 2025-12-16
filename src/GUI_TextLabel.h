@@ -2,6 +2,8 @@
 #ifndef OOP_GUI_TEXTLABEL_H
 #define OOP_GUI_TEXTLABEL_H
 
+#include "Game_Exceptions.h"
+
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 

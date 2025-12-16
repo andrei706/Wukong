@@ -33,8 +33,7 @@ Enemy::Enemy(const Enemy &other)
       AttackWarningClock(other.AttackWarningClock),
       CooldownClock(other.CooldownClock),
       DamagedClock(other.DamagedClock)
-{
-}
+{}
 
 
 Enemy::~Enemy() {
@@ -98,9 +97,9 @@ bool Enemy::GetDamagedStatus() const {
     return Damaged;
 }
 
-// int Enemy::GetLocalId() const {
-//     return LocalId;
-// }
+int Enemy::GetLocalId() const {
+    return LocalId;
+}
 
 int Enemy::GetExperience() const {
     return Experience;
@@ -146,6 +145,21 @@ void Enemy::Update(const sf::Vector2f& PlayerPosition, float deltaTime, float de
     }
 }
 
+void Enemy::DisplayInfo(std::ostream &out) const {
+    out<<std::endl << "Enemy Name: " << Name << std::endl
+            << "Weapon: " << *Weapon << std::endl
+            << "Stats: " << Stats << std::endl
+            << "ID: " << LocalId << std::endl;
+}
+
+void Enemy::AssignID(const std::shared_ptr<Enemy> &enemy) {
+    enemy->LocalId = Enemy::id;
+    Enemy::id++;
+    if (Enemy::id == 2001) {
+        Enemy::id = 0;
+    }
+}
+
 void Enemy::HandleActions(const sf::Vector2f &PlayerPosition, float deltaTime, float deltaTimeMultiplier) {
     sf::Vector2f direction = PlayerPosition - Sprite.getPosition();
 
@@ -182,7 +196,7 @@ void Enemy::HandleMeleeAttack(bool canAttack, sf::Vector2f direction, std::share
 
     if (inAttack == true) {
         if (CooldownClock.getElapsedTime().asSeconds() >= UsedWeapon->GetCooldown()) {
-            std::cout <<"Attack is done! Cooldown finished.\n";
+            //std::cout <<"Attack is done! Cooldown finished.\n";
             inAttack = false;
         }
         return;
@@ -197,7 +211,7 @@ void Enemy::HandleMeleeAttack(bool canAttack, sf::Vector2f direction, std::share
 
     if (getAttackReady == true) {
         if (AttackWarningClock.getElapsedTime().asSeconds() >= 0.5f) {
-            std::cout <<"Started attack! \n";
+            //std::cout <<"Started attack! \n";
 
             float radians = std::atan2(direction.y, direction.x);
             float angleDegrees = radians * 180.0f / 3.14f;
@@ -207,6 +221,18 @@ void Enemy::HandleMeleeAttack(bool canAttack, sf::Vector2f direction, std::share
             CooldownClock.restart();
             inAttack = true;
             getAttackReady = false;
+        }
+    }
+}
+
+void Enemy::HandleRangedAttack(bool canAttack, sf::Vector2f direction, std::shared_ptr<Tool> UsedWeapon, bool AttackWarningActive) {
+    if (CooldownClock.getElapsedTime().asSeconds() >= UsedWeapon->GetCooldown()) {
+        if (canAttack) {
+            float radians = std::atan2(direction.y, direction.x);
+            float angleDegrees = radians * 180.0f / 3.14159f;
+            UsedWeapon->Attack(Sprite, sf::degrees(angleDegrees));
+
+            CooldownClock.restart();
         }
     }
 }

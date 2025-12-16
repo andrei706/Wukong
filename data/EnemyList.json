@@ -22,5 +22,15 @@
     "Speed": 2.0,
     "Mana": 0,
     "WeaponName": "Ranger_Gun"
+  },
+  {
+    "Type": "Rotator",
+    "Name": "Machine",
+    "MaxHealth": 20.0,
+    "Speed": 5.0,
+    "Mana": 0,
+    "WeaponName": "Machine_Gun",
+    "RotationSpeed": 1.0,
+    "IsRotatingRight": false
   }
 ]

@@ -2,7 +2,12 @@
 #include "Tool.h"
 
 Tool::Tool(const std::string &name_, float Damage_, float Cooldown_, float Range_, int Critical_Chance_)
-    : Name(name_), Damage(Damage_), Cooldown(Cooldown_), Range(Range_), Critical_Chance(Critical_Chance_) {}
+    : Name(name_), Damage(Damage_), Cooldown(Cooldown_), Range(Range_), Critical_Chance(Critical_Chance_) {
+    if (Damage < 0) throw InvalidDataException(Name + " Tool Damage", Damage);
+    if (Cooldown < 0) throw InvalidDataException(Name + " Tool Cooldown", Cooldown);
+    if (Range < 0) throw InvalidDataException(Name + " Tool Range", Range);
+    if (Critical_Chance < 0) throw InvalidDataException(Name + " Tool Critical Chance", Critical_Chance);
+}
 
 float Tool::DamageCalculation() const {
     srand(time(nullptr));
@@ -53,7 +58,8 @@ void Tool::CreateAttackHitbox(sf::Vector2f Position, sf::Vector2f Offset, sf::An
         DamageCalculation(),
         sf::Vector2f{30.0f, 100.0f},
         Position + Offset,
-        Degrees
+        Degrees,
+        Cooldown
     );
 
     Attacks.push_back(new_hitbox);

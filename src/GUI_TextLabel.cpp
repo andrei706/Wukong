@@ -4,7 +4,7 @@
 GUI_TextLabel::GUI_TextLabel(sf::Text TextValue_, const std::string &Name_, const std::string &FontPath, int TextSize,
     sf::Color TextColor): TextValue(TextValue_), Name(Name_) {
     if (!TextFont.openFromFile(FontPath)) {
-        std::cout<<"Error: Font not found for Text Label, must give the path to font_name.ttf.";
+        throw AssetMissingException(FontPath);
     }
     TextValue.setFont(TextFont);
     TextValue.setCharacterSize(TextSize);

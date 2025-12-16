@@ -3,9 +3,9 @@
 
 #include "Enemy.h"
 
-Attack_Hitbox::Attack_Hitbox(float DamageValue_, sf::Vector2f Size_, sf::Vector2f Position_, sf::Angle Angle_, float Lifetime_,
+Attack_Hitbox::Attack_Hitbox(float DamageValue_, sf::Vector2f Size_, sf::Vector2f Position_, sf::Angle Angle_, float Lifetime_, float Cooldown_,
                              const std::string &TexturePath)
-    : DamageValue(DamageValue_), Size(Size_), Position(Position_), Rotation(Angle_), Lifetime(Lifetime_) {
+    : DamageValue(DamageValue_), Size(Size_), Position(Position_), Rotation(Angle_), Lifetime(Lifetime_), Cooldown(Cooldown_) {
 
     if (!Texture.loadFromFile(TexturePath)) {
         std::cerr << "Eroare la incarcarea texturii slash!" << std::endl;
@@ -23,17 +23,21 @@ Attack_Hitbox::Attack_Hitbox(float DamageValue_, sf::Vector2f Size_, sf::Vector2
 
 
 float Attack_Hitbox::GetDamageValue(int EnemyId){
-    if (canDamage) {
-        if (EnemyId != -1) {
-            for (auto const &i : Attacked) {
-                if (i.first == EnemyId)
-                    return 0;
-            }
-            Attacked.emplace_back(EnemyId, 0.5);
+    if (EnemyId == -1) return DamageValue; // This is the player ID
+    if (!canDamage) return 0;
+
+    for (auto const &entry : Attacked) {
+        if (entry.first == EnemyId) {
+            return 0;;
         }
-        return DamageValue;
     }
-    return 0;
+
+    Attacked.emplace_back(EnemyId, 0.5f);
+    for (auto const &entry : Attacked) {
+        std::cout << entry.first << " " << entry.second << std::endl;
+    }
+
+    return DamageValue;
 }
 
 sf::FloatRect Attack_Hitbox::GetBounds() const {
@@ -56,10 +60,26 @@ void Attack_Hitbox::UpdateBehavior(float deltaTime) {
 
     Sprite.setFillColor(newColor);
 
-    // if (Lifetime <= 0) {
-    //     canDamage = false;
+    if (Lifetime <= 0) {
+        canDamage = false;
+        isActive = false;
+    }
+    Lifetime -= deltaTime;
+}
+
+bool Attack_Hitbox::IsActive() const {
+    return isActive;
+}
+
+bool Attack_Hitbox::Update(float deltaTime) {
+    UpdateBehavior(deltaTime);
+    // for (int i = Attacked.size() - 1; i >= 0; i--) {
+    //     Attacked[i].second -= deltaTime;
+    //     if (Attacked[i].second <= 0) {
+    //         Attacked.erase(Attacked.begin() + i);
+    //     }
     // }
-    // Lifetime -= deltaTime;
+    return isActive;
 }
 
 std::ostream & operator<<(std::ostream &out, const Attack_Hitbox &object) {

@@ -19,14 +19,15 @@ protected:
     sf::Texture Texture;
 
     float Lifetime;
+    float Cooldown;
 
-    std::vector<std::pair<int, int>> Attacked;
+    std::vector<std::pair<int, float>> Attacked;
 
     bool canDamage = true;
     bool isActive = true;
 public:
     explicit Attack_Hitbox(float DamageValue_, sf::Vector2f Size_ = {100, 20}, sf::Vector2f Position_ = {0, 0}, sf::Angle Angle_ = sf::degrees(0)
-        , float Lifetime_ = 0.1, const std::string &TexturePath = "data/textures/attack_assets/slash_sprite.png");
+        , float Lifetime_ = 0.1, float Cooldown_ = 0.5f, const std::string &TexturePath = "data/textures/attack_assets/slash_sprite.png");
 
     virtual ~Attack_Hitbox() = default;
 
@@ -40,14 +41,9 @@ public:
 
     virtual void UpdateBehavior(float deltaTime);
 
-    bool IsActive() const {
-        return isActive;
-    }
+    bool IsActive() const;
 
-    bool Update(float deltaTime) {
-        UpdateBehavior(deltaTime);
-        return isActive;
-    }
+    bool Update(float deltaTime);
 };
 
 

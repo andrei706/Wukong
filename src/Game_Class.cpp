@@ -2,7 +2,6 @@
 #include "Game_Class.h"
 
 
-
 void Game_Class::RenderEntities() const {
     //Render Player
     if (!PlayerLost)
@@ -33,26 +32,34 @@ void Game_Class::RenderEntities() const {
         }
 
 }
-
 void Game_Class::ReadData() {
     std::ifstream toolFile("data/ToolList.json");
     if (!toolFile.is_open()) {
-        std::cerr << "Error opening data/ToolList.json\n";
-        return;
+        throw AssetMissingException("data/ToolList.json");
     }
 
     nlohmann::json toolData;
     try {
         toolFile >> toolData;
-    } catch (nlohmann::json::parse_error& e) {
-        std::cerr << "JSON Parse Error in ToolList.json: " << e.what() << '\n';
-        return;
+    } catch (const nlohmann::json::parse_error& e) {
+        throw InvalidDataException("ToolList.json JSON Syntax", 0);
     }
     toolFile.close();
 
     for (const auto& tool : toolData) {
+        if (!tool.contains("Type")) throw JsonMissingAttributeException("data/ToolList.json", "Type");
+        if (!tool.contains("WeaponName")) throw JsonMissingAttributeException("data/ToolList.json", "WeaponName");
+        if (!tool.contains("Cooldown")) throw JsonMissingAttributeException("data/ToolList.json", "Cooldown");
+        if (!tool.contains("Range")) throw JsonMissingAttributeException("data/ToolList.json", "Range");
+        if (!tool.contains("Critical_Chance")) throw JsonMissingAttributeException("data/ToolList.json", "Critical_Chance");
+
         std::shared_ptr<Tool> toolPtr;
-        if (tool.at("Type").get<std::string>() == "Punch") {
+        std::string type = tool.at("Type").get<std::string>();
+
+        if (type == "Punch") {
+            if (!tool.contains("Damage")) throw JsonMissingAttributeException("data/ToolList.json", "Damage");
+            if (!tool.contains("PunchRadius")) throw JsonMissingAttributeException("data/ToolList.json", "PunchRadius");
+
             toolPtr = std::make_shared<Tool_Punch>(
                 tool.at("WeaponName").get<std::string>(),
                 tool.at("Damage").get<float>(),
@@ -63,16 +70,21 @@ void Game_Class::ReadData() {
             );
             ToolList.push_back(toolPtr);
         }
-        if (tool.at("Type").get<std::string>() == "Ranged") {
+        else if (type == "Ranged") {
+            if (!tool.contains("Damage")) throw JsonMissingAttributeException("data/ToolList.json", "Damage");
+            if (!tool.contains("ProjectileSize")) throw JsonMissingAttributeException("data/ToolList.json", "ProjectileSize");
+            if (!tool.contains("ProjectileSpeed")) throw JsonMissingAttributeException("data/ToolList.json", "ProjectileSpeed");
+            if (!tool.contains("Lifetime")) throw JsonMissingAttributeException("data/ToolList.json", "Lifetime");
+
             toolPtr = std::make_shared<Tool_Ranged>(
-            tool.at("WeaponName").get<std::string>(),
-            tool.at("Damage").get<float>(),
-            tool.at("Cooldown").get<float>(),
-            tool.at("Range").get<float>(),
-            tool.at("Critical_Chance").get<int>(),
-            tool.at("ProjectileSize").get<float>(),
-            tool.at("ProjectileSpeed").get<float>(),
-            tool.at("Lifetime").get<float>()
+                tool.at("WeaponName").get<std::string>(),
+                tool.at("Damage").get<float>(),
+                tool.at("Cooldown").get<float>(),
+                tool.at("Range").get<float>(),
+                tool.at("Critical_Chance").get<int>(),
+                tool.at("ProjectileSize").get<float>(),
+                tool.at("ProjectileSpeed").get<float>(),
+                tool.at("Lifetime").get<float>()
             );
             ToolList.push_back(toolPtr);
         }
@@ -80,45 +92,68 @@ void Game_Class::ReadData() {
 
     std::ifstream enemyFile("data/EnemyList.json");
     if (!enemyFile.is_open()) {
-        std::cerr << "Error opening data/EnemyList.json\n";
-        return;
+        throw AssetMissingException("data/EnemyList.json");
     }
 
     nlohmann::json enemyData;
     try {
         enemyFile >> enemyData;
-    } catch (nlohmann::json::parse_error& e) {
-        std::cerr << "JSON Parse Error in EnemyList.json: " << e.what() << '\n';
-        return;
+    } catch (const nlohmann::json::parse_error& e) {
+        throw InvalidDataException("EnemyList.json JSON Syntax", 0);
     }
     enemyFile.close();
 
-
     for (const auto& enemy : enemyData) {
-        std::shared_ptr<Enemy> EnemyAuxPtr;
+        if (!enemy.contains("Type")) throw JsonMissingAttributeException("data/EnemyList.json", "Type");
+        if (!enemy.contains("MaxHealth")) throw JsonMissingAttributeException("data/EnemyList.json", "MaxHealth");
+        if (!enemy.contains("Speed")) throw JsonMissingAttributeException("data/EnemyList.json", "Speed");
+        if (!enemy.contains("Mana")) throw JsonMissingAttributeException("data/EnemyList.json", "Mana");
+        if (!enemy.contains("Name")) throw JsonMissingAttributeException("data/EnemyList.json", "Name");
 
+        std::shared_ptr<Enemy> EnemyAuxPtr;
         Character_Stats StatsAux{
             enemy.at("MaxHealth").get<float>(),
             enemy.at("Speed").get<float>(),
             enemy.at("Mana").get<int>()
         };
 
-        if (enemy.at("Type").get<std::string>() == "Walker") {
+        std::string type = enemy.at("Type").get<std::string>();
+
+        if (type == "Walker") {
             EnemyAuxPtr = std::make_shared<Enemy_Walker>(enemy.at("Name").get<std::string>());
             EnemyAuxPtr->AssignStats(StatsAux);
         }
-
-        if (enemy.at("Type").get<std::string>() == "Ranged") {
+        else if (type == "Ranged") {
             EnemyAuxPtr = std::make_shared<Enemy_Ranger>(enemy.at("Name").get<std::string>());
             EnemyAuxPtr->AssignStats(StatsAux);
         }
+        else if (type == "Rotator") {
+            if (!enemy.contains("RotationSpeed")) throw JsonMissingAttributeException("data/EnemyList.json", "RotationSpeed");
+            if (!enemy.contains("IsRotatingRight")) throw JsonMissingAttributeException("data/EnemyList.json", "IsRotatingRight");
+
+            EnemyAuxPtr = std::make_shared<Enemy_Rotator>(
+                enemy.at("Name").get<std::string>(),
+                enemy.at("RotationSpeed").get<float>(),
+                enemy.at("IsRotatingRight").get<bool>());
+            EnemyAuxPtr->AssignStats(StatsAux);
+        }
+
+        if (!enemy.contains("WeaponName")) throw JsonMissingAttributeException("data/EnemyList.json", "WeaponName");
         std::string WeaponName = enemy.at("WeaponName").get<std::string>();
+
+        bool weaponFound = false;
         for (auto &Weapon : ToolList) {
             if (Weapon->GetName() == WeaponName) {
                 EnemyAuxPtr->AssignWeapon(Weapon);
+                weaponFound = true;
                 break;
             }
         }
+
+        if (!weaponFound) {
+            throw InvalidDataException("Weapon Not Found in ToolList", 0);
+        }
+
         EnemyList.push_back(EnemyAuxPtr);
     }
 }
@@ -199,92 +234,56 @@ void Game_Class::AdjustView(unsigned int newWidth, unsigned int newHeight) {
 }
 
 void Game_Class::EventHandler() {
-    //Test Events
 
-
-    //Collision Verification
-    //Between Player and Enemy
+    //Check if the player is getting damaged
     sf::FloatRect PlayerBounds = player.GetSprite().getGlobalBounds();
-    // for (auto &i : SpawnedEnemies) {
-    //     sf::FloatRect EnemyBounds = i->GetEnemyHitbox();
-    //
-    //     if (EnemyBounds.findIntersection(PlayerBounds)) {
-    //         player.TakeDamage(i->GetDamage());
-    //     }
-    // }
-
     for (auto &i : SpawnedEnemies) {
         std::vector<std::shared_ptr<Attack_Hitbox>> EnemyAttackHitbox = i->GetHitboxes();
 
         for (auto &j : EnemyAttackHitbox) {
             if (j->GetBounds().findIntersection(PlayerBounds)) {
+                //std::cout<<"Intersection"<<std::endl;
                 player.TakeDamage(j->GetDamageValue(-1));
             }
         }
     }
 
+    //Check if enemies get damaged
     PlayerAttackHitbox = player.GetHitboxes();
+    for (auto it = SpawnedEnemies.begin(); it != SpawnedEnemies.end();) {
+        auto& i = *it;
+        bool EnemyWasKilled = false;
+        for (auto &j : PlayerAttackHitbox) {
+            if (i->GetEnemyHitbox().findIntersection(j->GetBounds())) {
+                if (!i->GetDamagedStatus()) {
+                    float DamageCount = j->GetDamageValue(i->GetLocalId());
+                    if (DamageCount) {
+                        std::cout<<DamageCount<<"Damaged: "<<DamageCount<<std::endl;
+                        bool isDead = i->TakeDamage(DamageCount);
+                        i->ChangeDamagedStatus(true, 0.5f);
 
-    // for (auto it = PlayerAttackHitbox.begin(); it != PlayerAttackHitbox.end();) {
-    //     auto& attack = *it;
-    //     //std::cout<<'\n'<<"GOT HERE BOYSSS";
-    //     attack->Update(dt);
-    //     //std::cout<<'\n'<<"MEGA KNIGHT";
-    //     ++it;
-    // }
-
-    //Player Events Functions and Actions
-    sf::Time ActionDurationTime = ActionClock.getElapsedTime();
-    if (!ActionCooldown) {
-        for (auto &i : SpawnedEnemies) {
-            if (i->GetDamagedStatus()) {
-                i->ChangeDamagedStatus(false, -5.0f);
-            }
-        }
-        ActionCooldown = player.HandleAttack(KeyManager); //Returneaza cat dureaza attackul
-        if (ActionCooldown > 0.0f) {
-            ActionClock.restart();
-        }
-    }
-    else {
-        if (ActionDurationTime < sf::seconds(ActionCooldown)) {
-            //Verify if enemies are touching the player hitbox
-            for (auto it = SpawnedEnemies.begin(); it != SpawnedEnemies.end();) {
-                auto& i = *it;
-                bool EnemyWasKilled = false;
-                for (auto &j : PlayerAttackHitbox) {
-                    if (i->GetEnemyHitbox().findIntersection(j->GetBounds())) {
-                        if (!i->GetDamagedStatus()) {
-                            std::cout<<"Damaged!\n";
-                            bool isDead = i->TakeDamage(j->GetDamageValue(0));
-                            i->ChangeDamagedStatus(true, ActionCooldown + 0.1f);
-
-                            if (!isDead) {
-                                player.AddExperience(i->GetExperience());
-                                it = SpawnedEnemies.erase(it);
-                                EnemyWasKilled = true;
-                                std::cout<<"Enemy has no health left!\n";
-                                break;
-                            }
+                        if (!isDead) {
+                            player.AddExperience(i->GetExperience());
+                            it = SpawnedEnemies.erase(it);
+                            EnemyWasKilled = true;
+                            std::cout<<"Enemy has no health left!\n";
+                            break;
                         }
                     }
                 }
-                if (!EnemyWasKilled)
-                    ++it;
             }
         }
-        else {
-            if (ActionDurationTime > sf::seconds(ActionCooldown) + sf::seconds(0.1f))
-                ActionCooldown = 0;
-            player.ClearAttackHitboxes();
-        }
+        if (!EnemyWasKilled)
+            ++it;
     }
-    PlayerAttackHitbox = player.GetHitboxes();
-    player.HandleMovement(window, dt, dtMultiplier);
+
+    //Update the goated player
+    player.Update(window, dt, dtMultiplier, KeyManager);
+
+    //Update enemies behavior
     for (auto &i : SpawnedEnemies) {
         i->Update(player.GetPosition(), dt, dtMultiplier);
     }
-
 
     //Update GUI
     UpdateHealthbar();
@@ -302,12 +301,10 @@ void Game_Class::EventHandler() {
             if (i.GetName() == "LoseText" && i.GetStatus() == false) {
                 i.ToggleActive();
                 PlayerLost = true;
-                player.ClearAttackHitboxes();
+                //player.ClearAttackHitboxes();
             }
         }
     }
-
-
 }
 
 void Game_Class::WindowRendering() {
@@ -364,17 +361,30 @@ Game_Class::Game_Class(sf::RenderWindow &window_, Player_Class &player_): window
 }
 
 void Game_Class::Setup() {
-    ActionClock.start();
     ReadData();
 
     SpawnedEnemies.push_back(EnemyList[0]->clone());
     SpawnedEnemies.push_back(EnemyList[2]->clone());
+    SpawnedEnemies.push_back(EnemyList[3]->clone());
     SpawnedEnemies[0]->SetPosition(500, 200);
     SpawnedEnemies[1]->SetPosition(500, 300);
+    SpawnedEnemies[2]->SetPosition(500, 400);
+    Enemy::AssignID(SpawnedEnemies[0]);
+    Enemy::AssignID(SpawnedEnemies[1]);
+    Enemy::AssignID(SpawnedEnemies[2]);
 
     std::cout<< *SpawnedEnemies[0] << std::endl << *SpawnedEnemies[1];
+    sf::Font font;
+    try {
+        if (!font.openFromFile("data/fonts/Tiny5-Regular.ttf")) {
+            throw AssetMissingException("data/fonts/Tiny5-Regular.ttf");
+        }
+    }
+    catch (const sf::Exception& e) {
+        std::cout<<"\n";
+        throw AssetMissingException("data/fonts/Tiny5-Regular.ttf");
+    }
 
-    sf::Font font("data/fonts/Tiny5-Regular.ttf");
     sf::Text text(font);
     text.setString("Hello World!");
     GUI_TextLabel textLabel(text, "Health", "data/fonts/Tiny5-Regular.ttf", 20);

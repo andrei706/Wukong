@@ -43,7 +43,6 @@ class Player_Class {
     void MakeInvincible(float Seconds);
     void HandleMovement(sf::RenderWindow &window, float deltaTime = 0.016, float deltaTimeMultiplier = 62.5);
     void HandleDodge(Key_Manager &keyManager);
-    void ClearAttackHitboxes();
     float HandleAttack(Key_Manager& KeyManager);
 
 public:

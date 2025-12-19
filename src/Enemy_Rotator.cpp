@@ -15,18 +15,23 @@ Enemy_Rotator& Enemy_Rotator::operator=(Enemy_Rotator other) {
 }
 
 void Enemy_Rotator::HandleActions(const sf::Vector2f &PlayerPosition, float deltaTime, float deltaTimeMultiplier) {
-    float angleChange = RotationSpeed * deltaTime * deltaTimeMultiplier;
+    sf::Vector2f PlayerDirection = PlayerPosition - Sprite.getPosition();
+    float distance = std::sqrt(PlayerDirection.x * PlayerDirection.x + PlayerDirection.y * PlayerDirection.y);
 
-    if (isRotatingRight) {
-        Sprite.rotate(sf::degrees(angleChange));
-    } else {
-        Sprite.rotate(sf::degrees(-angleChange));
+    if (distance < 1500.0f) {
+        float angleChange = RotationSpeed * deltaTime * deltaTimeMultiplier;
+
+        if (isRotatingRight) {
+            Sprite.rotate(sf::degrees(angleChange));
+        } else {
+            Sprite.rotate(sf::degrees(-angleChange));
+        }
+
+        float angleRadians = Sprite.getRotation().asRadians();
+
+        sf::Vector2f direction(std::cos(angleRadians), std::sin(angleRadians));
+        HandleRangedAttack(true, direction, Weapon);
     }
-
-    float angleRadians = Sprite.getRotation().asRadians();
-
-    sf::Vector2f direction(std::cos(angleRadians), std::sin(angleRadians));
-    HandleRangedAttack(true, direction, Weapon, false);
 }
 
 void swap(Enemy_Rotator& first, Enemy_Rotator& second) noexcept {

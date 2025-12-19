@@ -191,6 +191,7 @@ void Enemy::HandleActions(const sf::Vector2f &PlayerPosition, float deltaTime, f
 }
 
 void Enemy::HandleMeleeAttack(bool canAttack, sf::Vector2f direction, std::shared_ptr<Tool> UsedWeapon) {
+    if (UsedWeapon == NULL) throw InvalidActionException("Cannot attack without a weapon");
     sf::Vector2f TempPosition = Sprite.getPosition();
     AttackWarning.SetPosition({TempPosition.x, TempPosition.y - 60});
 
@@ -225,7 +226,8 @@ void Enemy::HandleMeleeAttack(bool canAttack, sf::Vector2f direction, std::share
     }
 }
 
-void Enemy::HandleRangedAttack(bool canAttack, sf::Vector2f direction, std::shared_ptr<Tool> UsedWeapon, bool AttackWarningActive) {
+void Enemy::HandleRangedAttack(bool canAttack, sf::Vector2f direction, std::shared_ptr<Tool> UsedWeapon) {
+    if (UsedWeapon == NULL) throw InvalidActionException("Cannot attack without a weapon");
     if (CooldownClock.getElapsedTime().asSeconds() >= UsedWeapon->GetCooldown()) {
         if (canAttack) {
             float radians = std::atan2(direction.y, direction.x);

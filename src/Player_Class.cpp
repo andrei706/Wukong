@@ -89,12 +89,6 @@ const std::vector<std::shared_ptr<Attack_Hitbox>>& Player_Class::GetHitboxes(){
     return ActiveHitboxes;
 }
 
-void Player_Class::ClearAttackHitboxes() {
-    Pole.ClearAttacks();
-    ActiveHitboxes.clear();
-    inAttack = false;
-}
-
 void Player_Class::Update(sf::RenderWindow &window, float deltaTime, float deltaTimeMultiplier, Key_Manager &keyManager) {
     UpdateInvincibility();
     Pole.Update(deltaTime);
@@ -114,7 +108,7 @@ float Player_Class::HandleAttack(Key_Manager& KeyManager) {
     inAttack = false;
     SpeedMultiplier = 1.f;
 
-    if (isDodging || inAttack)
+    if (isDodging)
         return 0.0f;
 
     if (KeyManager.CheckInput("LeftMouseButton")) {

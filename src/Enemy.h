@@ -35,7 +35,7 @@ protected:
     sf::Clock ActionClock, AttackWarningClock, CooldownClock, DamagedClock;
 
     void HandleMeleeAttack(bool canAttack, sf::Vector2f direction, std::shared_ptr<Tool> UsedWeapon);
-    void HandleRangedAttack(bool canAttack, sf::Vector2f direction, std::shared_ptr<Tool> UsedWeapon, bool AttackWarningActive);
+    void HandleRangedAttack(bool canAttack, sf::Vector2f direction, std::shared_ptr<Tool> UsedWeapon);
     virtual void HandleActions(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier);
 public:
 

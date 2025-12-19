@@ -33,8 +33,6 @@ public:
 
     [[nodiscard]] const std::vector<std::shared_ptr<Attack_Hitbox>>& GetAttackHitboxes() const;
 
-    void ClearAttacks();
-
     void ShowHitboxes(sf::RenderWindow& window) const;
 
     float GetCooldown() const;

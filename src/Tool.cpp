@@ -80,10 +80,6 @@ const std::vector<std::shared_ptr<Attack_Hitbox>> & Tool::GetAttackHitboxes() co
     return Attacks;
 }
 
-void Tool::ClearAttacks() {
-    Attacks.clear();
-}
-
 void Tool::ShowHitboxes(sf::RenderWindow &window) const {
     for (const auto & i : Attacks) {
         i->ShowSprite(window);

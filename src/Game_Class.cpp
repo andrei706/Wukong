@@ -41,7 +41,7 @@ void Game_Class::ReadData() {
     nlohmann::json toolData;
     try {
         toolFile >> toolData;
-    } catch (const nlohmann::json::parse_error& e) {
+    } catch (const nlohmann::json::parse_error&) {
         throw InvalidDataException("ToolList.json JSON Syntax", 0);
     }
     toolFile.close();
@@ -98,7 +98,7 @@ void Game_Class::ReadData() {
     nlohmann::json enemyData;
     try {
         enemyFile >> enemyData;
-    } catch (const nlohmann::json::parse_error& e) {
+    } catch (const nlohmann::json::parse_error&) {
         throw InvalidDataException("EnemyList.json JSON Syntax", 0);
     }
     enemyFile.close();
@@ -380,7 +380,7 @@ void Game_Class::Setup() {
             throw AssetMissingException("data/fonts/Tiny5-Regular.ttf");
         }
     }
-    catch (const sf::Exception& e) {
+    catch (const sf::Exception&) {
         std::cout<<"\n";
         throw AssetMissingException("data/fonts/Tiny5-Regular.ttf");
     }

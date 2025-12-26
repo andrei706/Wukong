@@ -74,7 +74,7 @@ void Player_Class::AddExperience(int Value) {
 
 void Player_Class::TakeDamage(float Value) {
     if (!Invincibility) {
-        std::cout<<Value;
+        //std::cout<<Value;
         Stats.ReduceHealth(Value);
         MakeInvincible(0.5f);
     }

@@ -48,8 +48,6 @@ class Game_Class {
     static float GetRandomValue(float min, float max);
 
 private:
-
-
     void RenderEntities() const;
     void ReadData();
     void UpdateHealthbar();

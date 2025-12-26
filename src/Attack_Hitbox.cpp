@@ -36,9 +36,9 @@ float Attack_Hitbox::GetDamageValue(int EnemyId) {
     }
 
     Attacked.emplace_back(EnemyId, Cooldown + 0.1f);
-    for (auto const &entry : Attacked) {
-        std::cout << entry.first << " " << entry.second << std::endl;
-    }
+    // for (auto const &entry : Attacked) {
+    //     std::cout << entry.first << " " << entry.second << std::endl;
+    // }
 
     return DamageValue;
 }

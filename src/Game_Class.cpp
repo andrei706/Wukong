@@ -427,7 +427,7 @@ void Game_Class::WaveHandler() {
         }
     }
 
-    if (currentWave->IsFinished() && SpawnedEnemies.empty()) {
+    if (currentWave->IsFinished() && SpawnedEnemies.empty() && ActiveSpawnWarnings.empty()) {
         WaveManager.MoveToNextWave();
         return;
     }

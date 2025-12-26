@@ -85,7 +85,7 @@ void Wave_Manager::MoveToNextWave() { CurrentWave++; }
 std::ostream & operator<<(std::ostream &os, const Wave &obj) {
     os<< "Index: " << obj.Index << std::endl
             << " MaxEnemiesOnDisplay: " << obj.MaxEnemiesOnDisplay << std::endl;
-    for (auto &i : obj.Enemies) {
+    for (auto const &i : obj.Enemies) {
         os << i.first << ": " << i.second<< std::endl;
     }
     os<<std::endl;
@@ -94,7 +94,7 @@ std::ostream & operator<<(std::ostream &os, const Wave &obj) {
 
 std::ostream & operator<<(std::ostream &os, const Wave_Manager &obj) {
     os << " CurrentWave: " << obj.CurrentWave << "\nWaves: "<< std::endl;
-    for (auto &i : obj.allWaves) {
+    for (auto const &i : obj.allWaves) {
         os << i << std::endl;
     }
     return os;

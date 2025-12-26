@@ -22,7 +22,7 @@ public:
 
     [[nodiscard]] bool IsReady() const;
 
-    [[nodiscard]] std::string GetEnemyName() const;
+    [[nodiscard]] const std::string& GetEnemyName() const;
 
     [[nodiscard]] sf::Vector2f GetPosition() const;
 };

@@ -67,11 +67,7 @@ public:
 
     void ChangeDamagedStatus(bool Value = true, float Seconds = 0.5f);
 
-    std::string GetName() const {
-        return Name;
-    }
-
-    bool GetDamagedStatus() const;
+    const std::string& GetName() const;
 
     int GetLocalId() const;
 

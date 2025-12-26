@@ -6,8 +6,8 @@
 
 Spawn_Warning::Spawn_Warning(const std::string &Name_, sf::Vector2f Position_, float Duration_, float Size_): EnemyName(Name_), Position(Position_), Timer(Duration_), maxTime(Duration_), Size(Size_) {
 
-    shape.setRadius(Size_);
-    shape.setOrigin({Size_, Size_});
+    shape.setRadius(Size);
+    shape.setOrigin({Size, Size});
     shape.setPosition(Position);
     shape.setFillColor(sf::Color(255, 255, 255, 100));
     shape.setOutlineThickness(2.f);
@@ -31,6 +31,6 @@ void Spawn_Warning::Render(sf::RenderWindow &window) const {
 
 bool Spawn_Warning::IsReady() const { return Finished; }
 
-std::string Spawn_Warning::GetEnemyName() const { return EnemyName; }
+const std::string& Spawn_Warning::GetEnemyName() const { return EnemyName; }
 
 sf::Vector2f Spawn_Warning::GetPosition() const { return Position; }

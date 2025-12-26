@@ -106,8 +106,8 @@ void Enemy::ChangeDamagedStatus(bool Value, float Seconds) {
     DamagedTimer = Seconds;
 }
 
-bool Enemy::GetDamagedStatus() const {
-    return Damaged;
+const std::string & Enemy::GetName() const {
+    return Name;
 }
 
 int Enemy::GetLocalId() const {

@@ -230,7 +230,7 @@ void Game_Class::PauseHandler() {
 }
 
 void Game_Class::SpawnEnemy(const std::string &Name, sf::Vector2f Position) {
-    for (auto &EnemyPtr : EnemyList) {
+    for (auto const &EnemyPtr : EnemyList) {
         if (EnemyPtr->GetName() == Name) {
             std::shared_ptr<Enemy> newEnemy = EnemyPtr->clone();
             newEnemy->SetPosition(Position.x, Position.y);

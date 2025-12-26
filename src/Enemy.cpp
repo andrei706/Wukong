@@ -177,8 +177,24 @@ void Enemy::MoveSafely(const std::vector<std::shared_ptr<Enemy>>& otherEnemies) 
             pushForce += repulsion;
         }
     }
+    sf::Vector2f finalMovement = IntendedMovement + (pushForce * 0.5f);
+    sf::Vector2f nextPos = currentPos + finalMovement;
 
-    Sprite.move(IntendedMovement + (pushForce * 0.5f));
+    // Verificam daca inamicul trece de limitele hartii
+    const float minX = 50.f;
+    const float maxX = 1230.f;
+    const float minY = 50.f;
+    const float maxY = 670.f;
+
+    if (nextPos.x < minX || nextPos.x > maxX) {
+        finalMovement.x = 0.f;
+    }
+
+    if (nextPos.y < minY || nextPos.y > maxY) {
+        finalMovement.y = 0.f;
+    }
+
+    Sprite.move(finalMovement);
 }
 
 void Enemy::Update(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier, const std::vector<std::shared_ptr<Enemy>>& otherEnemies) {

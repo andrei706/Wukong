@@ -171,6 +171,11 @@ float Player_Class::HandleAttack(Key_Manager& KeyManager) {
 
 void Player_Class::HandleMovement(sf::RenderWindow &window, float deltaTime, float deltaTimeMultiplier) {
 
+    const float minX = 50.f;
+    const float maxX = 1230.f;
+    const float minY = 50.f;
+    const float maxY = 670.f;
+
     if (inAttack && SpeedMultiplier == 0.f)
         return;
 
@@ -179,6 +184,11 @@ void Player_Class::HandleMovement(sf::RenderWindow &window, float deltaTime, flo
             isDodging = false;
         } else {
             sf::Vector2f dashStep = DodgeDirection * DodgeSpeed * deltaTime * deltaTimeMultiplier;
+            sf::Vector2f nextDodgePos = Sprite.getPosition() + dashStep;
+
+            if (nextDodgePos.x < minX || nextDodgePos.x > maxX) dashStep.x = 0.f;
+            if (nextDodgePos.y < minY || nextDodgePos.y > maxY) dashStep.y = 0.f;
+
             Sprite.move(dashStep);
             return;
         }
@@ -196,6 +206,11 @@ void Player_Class::HandleMovement(sf::RenderWindow &window, float deltaTime, flo
         movement.x -= speed * deltaTime * deltaTimeMultiplier;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
         movement.x += speed * deltaTime * deltaTimeMultiplier;
+
+    sf::Vector2f nextPos = Sprite.getPosition() + movement;
+
+    if (nextPos.x < minX || nextPos.x > maxX) movement.x = 0.f;
+    if (nextPos.y < minY || nextPos.y > maxY) movement.y = 0.f;
 
     Sprite.move(movement);
 

@@ -1,7 +1,8 @@
 
 #ifndef OOP_SPAWN_WARNING_H
 #define OOP_SPAWN_WARNING_H
-#include "SFML/Graphics.hpp"
+
+#include <SFML/Graphics.hpp>
 
 class Spawn_Warning {
     std::string EnemyName;

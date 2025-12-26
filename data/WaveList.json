@@ -5,7 +5,8 @@
     "Enemies": {
       "Zombie": 1,
       "Ghoul": 1,
-      "Ranger": 1
+      "Ranger": 1,
+      "Fiend": 1
     }
   },
   {

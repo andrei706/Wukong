@@ -32,5 +32,14 @@
     "RangedWeaponName": "Machine_Gun",
     "RotationSpeed": 1.0,
     "IsRotatingRight": false
+  },
+  {
+    "Type": "Ambidextrous",
+    "Name": "Fiend",
+    "MaxHealth": 25.0,
+    "Speed": 4.0,
+    "Mana": 0,
+    "MeleeWeaponName": "Ghoul_Punch",
+    "RangedWeaponName": "Ranger_Gun"
   }
 ]

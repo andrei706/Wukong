@@ -6,6 +6,7 @@
 #include "Enemy_Walker.h"
 #include "Enemy_Ranger.h"
 #include "Enemy_Rotator.h"
+#include "Enemy_Ambidextrous.h"
 #include "GUI_TextLabel.h"
 #include "GUI_Button.h"
 #include "Key_Manager.h"

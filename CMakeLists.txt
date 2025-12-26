@@ -104,6 +104,8 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         src/Wave_Manager.h
         src/Spawn_Warning.cpp
         src/Spawn_Warning.h
+        src/Enemy_Ambidextrous.cpp
+        src/Enemy_Ambidextrous.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

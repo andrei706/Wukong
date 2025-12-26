@@ -147,6 +147,10 @@ void Game_Class::ReadData() {
                 enemy.at("IsRotatingRight").get<bool>());
             EnemyAuxPtr->AssignStats(StatsAux);
         }
+        else if (type == "Ambidextrous") {
+            EnemyAuxPtr = std::make_shared<Enemy_Ambidextrous>(enemy.at("Name").get<std::string>());
+            EnemyAuxPtr->AssignStats(StatsAux);
+        }
 
         if (enemy.contains("MeleeWeaponName")) {
             std::string meleeName = enemy.at("MeleeWeaponName").get<std::string>();

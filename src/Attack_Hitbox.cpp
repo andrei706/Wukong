@@ -22,17 +22,20 @@ Attack_Hitbox::Attack_Hitbox(float DamageValue_, sf::Vector2f Size_, sf::Vector2
 
 
 
-float Attack_Hitbox::GetDamageValue(int EnemyId){
-    if (EnemyId == -1) return DamageValue; // This is the player ID
+float Attack_Hitbox::GetDamageValue(int EnemyId) {
+    if (EnemyId == -1 ) { // This is the player ID
+        Attacked.emplace_back(-1, 0.0f);
+        return DamageValue;
+    }
     if (!canDamage) return 0;
 
     for (auto const &entry : Attacked) {
         if (entry.first == EnemyId) {
-            return 0;;
+            return 0;
         }
     }
 
-    Attacked.emplace_back(EnemyId, 0.5f);
+    Attacked.emplace_back(EnemyId, Cooldown + 0.1f);
     for (auto const &entry : Attacked) {
         std::cout << entry.first << " " << entry.second << std::endl;
     }
@@ -49,6 +52,9 @@ void Attack_Hitbox::ShowSprite(sf::RenderWindow &window) const {
 }
 
 void Attack_Hitbox::UpdateBehavior(float deltaTime) {
+    if (Cooldown - Lifetime > 0.1f)
+        canDamage = false;
+
     sf::Color currentColor = Sprite.getFillColor();
 
     float deltaAlpha = 600.0f * deltaTime;
@@ -73,12 +79,14 @@ bool Attack_Hitbox::IsActive() const {
 
 bool Attack_Hitbox::Update(float deltaTime) {
     UpdateBehavior(deltaTime);
-    // for (int i = Attacked.size() - 1; i >= 0; i--) {
-    //     Attacked[i].second -= deltaTime;
-    //     if (Attacked[i].second <= 0) {
-    //         Attacked.erase(Attacked.begin() + i);
-    //     }
-    // }
+    for (auto it = Attacked.begin(); it != Attacked.end(); ) {
+        it->second -= deltaTime;
+        if (it->second <= 0) {
+            it = Attacked.erase(it);
+        } else {
+            ++it;
+        }
+    }
     return isActive;
 }
 

@@ -1,21 +1,17 @@
-
-
 #include "Player_Class.h"
-
-
 
 void Player_Class::UpdateInvincibility() {
     if (Invincibility) {
         if (!isDodging) {
             if ((int)(ClockInvincibilityTime.getElapsedTime().asMilliseconds() / 100) % 2 == 0) {
-                Sprite.setFillColor(sf::Color(100, 100, 255, 100));
+                Sprite.setFillColor(sf::Color(255, 255, 255, 100));
             } else {
-                Sprite.setFillColor(sf::Color::Blue);
+                Sprite.setFillColor(sf::Color::White);
             }
         }
         if (ClockInvincibilityTime.getElapsedTime() >= InvincibilityTime) {
             Invincibility = false;
-            Sprite.setFillColor(sf::Color::Blue);
+            Sprite.setFillColor(sf::Color::White);
         }
     }
 }
@@ -28,9 +24,14 @@ void Player_Class::MakeInvincible(float Seconds) {
 
 Player_Class::Player_Class(int Experience_, float InvincibilityTime_): Experience(Experience_), InvincibilityTime(sf::seconds(InvincibilityTime_)) {
 
-    Sprite.setSize(Size);
-    Sprite.setOrigin({Size.x / 2, Size.y / 2});
-    Sprite.setFillColor(sf::Color::Blue);
+    if (!PlayerTexture.loadFromFile("data/textures/player/Monkey_Sprite_Sheet.png")) {
+        throw AssetMissingException("data/textures/player/Monkey_Sprite_Sheet.png");
+    }
+
+    Sprite.setSize(sf::Vector2f(FrameSize));
+    Sprite.setOrigin({FrameSize.x / 2.0f, FrameSize.y / 2.0f});
+    Sprite.setTexture(&PlayerTexture);
+    Sprite.setTextureRect(sf::IntRect({0, 0}, FrameSize));
     Sprite.setPosition(Position);
 
     RangedCooldown.start();
@@ -39,7 +40,6 @@ Player_Class::Player_Class(int Experience_, float InvincibilityTime_): Experienc
 
     Invincibility = false;
 
-    Gauge = 0;
 }
 
 void Player_Class::ShowSprite(sf::RenderWindow &window) const {
@@ -62,6 +62,10 @@ sf::Vector2f Player_Class::GetPosition() const {
 
 float Player_Class::GetHealth() const {
     return Stats.GetHealth();
+}
+
+float Player_Class::GetGauge() const {
+    return Gauge;
 }
 
 void Player_Class::AddExperience(int Value) {
@@ -102,6 +106,29 @@ void Player_Class::Update(sf::RenderWindow &window, float deltaTime, float delta
         }
     }
     HandleMovement(window, deltaTime, deltaTimeMultiplier);
+    UpdateAnimation(deltaTime);
+}
+
+void Player_Class::Restart() {
+    Experience = 0;
+    Gauge = 50;
+    Stats.RestoreHealth(500.0f);
+
+    Invincibility = false;
+    inAttack = false;
+    inRangedAttack = false;
+    isDodging = false;
+
+    ActiveHitboxes.clear();
+
+    SetPosition({140.f, 360.f});
+    Sprite.setFillColor(sf::Color::White);
+    Sprite.setTextureRect(sf::IntRect({0, 0}, FrameSize));
+
+    AttackCooldown.restart();
+    RangedCooldown.restart();
+    ClockDodgeCooldown.restart();
+    ClockInvincibilityTime.restart();
 }
 
 float Player_Class::HandleAttack(Key_Manager& KeyManager) {
@@ -112,6 +139,7 @@ float Player_Class::HandleAttack(Key_Manager& KeyManager) {
         return 0.0f;
 
     if (KeyManager.CheckInput("LeftMouseButton")) {
+        if (Gauge < 96) Gauge += 5;
         float cooldown_time;
         inAttack = true;
         SpeedMultiplier = 0.f;
@@ -122,14 +150,13 @@ float Player_Class::HandleAttack(Key_Manager& KeyManager) {
     }
 
     if (KeyManager.CheckInput("RightMouseButton")) {
-        // Verificarea Cooldown-ului la Distanță (RangedCooldown)
-        if (RangedCooldown.getElapsedTime() > sf::seconds(0.2f)) {
-
+        // Verificarea cooldownului de la distanta + daca are gauge
+        if (RangedCooldown.getElapsedTime() > sf::seconds(0.2f) && Gauge >= 4) {
+            Gauge -= 5;
             ActiveHitboxes.clear();
             inRangedAttack = true;
             SpeedMultiplier = 0.3f;
             Blast.Attack(Sprite, Rotation);
-
             const auto& blast_hits = Blast.GetAttackHitboxes();
             ActiveHitboxes.insert(ActiveHitboxes.end(), blast_hits.begin(), blast_hits.end());
 
@@ -137,6 +164,8 @@ float Player_Class::HandleAttack(Key_Manager& KeyManager) {
             return 0.f;
         }
     }
+    else if (!(RangedCooldown.getElapsedTime() > sf::seconds(0.2f) && Gauge >= 4))
+            inRangedAttack = false;
     return 0.0f;
 }
 
@@ -175,10 +204,42 @@ void Player_Class::HandleMovement(sf::RenderWindow &window, float deltaTime, flo
     sf::Vector2f PlayerPosition = Sprite.getPosition();
     sf::Vector2f diff = MouseWorldPos - PlayerPosition;
 
+    FacingRight = (MouseWorldPos.x >= PlayerPosition.x);
+
     float radians = std::atan2(diff.y, diff.x);
     float angleDegrees = radians * 180.f / 3.14f;
     //Sprite.setRotation(sf::degrees(angleDegrees));
     Rotation = sf::degrees(angleDegrees);
+}
+
+void Player_Class::UpdateAnimation(float dt) {
+    if (isDodging)
+        VisualID = 5;
+    else if (inAttack) {
+        VisualID = 3; // Melee stance
+    }
+    else if (inRangedAttack) {
+        VisualID = 4; // Ranged stance
+    }
+    else if (SpeedMultiplier > 0.1f && (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) ||
+                                        sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) ||
+                                        sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) ||
+                                        sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))) {
+        AnimationTimer += dt;
+        if (AnimationTimer >= 0.15f) {
+            WalkToggle = (WalkToggle == 0) ? 1 : 0;
+            AnimationTimer = 0.f;
+        }
+        VisualID = (WalkToggle == 0) ? 1 : 2;
+    }
+    else {
+        VisualID = 0; // Idle
+    }
+
+    Sprite.setTextureRect(sf::IntRect({VisualID * FrameSize.x, 0}, FrameSize));
+
+    if (FacingRight) Sprite.setScale({1.f, 1.f});
+    else Sprite.setScale({-1.f, 1.f});
 }
 
 void Player_Class::StartDodge(sf::Vector2f inputDirection) {
@@ -200,14 +261,17 @@ void Player_Class::StartDodge(sf::Vector2f inputDirection) {
 
 void Player_Class::HandleDodge(Key_Manager &keyManager) {
     if (keyManager.CheckInput("Space")) {
-        MakeInvincible(0.5f);
         if (ClockDodgeCooldown.getElapsedTime() >= DodgeCooldown && !isDodging) {
+            MakeInvincible(0.5f);
             sf::Vector2f inputDir(0.f, 0.f);
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) inputDir.y -= 1.f;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) inputDir.y += 1.f;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) inputDir.x -= 1.f;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) inputDir.x += 1.f;
             StartDodge(inputDir);
+
+            if (inAttack)
+                SpeedMultiplier = 0.5f;
         }
     }
 }

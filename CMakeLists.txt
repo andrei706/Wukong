@@ -100,6 +100,10 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         src/Enemy_Rotator.h
         src/Game_Exceptions.cpp
         src/Game_Exceptions.h
+        src/Wave_Manager.cpp
+        src/Wave_Manager.h
+        src/Spawn_Warning.cpp
+        src/Spawn_Warning.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

@@ -6,6 +6,7 @@
 #include "Character_Stats.h"
 #include "Tool.h"
 #include "Attack_Warning.h"
+#include "Tool_Ranged.h"
 #include "Game_Exceptions.h"
 
 #include <string>
@@ -20,8 +21,13 @@ class Enemy {
     static int id;
     int LocalId;
 
+    std::vector<std::shared_ptr<Attack_Hitbox>> ActiveHitboxes;
+
+    void MoveSafely(const std::vector<std::shared_ptr<Enemy>>& otherEnemies);
+
 protected:
-    std::shared_ptr<Tool> Weapon = std::make_shared<Tool>("Sword", 3.0f, 0.6f, 10.0f);
+    std::shared_ptr<Tool> MeleeWeapon = std::make_shared<Tool>("Sword", 3.0f, 0.6f, 10.0f);
+    std::shared_ptr<Tool> RangedWeapon = std::make_shared<Tool_Ranged>("Blast", 3.0f, 0.6f, 10.0f);
 
     bool Damaged = false; //Daca a si-a primit dmg de la atacul player-ului sau nu ca sa nu-si primeasca in continuu dmg
     bool inAttack = false;
@@ -34,8 +40,10 @@ protected:
     sf::Vector2f Position = {200.f, 100.f};
     sf::Clock ActionClock, AttackWarningClock, CooldownClock, DamagedClock;
 
-    void HandleMeleeAttack(bool canAttack, sf::Vector2f direction, std::shared_ptr<Tool> UsedWeapon);
-    void HandleRangedAttack(bool canAttack, sf::Vector2f direction, std::shared_ptr<Tool> UsedWeapon);
+    sf::Vector2f IntendedMovement;
+
+    void HandleMeleeAttack(bool canAttack, sf::Vector2f direction);
+    void HandleRangedAttack(bool canAttack, sf::Vector2f direction);
     virtual void HandleActions(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier);
 public:
 
@@ -59,15 +67,21 @@ public:
 
     void ChangeDamagedStatus(bool Value = true, float Seconds = 0.5f);
 
+    std::string GetName() const {
+        return Name;
+    }
+
     bool GetDamagedStatus() const;
 
     int GetLocalId() const;
 
     int GetExperience() const;
 
+    sf::Vector2f GetPosition() const;
+
     bool TakeDamage (float Damage_Points);
 
-    void AssignWeapon (const std::shared_ptr<Tool>& toolPtr);
+    void AssignWeapon (const std::shared_ptr<Tool>& toolPtr, bool Melee = true);
 
     void AssignStats (const Character_Stats& other);
 
@@ -77,7 +91,7 @@ public:
 
     void RenderHitboxes(sf::RenderWindow& window) const;
 
-    void Update(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier);
+    void Update(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier, const std::vector<std::shared_ptr<Enemy>>& otherEnemies);
 
     void DisplayInfo(std::ostream &out) const;
 

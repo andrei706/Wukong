@@ -4,8 +4,8 @@
 #include "Attack_Hitbox.h"
 
 class Attack_Projectile : public Attack_Hitbox {
-private:
     sf::Vector2f Velocity;
+    bool DestroyOnHit = false;
 public:
     explicit Attack_Projectile(float DamageValue_,
                                sf::Vector2f Size_ = {100, 20},
@@ -13,7 +13,8 @@ public:
                                sf::Angle Angle_ = sf::degrees(0),
                                sf::Vector2f Velocity_ = {0.f, 0.f},
                                float Lifetime_ = 5,
-                               float Cooldown_ = 0.5f);
+                               float Cooldown_ = 0.5f,
+                               bool DestroyOnHit_ = true);
 
     void UpdateBehavior(float deltaTime) override;
 

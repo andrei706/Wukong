@@ -9,10 +9,13 @@
 #include "GUI_TextLabel.h"
 #include "GUI_Button.h"
 #include "Key_Manager.h"
+#include "Wave_Manager.h"
+#include "Spawn_Warning.h"
 
 
 #include <iostream>
 #include <fstream>
+#include <random>
 #include <nlohmann/json.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -27,12 +30,13 @@ class Game_Class {
     bool isPaused = false;
     Player_Class &player;
     Key_Manager KeyManager;
-
+    Wave_Manager WaveManager;
     sf::Vector2f windowSize = window.getDefaultView().getSize();
     sf::View view;
 
     sf::Clock GameClock;
 
+    std::vector<Spawn_Warning> ActiveSpawnWarnings;
     std::vector<std::shared_ptr<Enemy>> EnemyList, SpawnedEnemies;
     std::vector<std::shared_ptr<Tool>> ToolList;
     std::vector<std::shared_ptr<Attack_Hitbox>> PlayerAttackHitbox;
@@ -41,18 +45,23 @@ class Game_Class {
 
     bool PlayerLost = false;
 
+    static float GetRandomValue(float min, float max);
+
 private:
+
 
     void RenderEntities() const;
     void ReadData();
     void UpdateHealthbar();
+    void UpdateSpawnWarnings();
     void Replay();
     void PauseHandler();
-
+    void SpawnEnemy(const std::string& Name, sf::Vector2f Position);
     void AdjustView(unsigned int newWidth, unsigned int newHeight);
-
     void EventHandler();
     void WindowRendering();
+    void WaveHandler();
+    void ToggleRotatorRotation() const;
 
 public:
     Game_Class(sf::RenderWindow& window_, Player_Class& player_);

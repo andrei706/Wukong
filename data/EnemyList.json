@@ -5,7 +5,7 @@
     "MaxHealth": 20.0,
     "Speed": 3.0,
     "Mana": 0,
-    "WeaponName": "Zombie_Punch"
+    "MeleeWeaponName": "Zombie_Punch"
   },
   {
     "Type": "Walker",
@@ -13,7 +13,7 @@
     "MaxHealth": 25.0,
     "Speed": 5.0,
     "Mana": 0,
-    "WeaponName": "Ghoul_Punch"
+    "MeleeWeaponName": "Ghoul_Punch"
   },
   {
     "Type": "Ranged",
@@ -21,7 +21,7 @@
     "MaxHealth": 15.0,
     "Speed": 2.0,
     "Mana": 0,
-    "WeaponName": "Ranger_Gun"
+    "RangedWeaponName": "Ranger_Gun"
   },
   {
     "Type": "Rotator",
@@ -29,7 +29,7 @@
     "MaxHealth": 20.0,
     "Speed": 5.0,
     "Mana": 0,
-    "WeaponName": "Machine_Gun",
+    "RangedWeaponName": "Machine_Gun",
     "RotationSpeed": 1.0,
     "IsRotatingRight": false
   }

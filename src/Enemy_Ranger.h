@@ -9,6 +9,8 @@ class Enemy_Ranger : public Enemy {
     int VerticalDirection = 1;
     bool isFleeing = false;
     //sf::Clock RangedWeaponClock;
+protected:
+    void HandleActions(const sf::Vector2f &PlayerPosition, float deltaTime, float deltaTimeMultiplier) override;
 
 public:
     explicit Enemy_Ranger(const std::string &name);
@@ -16,8 +18,6 @@ public:
     Enemy_Ranger(const Enemy_Ranger& other);
 
     std::shared_ptr<Enemy> clone() const override;
-
-    void HandleActions(const sf::Vector2f &PlayerPosition, float deltaTime, float deltaTimeMultiplier) override;
 
     Enemy_Ranger& operator=(Enemy_Ranger other);
 

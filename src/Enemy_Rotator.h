@@ -7,6 +7,8 @@
 class Enemy_Rotator : public Enemy{
     float RotationSpeed;
     bool isRotatingRight = false;
+protected:
+    void HandleActions(const sf::Vector2f &PlayerPosition, float deltaTime, float deltaTimeMultiplier) override;
 public:
     explicit Enemy_Rotator(const std::string &name, float RotationSpeed_ = 30.0f, bool isRotatingRight = false);
 
@@ -18,7 +20,7 @@ public:
 
     friend void swap(Enemy_Rotator& first, Enemy_Rotator& second) noexcept;
 
-    void HandleActions(const sf::Vector2f &PlayerPosition, float deltaTime, float deltaTimeMultiplier) override;
+    void SwapRotation();
 };
 
 

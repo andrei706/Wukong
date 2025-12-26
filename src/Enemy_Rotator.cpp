@@ -14,6 +14,10 @@ Enemy_Rotator& Enemy_Rotator::operator=(Enemy_Rotator other) {
     return *this;
 }
 
+void Enemy_Rotator::SwapRotation() {
+    isRotatingRight = !isRotatingRight;
+}
+
 void Enemy_Rotator::HandleActions(const sf::Vector2f &PlayerPosition, float deltaTime, float deltaTimeMultiplier) {
     sf::Vector2f PlayerDirection = PlayerPosition - Sprite.getPosition();
     float distance = std::sqrt(PlayerDirection.x * PlayerDirection.x + PlayerDirection.y * PlayerDirection.y);
@@ -30,7 +34,7 @@ void Enemy_Rotator::HandleActions(const sf::Vector2f &PlayerPosition, float delt
         float angleRadians = Sprite.getRotation().asRadians();
 
         sf::Vector2f direction(std::cos(angleRadians), std::sin(angleRadians));
-        HandleRangedAttack(true, direction, Weapon);
+        HandleRangedAttack(true, direction);
     }
 }
 

@@ -49,10 +49,11 @@ void Enemy_Ranger::HandleActions(const sf::Vector2f &PlayerPosition, float delta
 
         movement.y = VerticalDirection * speed;
 
-        Sprite.move(movement * deltaTime * deltaTimeMultiplier);
+        //Sprite.move(movement * deltaTime * deltaTimeMultiplier);
+        IntendedMovement = movement * deltaTime * deltaTimeMultiplier;
     }
     if (!isFleeing)
-        HandleMeleeAttack(1, direction, Weapon);
+        HandleRangedAttack(1, direction);
 }
 
 Enemy_Ranger & Enemy_Ranger::operator=(Enemy_Ranger other) {

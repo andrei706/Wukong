@@ -8,9 +8,10 @@ Attack_Projectile::Attack_Projectile(
     sf::Angle Angle_,
     sf::Vector2f Velocity_,
     float Lifetime_,
-    float Cooldown_)
+    float Cooldown_,
+    bool DestroyOnHit_)
 : Attack_Hitbox(DamageValue_, Size_, Position_, Angle_, Lifetime_, Cooldown_, "data/textures/attack_assets/projectile_sprite.png"),
-  Velocity(Velocity_)
+  Velocity(Velocity_), DestroyOnHit(DestroyOnHit_)
 {
     Sprite.setSize(Size_);
     Sprite.setOrigin({Size_.x / 2, Size_.y / 2});
@@ -21,12 +22,15 @@ Attack_Projectile::Attack_Projectile(
 }
 
 void Attack_Projectile::UpdateBehavior(float deltaTime) {
+    if (Lifetime <= 0) {
+        isActive = false;
+    }
+    if (DestroyOnHit && !Attacked.empty()) {
+        isActive = false;
+    }
     if (Lifetime > 0) {
         Position += Velocity * deltaTime * 100.f;
         Sprite.setPosition(Position);
         Lifetime -= deltaTime;
-    }
-    if (Lifetime <= 0) {
-        isActive = false;
     }
 }

@@ -2,14 +2,24 @@
 #include "Game_Class.h"
 
 
+float Game_Class::GetRandomValue(float min, float max) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dis(min, max);
+    return dis(gen);
+}
+
 void Game_Class::RenderEntities() const {
     //Render Player
     if (!PlayerLost)
         player.ShowSprite(window);
+    //Render Enemy Spawn Warnings
+    for (const auto& warn : ActiveSpawnWarnings) {
+        warn.Render(window);
+    }
     //Render Enemies
     for (const auto &i : SpawnedEnemies) {
         i->ShowSprite(window);
-
     }
     for (const auto &i :SpawnedEnemies) {
         i->RenderHitboxes(window);
@@ -138,20 +148,30 @@ void Game_Class::ReadData() {
             EnemyAuxPtr->AssignStats(StatsAux);
         }
 
-        if (!enemy.contains("WeaponName")) throw JsonMissingAttributeException("data/EnemyList.json", "WeaponName");
-        std::string WeaponName = enemy.at("WeaponName").get<std::string>();
-
-        bool weaponFound = false;
-        for (auto &Weapon : ToolList) {
-            if (Weapon->GetName() == WeaponName) {
-                EnemyAuxPtr->AssignWeapon(Weapon);
-                weaponFound = true;
-                break;
+        if (enemy.contains("MeleeWeaponName")) {
+            std::string meleeName = enemy.at("MeleeWeaponName").get<std::string>();
+            bool found = false;
+            for (auto &weapon : ToolList) {
+                if (weapon->GetName() == meleeName) {
+                    EnemyAuxPtr->AssignWeapon(weapon);
+                    found = true;
+                    break;
+                }
             }
+            if (!found) throw JsonMissingAttributeException("data/ToolList.json", "MeleeWeapon " + meleeName);
         }
 
-        if (!weaponFound) {
-            throw InvalidDataException("Weapon Not Found in ToolList", 0);
+        if (enemy.contains("RangedWeaponName")) {
+            std::string rangedName = enemy.at("RangedWeaponName").get<std::string>();
+            bool found = false;
+            for (auto &weapon : ToolList) {
+                if (weapon->GetName() == rangedName) {
+                    EnemyAuxPtr->AssignWeapon(weapon, false);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) throw JsonMissingAttributeException("data/ToolList.json", "RangedWeapon " + rangedName);
         }
 
         EnemyList.push_back(EnemyAuxPtr);
@@ -163,27 +183,34 @@ void Game_Class::UpdateHealthbar() {
         if (i.GetName() == "Health") {
             i.SetText("Health: " + std::to_string(player.GetHealth()));
         }
+        if (i.GetName() == "GaugeLabel") {
+            i.SetText("Gauge: " + std::to_string(static_cast<int>(player.GetGauge())));
+        }
     }
 }
 
 void Game_Class::Replay() {
     SpawnedEnemies.clear();
-    SpawnedEnemies.push_back(EnemyList[0]->clone());
-    SpawnedEnemies.push_back(EnemyList[1]->clone());
-    SpawnedEnemies[0]->SetPosition(500, 200);
-    SpawnedEnemies[1]->SetPosition(500, 300);
+    ActiveSpawnWarnings.clear();
+    PlayerAttackHitbox.clear();
+
+    ToggleRotatorRotation();
+    WaveManager.Reset("data/WaveList.json");
+
     PlayerLost = false;
-    player.RestoreHealth(999999999.9f);
-    player.SetPosition({100, 100});
+    isPaused = false;
+    player.Restart();
+
     for (auto &i : TextLabelList) {
-        if (i.GetName() == "WinText" && i.GetStatus()) {
+        if ((i.GetName() == "WinText" || i.GetName() == "LoseText") && i.GetStatus()) {
             i.ToggleActive();
         }
-        if (i.GetName() == "LoseText" && i.GetStatus()) {
+        if (i.GetName() == "WaveAnnouncer" && !i.GetStatus()) {
             i.ToggleActive();
         }
     }
-    isPaused = false;
+
+    GameClock.restart();
 }
 
 void Game_Class::PauseHandler() {
@@ -200,6 +227,19 @@ void Game_Class::PauseHandler() {
                 Replay();
         }
     }
+}
+
+void Game_Class::SpawnEnemy(const std::string &Name, sf::Vector2f Position) {
+    for (auto &EnemyPtr : EnemyList) {
+        if (EnemyPtr->GetName() == Name) {
+            std::shared_ptr<Enemy> newEnemy = EnemyPtr->clone();
+            newEnemy->SetPosition(Position.x, Position.y);
+            Enemy::AssignID(newEnemy);
+            SpawnedEnemies.push_back(newEnemy);
+            return;
+        }
+    }
+    throw InvalidDataException("Enemy prototype not found: " + Name, 0);
 }
 
 void Game_Class::AdjustView(unsigned int newWidth, unsigned int newHeight) {
@@ -234,6 +274,7 @@ void Game_Class::AdjustView(unsigned int newWidth, unsigned int newHeight) {
 }
 
 void Game_Class::EventHandler() {
+    UpdateSpawnWarnings();
 
     //Check if the player is getting damaged
     sf::FloatRect PlayerBounds = player.GetSprite().getGlobalBounds();
@@ -255,22 +296,21 @@ void Game_Class::EventHandler() {
         bool EnemyWasKilled = false;
         for (auto &j : PlayerAttackHitbox) {
             if (i->GetEnemyHitbox().findIntersection(j->GetBounds())) {
-                if (!i->GetDamagedStatus()) {
+                //if (!i->GetDamagedStatus()) {
                     float DamageCount = j->GetDamageValue(i->GetLocalId());
                     if (DamageCount) {
-                        std::cout<<DamageCount<<"Damaged: "<<DamageCount<<std::endl;
+                        //std::cout<<DamageCount<<"Damaged: "<<DamageCount<<std::endl;
                         bool isDead = i->TakeDamage(DamageCount);
                         i->ChangeDamagedStatus(true, 0.5f);
-
                         if (!isDead) {
                             player.AddExperience(i->GetExperience());
                             it = SpawnedEnemies.erase(it);
                             EnemyWasKilled = true;
-                            std::cout<<"Enemy has no health left!\n";
+                            //std::cout<<"Enemy has no health left!\n";
                             break;
                         }
                     }
-                }
+                //}
             }
         }
         if (!EnemyWasKilled)
@@ -282,20 +322,20 @@ void Game_Class::EventHandler() {
 
     //Update enemies behavior
     for (auto &i : SpawnedEnemies) {
-        i->Update(player.GetPosition(), dt, dtMultiplier);
+        i->Update(player.GetPosition(), dt, dtMultiplier, SpawnedEnemies);
     }
 
     //Update GUI
     UpdateHealthbar();
 
     //Win Conditions
-    if (SpawnedEnemies.empty()) {
-        for (auto &i : TextLabelList) {
-            if (i.GetName() == "WinText" && i.GetStatus() == false) {
-                i.ToggleActive();
-            }
-        }
-    }
+    // if (SpawnedEnemies.empty()) {
+    //     for (auto &i : TextLabelList) {
+    //         if (i.GetName() == "WinText" && i.GetStatus() == false) {
+    //             i.ToggleActive();
+    //         }
+    //     }
+    // }
     if (player.GetHealth() == 0) {
         for (auto &i : TextLabelList) {
             if (i.GetName() == "LoseText" && i.GetStatus() == false) {
@@ -341,13 +381,80 @@ void Game_Class::WindowRendering() {
         if (isPaused || PlayerLost)
             PauseHandler();
 
-        if (!PlayerLost && !isPaused)
+        if (!PlayerLost && !isPaused) {
+            WaveHandler();
             EventHandler();
+        }
 
         //Rendering
         window.clear(sf::Color::White);
         RenderEntities();
         window.display();
+    }
+}
+
+void Game_Class::UpdateSpawnWarnings() {
+    for (auto it = ActiveSpawnWarnings.begin(); it != ActiveSpawnWarnings.end(); ) {
+        it->Update(dt);
+
+        if (it->IsReady()) {
+            SpawnEnemy(it->GetEnemyName(), it->GetPosition());
+            it = ActiveSpawnWarnings.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void Game_Class::WaveHandler() {
+    srand(time(NULL));
+    Wave* currentWave = WaveManager.GetCurrentWave();
+    int currentCount = static_cast<int>(SpawnedEnemies.size() + ActiveSpawnWarnings.size());
+
+    if (currentWave == nullptr && currentCount == 0) {
+        for (auto &i : TextLabelList) {
+            if (i.GetName() == "WinText" && i.GetStatus() == false) {
+                i.ToggleActive();
+            }
+        }
+        return;
+    }
+
+    for (auto &label : TextLabelList) {
+        if (label.GetName() == "WaveAnnouncer") {
+            label.SetText("WAVE " + std::to_string(currentWave->GetIndex()));
+            if (!label.GetStatus()) label.ToggleActive();
+        }
+    }
+
+    if (currentWave->IsFinished() && SpawnedEnemies.empty()) {
+        WaveManager.MoveToNextWave();
+        return;
+    }
+
+    if (!currentWave->IsFinished() && currentCount < currentWave->GetEnemiesOnDisplay()) {
+        std::string nextEnemyName = currentWave->GetNextEnemy();
+
+        if (!nextEnemyName.empty()) {
+            sf::Vector2f spawnPos = {
+                GetRandomValue(100, 1100),
+                GetRandomValue(100, 600)
+            };
+            ActiveSpawnWarnings.emplace_back(nextEnemyName, spawnPos, 1.5f);
+        }
+
+        //std::cout<<*currentWave;
+    }
+}
+
+void Game_Class::ToggleRotatorRotation() const {
+    for (auto& enemyPtr : EnemyList) {
+        // convertim pointerul de baza intr-un pointer de tip enemy rotator
+        // enemylist are pointeri de tip enemy
+        std::shared_ptr<Enemy_Rotator> Rotator = std::dynamic_pointer_cast<Enemy_Rotator>(enemyPtr);
+        if (Rotator) {
+            Rotator->SwapRotation();
+        }
     }
 }
 
@@ -362,18 +469,10 @@ Game_Class::Game_Class(sf::RenderWindow &window_, Player_Class &player_): window
 
 void Game_Class::Setup() {
     ReadData();
+    WaveManager.LoadWaves("data/WaveList.json");
+    std::cout<<WaveManager;
 
-    SpawnedEnemies.push_back(EnemyList[0]->clone());
-    SpawnedEnemies.push_back(EnemyList[2]->clone());
-    SpawnedEnemies.push_back(EnemyList[3]->clone());
-    SpawnedEnemies[0]->SetPosition(500, 200);
-    SpawnedEnemies[1]->SetPosition(500, 300);
-    SpawnedEnemies[2]->SetPosition(500, 400);
-    Enemy::AssignID(SpawnedEnemies[0]);
-    Enemy::AssignID(SpawnedEnemies[1]);
-    Enemy::AssignID(SpawnedEnemies[2]);
-
-    std::cout<< *SpawnedEnemies[0] << std::endl << *SpawnedEnemies[1];
+    //std::cout<< *SpawnedEnemies[0] << std::endl << *SpawnedEnemies[1];
     sf::Font font;
     try {
         if (!font.openFromFile("data/fonts/Tiny5-Regular.ttf")) {
@@ -405,11 +504,24 @@ void Game_Class::Setup() {
     textLabel.SetSize(50);
     TextLabelList.push_back(textLabel);
 
-    GUI_Button Button1("Resume", "data/textures/buttons/Resume_Button.png", {550, 500});
+    textLabel.SetText("WAVE 1");
+    textLabel.SetName("WaveAnnouncer");
+    textLabel.ToggleActive();
+    textLabel.SetColor(sf::Color::Black);
+    textLabel.SetSize(30);
+    textLabel.SetPosition({500, 0});
+    TextLabelList.push_back(textLabel);
+
+    GUI_TextLabel gaugeLabel(text, "GaugeLabel", "data/fonts/Tiny5-Regular.ttf", 20);
+    gaugeLabel.SetPosition({0, 30});
+    gaugeLabel.SetColor(sf::Color::Blue);
+    TextLabelList.push_back(gaugeLabel);
+
+    GUI_Button Button1("Resume", "data/textures/buttons/Resume_Button.png", {1050, 600});
     PauseButtonList.push_back(Button1);
-    GUI_Button Button2("Replay", "data/textures/buttons/Replay_Button.png", {300, 500});
+    GUI_Button Button2("Replay", "data/textures/buttons/Replay_Button.png", {800, 600});
     PauseButtonList.push_back(Button2);
-    GUI_Button Button3("Exit", "data/textures/buttons/Exit_Button.png", {25, 500});
+    GUI_Button Button3("Exit", "data/textures/buttons/Exit_Button.png", {50, 600});
     PauseButtonList.push_back(Button3);
 
     WindowRendering();

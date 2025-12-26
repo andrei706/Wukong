@@ -13,14 +13,14 @@ Enemy::Enemy(const std::string &name_): Name(name_) {
     DamagedClock.start();
 
     LocalId = id;
-    //IncreaseID();
 }
 
 Enemy::Enemy(const Enemy &other)
     : Name(other.Name),
       AttackWarning(other.AttackWarning),
       LocalId(other.LocalId),
-      Weapon(other.Weapon ? other.Weapon->clone() : nullptr),
+      MeleeWeapon(other.MeleeWeapon ? other.MeleeWeapon->clone() : nullptr),
+      RangedWeapon(other.RangedWeapon ? other.RangedWeapon->clone() : nullptr),
       Damaged(other.Damaged),
       inAttack(other.inAttack),
       Stats(other.Stats),
@@ -48,7 +48,8 @@ void swap(Enemy &first, Enemy &second) noexcept {
     using std::swap;
     swap(first.Name, second.Name);
     swap(first.Stats, second.Stats);
-    swap(first.Weapon, second.Weapon);
+    swap(first.MeleeWeapon, second.MeleeWeapon);
+    swap(first.RangedWeapon, second.RangedWeapon);
     swap(first.Sprite, second.Sprite);
     swap(first.Position, second.Position);
     swap(first.Experience, second.Experience);
@@ -76,7 +77,19 @@ sf::FloatRect Enemy::GetEnemyHitbox() {
 }
 
 const std::vector<std::shared_ptr<Attack_Hitbox>> & Enemy::GetHitboxes() {
-    return Weapon->GetAttackHitboxes();
+    ActiveHitboxes.clear();
+
+    if (MeleeWeapon != nullptr) {
+        const auto& meleeHits = MeleeWeapon->GetAttackHitboxes();
+        ActiveHitboxes.insert(ActiveHitboxes.end(), meleeHits.begin(), meleeHits.end());
+    }
+
+    if (RangedWeapon != nullptr) {
+        const auto& rangedHits = RangedWeapon->GetAttackHitboxes();
+        ActiveHitboxes.insert(ActiveHitboxes.end(), rangedHits.begin(), rangedHits.end());
+    }
+
+    return ActiveHitboxes;
 }
 
 
@@ -105,13 +118,23 @@ int Enemy::GetExperience() const {
     return Experience;
 }
 
+sf::Vector2f Enemy::GetPosition() const {
+    return Sprite.getPosition();
+}
+
 bool Enemy::TakeDamage(float Damage_Points) {
     return Stats.ReduceHealth(Damage_Points);
 }
 
-void Enemy::AssignWeapon(const std::shared_ptr<Tool>& toolPtr) {
-    Weapon = nullptr;
-    Weapon = toolPtr->clone();
+void Enemy::AssignWeapon(const std::shared_ptr<Tool>& toolPtr, bool isMelee) {
+    if (isMelee) {
+        MeleeWeapon = nullptr;
+        MeleeWeapon = toolPtr->clone();
+    }
+    else {
+        RangedWeapon = nullptr;
+        RangedWeapon = toolPtr->clone();
+    }
     // std::cout << "   Tipul din ToolList: " << typeid(*Weapon).name() << "\n";
     // std::cout<<*Weapon;
 }
@@ -132,14 +155,39 @@ void Enemy::ShowSprite(sf::RenderWindow &window) const {
 }
 
 void Enemy::RenderHitboxes(sf::RenderWindow &window) const {
-    Weapon->ShowHitboxes(window);
+    MeleeWeapon->ShowHitboxes(window);
+    RangedWeapon->ShowHitboxes(window);
 }
 
-void Enemy::Update(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier) {
+void Enemy::MoveSafely(const std::vector<std::shared_ptr<Enemy>>& otherEnemies) {
+    sf::Vector2f pushForce(0.f, 0.f);
+    sf::Vector2f currentPos = Sprite.getPosition();
+    float minSafeDistance = 40.f; // Raza de coliziune personală
+
+    for (const auto& other : otherEnemies) {
+        if (other.get() == this) continue;
+
+        sf::Vector2f otherPos = other->GetPosition();
+        sf::Vector2f diff = currentPos - otherPos;
+        float distSq = diff.x * diff.x + diff.y * diff.y;
+
+        if (distSq < minSafeDistance * minSafeDistance && distSq > 0.01f) {
+            float dist = std::sqrt(distSq);
+            sf::Vector2f repulsion = (diff / dist) * (minSafeDistance - dist);
+            pushForce += repulsion;
+        }
+    }
+
+    Sprite.move(IntendedMovement + (pushForce * 0.5f));
+}
+
+void Enemy::Update(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier, const std::vector<std::shared_ptr<Enemy>>& otherEnemies) {
     AttackWarning.Update();
     HandleActions(PlayerPosition, deltaTime, deltaTimeMultiplier);
-    Weapon->Update(deltaTime);
-
+    MeleeWeapon->Update(deltaTime);
+    RangedWeapon->Update(deltaTime);
+    if (!inAttack && !getAttackReady)
+        MoveSafely(otherEnemies);
     if (DamagedTimer < DamagedClock.getElapsedTime().asSeconds()) {
         Damaged = false;
     }
@@ -147,7 +195,8 @@ void Enemy::Update(const sf::Vector2f& PlayerPosition, float deltaTime, float de
 
 void Enemy::DisplayInfo(std::ostream &out) const {
     out<<std::endl << "Enemy Name: " << Name << std::endl
-            << "Weapon: " << *Weapon << std::endl
+            << "Melee Weapon: " << *MeleeWeapon << std::endl
+            << "Ranged Weapon: "<< *RangedWeapon <<std::endl
             << "Stats: " << Stats << std::endl
             << "ID: " << LocalId << std::endl;
 }
@@ -168,7 +217,7 @@ void Enemy::HandleActions(const sf::Vector2f &PlayerPosition, float deltaTime, f
 
     if (inAttack == false && getAttackReady == false) {
         float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-        if (distance > 25.0f) {
+        if (distance > 50.0f) {
 
             sf::Vector2f unitDirection = direction / distance;
             float speed = Stats.GetSpeed();
@@ -183,20 +232,21 @@ void Enemy::HandleActions(const sf::Vector2f &PlayerPosition, float deltaTime, f
             // Sprite.setRotation(sf::degrees(angleDegrees));
         }
         else {
-            HandleMeleeAttack(1, direction, Weapon);
+            HandleMeleeAttack(1, direction);
+            HandleRangedAttack(1, direction);
         }
     }
-    HandleMeleeAttack(0, direction, Weapon);
+    HandleMeleeAttack(0, direction);
 
 }
 
-void Enemy::HandleMeleeAttack(bool canAttack, sf::Vector2f direction, std::shared_ptr<Tool> UsedWeapon) {
-    if (UsedWeapon == NULL) throw InvalidActionException("Cannot attack without a weapon");
+void Enemy::HandleMeleeAttack(bool canAttack, sf::Vector2f direction) {
+    if (MeleeWeapon == NULL) throw InvalidActionException("Cannot attack without a weapon");
     sf::Vector2f TempPosition = Sprite.getPosition();
     AttackWarning.SetPosition({TempPosition.x, TempPosition.y - 60});
 
     if (inAttack == true) {
-        if (CooldownClock.getElapsedTime().asSeconds() >= UsedWeapon->GetCooldown()) {
+        if (CooldownClock.getElapsedTime().asSeconds() >= MeleeWeapon->GetCooldown()) {
             //std::cout <<"Attack is done! Cooldown finished.\n";
             inAttack = false;
         }
@@ -217,7 +267,7 @@ void Enemy::HandleMeleeAttack(bool canAttack, sf::Vector2f direction, std::share
             float radians = std::atan2(direction.y, direction.x);
             float angleDegrees = radians * 180.0f / 3.14f;
 
-            UsedWeapon->Attack(Sprite, sf::degrees(angleDegrees));
+            MeleeWeapon->Attack(Sprite, sf::degrees(angleDegrees));
 
             CooldownClock.restart();
             inAttack = true;
@@ -226,13 +276,13 @@ void Enemy::HandleMeleeAttack(bool canAttack, sf::Vector2f direction, std::share
     }
 }
 
-void Enemy::HandleRangedAttack(bool canAttack, sf::Vector2f direction, std::shared_ptr<Tool> UsedWeapon) {
-    if (UsedWeapon == NULL) throw InvalidActionException("Cannot attack without a weapon");
-    if (CooldownClock.getElapsedTime().asSeconds() >= UsedWeapon->GetCooldown()) {
+void Enemy::HandleRangedAttack(bool canAttack, sf::Vector2f direction) {
+    if (RangedWeapon == NULL) throw InvalidActionException("Cannot attack without a weapon");
+    if (CooldownClock.getElapsedTime().asSeconds() >= RangedWeapon->GetCooldown()) {
         if (canAttack) {
             float radians = std::atan2(direction.y, direction.x);
             float angleDegrees = radians * 180.0f / 3.14159f;
-            UsedWeapon->Attack(Sprite, sf::degrees(angleDegrees));
+            RangedWeapon->Attack(Sprite, sf::degrees(angleDegrees));
 
             CooldownClock.restart();
         }

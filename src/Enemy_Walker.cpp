@@ -28,15 +28,15 @@ void Enemy_Walker::HandleActions(const sf::Vector2f &PlayerPosition, float delta
             }
             sf::Vector2f movement = unitDirection * speed * deltaTime * deltaTimeMultiplier;
 
-            Sprite.move(movement);
-
+            //Sprite.move(movement);
+            IntendedMovement = movement;
             // Sprite.setRotation(sf::degrees(angleDegrees));
         }
         else {
-            HandleMeleeAttack(1, direction, Weapon);
+            HandleMeleeAttack(1, direction);
         }
     }
-    HandleMeleeAttack(0, direction, Weapon);
+    HandleMeleeAttack(0, direction);
 }
 
 std::shared_ptr<Enemy> Enemy_Walker::clone() const {

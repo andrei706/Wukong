@@ -15,12 +15,13 @@
 
 class Player_Class {
     int Experience, Gauge = 50;
-    bool Invincibility = false, inAttack = false, inRangedAttack = false;
+    bool Invincibility = false, inAttack = false, inRangedAttack = false, inRangedBallAttack = false;
     float SpeedMultiplier = 0.f;
     Character_Stats Stats{150, 2.5, 0};
-    //Tool_Punch Pole{"Pole", 5, 0.4f, 40, 2};
     Tool Pole{"Pole", 5, 0.5f, 40, 2};
-    Tool_Ranged Blast{"Blast", 5, 0.5f, 1, 10, 30, 10, 2};
+    Tool_Ranged Blast{"Blast", 5, 0.2f, 1, 10, 1, 1.0f, 30, 15, 4, true};
+    Tool_Ranged SpiritBall{"SpiritBall", 5, 1.5f, 100, 10, 1, 0.5, 75,
+    1.5f, 10, false};
 
     sf::RectangleShape Sprite;
     sf::Texture PlayerTexture;
@@ -37,7 +38,7 @@ class Player_Class {
     bool FacingRight = true;
 
     sf::Time InvincibilityTime = sf::seconds(1.0f), InAttackTime = sf::seconds(0.0f);
-    sf::Clock ClockInvincibilityTime, AttackCooldown, RangedCooldown;
+    sf::Clock ClockInvincibilityTime, AttackCooldown, RangedCooldown, BallRangedCooldown;
     std::vector<std::shared_ptr<Attack_Hitbox>> ActiveHitboxes;
 
     bool isDodging = false;
@@ -54,6 +55,7 @@ class Player_Class {
     void HandleMovement(sf::RenderWindow &window, float deltaTime = 0.016, float deltaTimeMultiplier = 62.5);
     void HandleDodge(Key_Manager &keyManager);
     float HandleAttack(Key_Manager& KeyManager);
+    void UpgradeWeapon(const std::string& Name, float Bonus_Damage, float Damage_Multiplier);
 
 public:
     explicit Player_Class(int Experience_ = 0, float InvincibilityTime_ = 1.0f);
@@ -64,11 +66,13 @@ public:
     sf::Vector2f GetPosition() const;
     void Restart();
     float GetHealth() const;
-    float GetGauge() const;
+    int GetGauge() const;
     void AddExperience(int Value);
-    void TakeDamage(float Value);
+    int GetExperience() const;
+    bool TakeDamage(float Value);
     void RestoreHealth(float Value);
     const std::vector<std::shared_ptr<Attack_Hitbox>>& GetHitboxes();
+    void ApplyUpgrades(const std::vector<std::pair<std::string, float>>& upgrades);
     void Update(sf::RenderWindow &window, float deltaTime, float deltaTimeMultiplier, Key_Manager &keyManager);
 };
 

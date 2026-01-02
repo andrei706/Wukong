@@ -4,7 +4,7 @@
     "Name": "Zombie",
     "MaxHealth": 20.0,
     "Speed": 3.0,
-    "Mana": 0,
+    "Mana": 5,
     "MeleeWeaponName": "Zombie_Punch"
   },
   {
@@ -12,7 +12,7 @@
     "Name": "Ghoul",
     "MaxHealth": 25.0,
     "Speed": 5.0,
-    "Mana": 0,
+    "Mana": 10,
     "MeleeWeaponName": "Ghoul_Punch"
   },
   {
@@ -20,7 +20,7 @@
     "Name": "Ranger",
     "MaxHealth": 15.0,
     "Speed": 2.0,
-    "Mana": 0,
+    "Mana": 7,
     "RangedWeaponName": "Ranger_Gun"
   },
   {
@@ -28,7 +28,7 @@
     "Name": "Machine",
     "MaxHealth": 20.0,
     "Speed": 5.0,
-    "Mana": 0,
+    "Mana": 6,
     "RangedWeaponName": "Machine_Gun",
     "RotationSpeed": 1.0,
     "IsRotatingRight": false
@@ -38,8 +38,17 @@
     "Name": "Fiend",
     "MaxHealth": 25.0,
     "Speed": 4.0,
-    "Mana": 0,
+    "Mana": 15,
     "MeleeWeaponName": "Ghoul_Punch",
     "RangedWeaponName": "Ranger_Gun"
+  },
+  {
+    "Type": "AgileBoss",
+    "Name": "Smurf",
+    "MaxHealth": 150.0,
+    "Speed": 7.0,
+    "Mana": 150,
+    "MeleeWeaponName": "Ghoul_Punch",
+    "RangedWeaponName": "Smurf_Gun"
   }
 ]

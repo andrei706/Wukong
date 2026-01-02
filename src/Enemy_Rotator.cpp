@@ -34,7 +34,7 @@ void Enemy_Rotator::HandleActions(const sf::Vector2f &PlayerPosition, float delt
         float angleRadians = Sprite.getRotation().asRadians();
 
         sf::Vector2f direction(std::cos(angleRadians), std::sin(angleRadians));
-        HandleRangedAttack(true, direction);
+        HandleRangedAttack(true, direction, 0.0f);
     }
 }
 

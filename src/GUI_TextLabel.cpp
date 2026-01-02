@@ -1,17 +1,41 @@
 
 #include "GUI_TextLabel.h"
 
-GUI_TextLabel::GUI_TextLabel(sf::Text TextValue_, const std::string &Name_, const std::string &FontPath, int TextSize,
-    sf::Color TextColor): TextValue(TextValue_), Name(Name_) {
-    if (!TextFont.openFromFile(FontPath)) {
+GUI_TextLabel::GUI_TextLabel(const std::string &Name_, const std::string &FontPath, int TextSize, sf::Color TextColor, bool OutlineEnabled)
+: TextFont(std::make_shared<sf::Font>()),
+  TextValue(*TextFont),
+  Name(Name_)
+    {
+    if (!TextFont->openFromFile(FontPath)) {
         throw AssetMissingException(FontPath);
     }
-    TextValue.setFont(TextFont);
     TextValue.setCharacterSize(TextSize);
     TextValue.setFillColor(TextColor);
+    if (OutlineEnabled) {
+        TextValue.setOutlineColor(sf::Color::Black);
+        TextValue.setOutlineThickness(2.0f);
+    }
 }
 
-void GUI_TextLabel::SetText(std::string TextValue_) {
+GUI_TextLabel::GUI_TextLabel(const GUI_TextLabel& other)
+    : TextFont(other.TextFont), TextValue(other.TextValue),
+      Position(other.Position), Name(other.Name), Status(other.Status) {
+    TextValue.setFont(*TextFont);
+}
+
+GUI_TextLabel& GUI_TextLabel::operator=(const GUI_TextLabel& other) {
+    if (this != &other) {
+        TextFont = other.TextFont;
+        TextValue = other.TextValue;
+        Position = other.Position;
+        Name = other.Name;
+        Status = other.Status;
+        TextValue.setFont(*TextFont);
+    }
+    return *this;
+}
+
+void GUI_TextLabel::SetText(const std::string &TextValue_) {
     TextValue.setString(TextValue_);
 }
 
@@ -42,6 +66,10 @@ bool GUI_TextLabel::GetStatus() const {
 
 void GUI_TextLabel::ToggleActive() {
     Status = !Status;
+}
+
+sf::Vector2f GUI_TextLabel::GetPosition() const {
+    return TextValue.getPosition();
 }
 
 void GUI_TextLabel::ShowSprite(sf::RenderWindow &window) const {

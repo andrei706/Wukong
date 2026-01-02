@@ -1,12 +1,13 @@
 
 #include "Tool_Ranged.h"
 
-Tool_Ranged::Tool_Ranged(const std::string &name_, float Damage_, float Cooldown_, float Range_, int Critical_Chance_,
-    float ProjectileSize_, float ProjectileSpeed_, float Lifetime_)
-    : Tool(name_, Damage_, Cooldown_, Range_, Critical_Chance_),
-    ProjectileSize(ProjectileSize_),
-    ProjectileSpeed(ProjectileSpeed_),
-    Lifetime(Lifetime_){}
+Tool_Ranged::Tool_Ranged(const std::string& name_, float Damage_, float Cooldown_, float Range_,
+                         int Critical_Chance_, int burstCount, float burstDelay,
+                         float ProjectileSize_, float ProjectileSpeed_,
+                         float Lifetime_, bool DestroyProjectileOnHit_)
+    : Tool(name_, Damage_, Cooldown_, Range_, Critical_Chance_, burstCount, burstDelay),
+      ProjectileSize(ProjectileSize_), ProjectileSpeed(ProjectileSpeed_),
+      Lifetime(Lifetime_), DestroyProjectileOnHit(DestroyProjectileOnHit_) {}
 
 std::shared_ptr<Tool> Tool_Ranged::clone() const {
     return std::make_shared<Tool_Ranged>(*this);
@@ -22,7 +23,9 @@ void Tool_Ranged::CreateAttackHitbox(sf::Vector2f Position, sf::Vector2f Offset,
         Position,
         Degrees,
         Offset,
-        Lifetime
+        Lifetime,
+        0.1,
+        DestroyProjectileOnHit
     );
 
     Attacks.push_back(new_projectile);

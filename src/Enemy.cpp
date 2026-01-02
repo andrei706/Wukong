@@ -5,18 +5,28 @@
 int Enemy::id = 0;
 
 Enemy::Enemy(const std::string &name_): Name(name_) {
-    Sprite.setFillColor(sf::Color::Red);
+    std::string texturePath = "data/textures/enemies/" + Name + "/anim.png";
+
+    if (!EnemyTexture.loadFromFile(texturePath)) {
+        throw AssetMissingException(texturePath);
+    }
+
+    Sprite.setTexture(&EnemyTexture);
+
     Sprite.setPosition(Position);
-    Sprite.setSize({50, 50});
-    Sprite.setOrigin({25, 25});
+    Sprite.setSize(sf::Vector2f(FrameSize));
+    Sprite.setOrigin({FrameSize.x / 2.0f, FrameSize.y / 2.0f});
+
+    Sprite.setTextureRect(sf::IntRect({0, 0}, FrameSize));
+
     ActionClock.start();
     DamagedClock.start();
-
     LocalId = id;
 }
 
 Enemy::Enemy(const Enemy &other)
     : Name(other.Name),
+      EnemyTexture(other.EnemyTexture),
       AttackWarning(other.AttackWarning),
       LocalId(other.LocalId),
       MeleeWeapon(other.MeleeWeapon ? other.MeleeWeapon->clone() : nullptr),
@@ -25,15 +35,15 @@ Enemy::Enemy(const Enemy &other)
       inAttack(other.inAttack),
       Stats(other.Stats),
       getAttackReady(other.getAttackReady),
-      Experience(other.Experience),
       DamagedTimer(other.DamagedTimer),
       Sprite(other.Sprite),
       Position(other.Position),
       ActionClock(other.ActionClock),
       AttackWarningClock(other.AttackWarningClock),
       CooldownClock(other.CooldownClock),
-      DamagedClock(other.DamagedClock)
-{}
+      DamagedClock(other.DamagedClock) {
+    Sprite.setTexture(&EnemyTexture);
+}
 
 
 Enemy::~Enemy() {
@@ -47,24 +57,24 @@ std::shared_ptr<Enemy> Enemy::clone() const {
 void swap(Enemy &first, Enemy &second) noexcept {
     using std::swap;
     swap(first.Name, second.Name);
+    swap(first.EnemyTexture, second.EnemyTexture);
     swap(first.Stats, second.Stats);
     swap(first.MeleeWeapon, second.MeleeWeapon);
     swap(first.RangedWeapon, second.RangedWeapon);
     swap(first.Sprite, second.Sprite);
     swap(first.Position, second.Position);
-    swap(first.Experience, second.Experience);
-
     swap(first.Damaged, second.Damaged);
     swap(first.inAttack, second.inAttack);
     swap(first.getAttackReady, second.getAttackReady);
     swap(first.DamagedTimer, second.DamagedTimer);
-
     swap(first.ActionClock, second.ActionClock);
     swap(first.AttackWarningClock, second.AttackWarningClock);
     swap(first.CooldownClock, second.CooldownClock);
     swap(first.DamagedClock, second.DamagedClock);
-
     swap(first.AttackWarning, second.AttackWarning);
+
+    first.Sprite.setTexture(&first.EnemyTexture);
+    second.Sprite.setTexture(&second.EnemyTexture);
 }
 
 Enemy & Enemy::operator=(Enemy other) {
@@ -115,7 +125,7 @@ int Enemy::GetLocalId() const {
 }
 
 int Enemy::GetExperience() const {
-    return Experience;
+    return Stats.GetMana();
 }
 
 sf::Vector2f Enemy::GetPosition() const {
@@ -197,15 +207,57 @@ void Enemy::MoveSafely(const std::vector<std::shared_ptr<Enemy>>& otherEnemies) 
     Sprite.move(finalMovement);
 }
 
+void Enemy::UpdateAnimation(const sf::Vector2f &PlayerPosition, float deltaTime) {
+    sf::Vector2f currentPos = Sprite.getPosition();
+
+    if (inAttack || getAttackReady || isChargingRanged) {
+        facingRight = (PlayerPosition.x >= currentPos.x);
+    }
+
+    else if (std::abs(IntendedMovement.x) > 0.1f) {
+        facingRight = (IntendedMovement.x > 0);
+    }
+
+    Sprite.setScale(facingRight ? sf::Vector2f(1.f, 1.f) : sf::Vector2f(-1.f, 1.f));
+
+
+    if (isChargingRanged) {
+        currentVisualID = 5;
+    }
+    else if (inAttack) {
+        currentVisualID = 4;
+    }
+    else if (getAttackReady) {
+        currentVisualID = 3;
+    }
+    else if (std::abs(IntendedMovement.x) > 0.1f || std::abs(IntendedMovement.y) > 0.1f) {
+        animationTimer += deltaTime;
+        currentVisualID = (static_cast<int>(animationTimer * 5.0f) % 2 == 0) ? 1 : 2;
+    }
+    else {
+        currentVisualID = 0; // Idle
+    }
+
+    Sprite.setTextureRect(sf::IntRect({currentVisualID * FrameSize.x, 0}, FrameSize));
+}
+
 void Enemy::Update(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier, const std::vector<std::shared_ptr<Enemy>>& otherEnemies) {
     AttackWarning.Update();
     HandleActions(PlayerPosition, deltaTime, deltaTimeMultiplier);
     MeleeWeapon->Update(deltaTime);
     RangedWeapon->Update(deltaTime);
-    if (!inAttack && !getAttackReady)
+
+    if ((!inAttack || isRangedAttacking) && !getAttackReady)
         MoveSafely(otherEnemies);
+
+    UpdateAnimation(PlayerPosition, deltaTime);
+
     if (DamagedTimer < DamagedClock.getElapsedTime().asSeconds()) {
         Damaged = false;
+    }
+    if (CooldownClock.getElapsedTime().asSeconds() > nextAttackDelay && isRangedAttacking) {
+        isRangedAttacking = false;
+        CooldownClock.restart();
     }
 }
 
@@ -292,14 +344,24 @@ void Enemy::HandleMeleeAttack(bool canAttack, sf::Vector2f direction) {
     }
 }
 
-void Enemy::HandleRangedAttack(bool canAttack, sf::Vector2f direction) {
+void Enemy::HandleRangedAttack(bool canAttack, sf::Vector2f direction, float waitTime) {
     if (RangedWeapon == NULL) throw InvalidActionException("Cannot attack without a weapon");
-    if (CooldownClock.getElapsedTime().asSeconds() >= RangedWeapon->GetCooldown()) {
-        if (canAttack) {
-            float radians = std::atan2(direction.y, direction.x);
-            float angleDegrees = radians * 180.0f / 3.14159f;
-            RangedWeapon->Attack(Sprite, sf::degrees(angleDegrees));
 
+    if (canAttack) {
+        float radians = std::atan2(direction.y, direction.x);
+        float angleDegrees = radians * 180.0f / 3.14159f;
+
+        if (CooldownClock.getElapsedTime().asSeconds() < RangedWeapon->GetCooldown()) {
+            isChargingRanged = true;
+        }
+        else if (CooldownClock.getElapsedTime().asSeconds() > RangedWeapon->GetCooldown() && !isRangedAttacking) {
+            float weaponCooldown = RangedWeapon->Attack(Sprite, sf::degrees(angleDegrees));
+            nextAttackDelay = weaponCooldown + waitTime;
+            isChargingRanged = false;
+            isRangedAttacking = true;
+        }
+        else if (CooldownClock.getElapsedTime().asSeconds() > RangedWeapon->GetCooldown() + waitTime) {
+            isRangedAttacking = false;
             CooldownClock.restart();
         }
     }

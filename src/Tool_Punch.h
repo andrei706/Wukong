@@ -8,7 +8,9 @@
 class Tool_Punch : public Tool {
     float PunchRadius = 30.0f;
 public:
-    Tool_Punch(const std::string &name_, float Damage_, float Cooldown_, float Range_, int Critical_Chance_, float PunchRadius_ = 30.0f);
+    Tool_Punch(const std::string &name_, float Damage_, float Cooldown_, float Range_,
+                   int Critical_Chance_, float PunchRadius_ = 30.0f,
+                   int burstCount = 1, float burstDelay = 0.1f);
 
     [[nodiscard]] std::shared_ptr<Tool> clone() const override;
 

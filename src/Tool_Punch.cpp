@@ -2,7 +2,8 @@
 #include "Tool_Punch.h"
 
 Tool_Punch::Tool_Punch(const std::string &name_, float Damage_, float Cooldown_, float Range_, int Critical_Chance_,
-    float PunchRadius_): Tool(name_, Damage_, Cooldown_, Range_, Critical_Chance_), PunchRadius(PunchRadius_) {}
+    float PunchRadius_, int burstCount, float burstDelay )
+    : Tool(name_, Damage_, Cooldown_, Range_, Critical_Chance_, burstCount, burstDelay), PunchRadius(PunchRadius_) {}
 
 std::shared_ptr<Tool> Tool_Punch::clone() const {
     return std::make_shared<Tool_Punch>(*this);

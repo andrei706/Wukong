@@ -5,7 +5,6 @@
 #include "Enemy_Walker.h"
 
 Enemy_Walker::Enemy_Walker(const std::string &name): Enemy(name) {
-    Sprite.setFillColor(sf::Color::Green);
 }
 
 Enemy_Walker::Enemy_Walker(const Enemy_Walker &other): Enemy(other) {}

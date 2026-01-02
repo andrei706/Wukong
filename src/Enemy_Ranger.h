@@ -8,7 +8,7 @@ class Enemy_Ranger : public Enemy {
     float TargetX = 200.0f;
     int VerticalDirection = 1;
     bool isFleeing = false;
-    //sf::Clock RangedWeaponClock;
+    float changeTimer = 0.f;
 protected:
     void HandleActions(const sf::Vector2f &PlayerPosition, float deltaTime, float deltaTimeMultiplier) override;
 

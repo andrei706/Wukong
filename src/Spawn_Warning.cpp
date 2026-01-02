@@ -9,7 +9,7 @@ Spawn_Warning::Spawn_Warning(const std::string &Name_, sf::Vector2f Position_, f
     shape.setRadius(Size);
     shape.setOrigin({Size, Size});
     shape.setPosition(Position);
-    shape.setFillColor(sf::Color(255, 255, 255, 100));
+    shape.setFillColor(sf::Color(0, 0, 0, 100));
     shape.setOutlineThickness(2.f);
     shape.setOutlineColor(sf::Color::Red);
 }
@@ -22,7 +22,7 @@ void Spawn_Warning::Update(float dt) {
 
     float progress = 1.0f - (Timer / maxTime);
     shape.setScale({0.5f + progress, 0.5f + progress});
-    shape.setFillColor(sf::Color(255, 255, 255, 150 * progress + 50));
+    shape.setFillColor(sf::Color(0, 0, 0, 150 * progress + 50));
 }
 
 void Spawn_Warning::Render(sf::RenderWindow &window) const {

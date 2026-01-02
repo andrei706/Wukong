@@ -2,7 +2,6 @@
 #include "Enemy_Ranger.h"
 
 Enemy_Ranger::Enemy_Ranger(const std::string &name): Enemy(name) {
-    Sprite.setFillColor(sf::Color::Yellow);
 }
 
 std::shared_ptr<Enemy> Enemy_Ranger::clone() const {
@@ -14,14 +13,14 @@ void Enemy_Ranger::HandleActions(const sf::Vector2f &PlayerPosition, float delta
 
     float speed = Stats.GetSpeed();
     if (Damaged) {
-        speed /= 2.0f;
+        speed *= 2.0f;
     }
 
     if (getAttackReady == false) {
         float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
         if (distance < 150.0f && !isFleeing) {
             isFleeing = true;
-
+            isChargingRanged = false;
             if (TargetX < 640.0f) {
                 TargetX = 1000.0f;
             } else {
@@ -40,6 +39,19 @@ void Enemy_Ranger::HandleActions(const sf::Vector2f &PlayerPosition, float delta
             movement.x = dirX * speed * (isFleeing ? 1.5f : 1.0f);
         }
 
+        changeTimer += deltaTime;
+
+        if (changeTimer >= 2.0f) {
+            static Random_Value_Generator<int> chanceGen(0, 2);
+            int roll = chanceGen.generate();
+
+            if (roll == 0) VerticalDirection = 1;      // Jos
+            else if (roll == 1) VerticalDirection = -1; // Sus
+            else VerticalDirection = 0;                 // Stă pe loc
+
+            changeTimer = 0.f;
+        }
+
         if (Sprite.getPosition().y > 600.0f) VerticalDirection = -1;
         if (Sprite.getPosition().y < 100.0f) VerticalDirection = 1;
 
@@ -49,7 +61,6 @@ void Enemy_Ranger::HandleActions(const sf::Vector2f &PlayerPosition, float delta
 
         movement.y = VerticalDirection * speed;
 
-        //Sprite.move(movement * deltaTime * deltaTimeMultiplier);
         IntendedMovement = movement * deltaTime * deltaTimeMultiplier;
     }
     if (!isFleeing)

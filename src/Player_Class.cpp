@@ -36,6 +36,7 @@ Player_Class::Player_Class(int Experience_, float InvincibilityTime_): Experienc
 
     RangedCooldown.start();
     ClockDodgeCooldown.restart();
+    BallRangedCooldown.start();
     AttackCooldown.start();
 
     Invincibility = false;
@@ -64,7 +65,7 @@ float Player_Class::GetHealth() const {
     return Stats.GetHealth();
 }
 
-float Player_Class::GetGauge() const {
+int Player_Class::GetGauge() const {
     return Gauge;
 }
 
@@ -72,12 +73,18 @@ void Player_Class::AddExperience(int Value) {
     Experience += Value;
 }
 
-void Player_Class::TakeDamage(float Value) {
+int Player_Class::GetExperience() const {
+    return Experience;
+}
+
+bool Player_Class::TakeDamage(float Value) {
     if (!Invincibility) {
         //std::cout<<Value;
         Stats.ReduceHealth(Value);
         MakeInvincible(0.5f);
+        return true;
     }
+    return false;
 }
 
 void Player_Class::RestoreHealth(float Value) {
@@ -90,13 +97,45 @@ const std::vector<std::shared_ptr<Attack_Hitbox>>& Player_Class::GetHitboxes(){
     ActiveHitboxes.insert(ActiveHitboxes.end(), pole_hits.begin(), pole_hits.end());
     const auto& blast_hits = Blast.GetAttackHitboxes();
     ActiveHitboxes.insert(ActiveHitboxes.end(), blast_hits.begin(), blast_hits.end());
+    const auto& spirit_hits = SpiritBall.GetAttackHitboxes();
+    ActiveHitboxes.insert(ActiveHitboxes.end(), spirit_hits.begin(), spirit_hits.end());
+
     return ActiveHitboxes;
+}
+
+void Player_Class::ApplyUpgrades(const std::vector<std::pair<std::string, float>> &upgrades) {
+    for (const auto& upgrade : upgrades) {
+        const std::string& statName = upgrade.first;
+        float value = upgrade.second;
+
+        if (value <= 0) continue;
+
+        if (statName == "MaxHealth") {
+            Stats.AddStat("MaxHealth", value);
+        }
+        else if (statName == "Defense") {
+            Stats.AddStat("Defense", value);
+        }
+        else if (statName == "MeleeWeapon") {
+            UpgradeWeapon("Melee", value, 0.1f);
+        }
+        else if (statName == "RangedWeapon") {
+            UpgradeWeapon("Ranged", value, 0.1f);
+        }
+        else if (statName == "SpiritBall") {
+            UpgradeWeapon("SpiritBall", value, 0.1f);
+        }
+        else if (statName == "RestoreHealth") {
+            RestoreHealth(20 * value);
+        }
+    }
 }
 
 void Player_Class::Update(sf::RenderWindow &window, float deltaTime, float deltaTimeMultiplier, Key_Manager &keyManager) {
     UpdateInvincibility();
     Pole.Update(deltaTime);
     Blast.Update(deltaTime);
+    SpiritBall.Update(deltaTime);
     HandleDodge(keyManager);
     if (InAttackTime < AttackCooldown.getElapsedTime()) {
         float cooldown = HandleAttack(keyManager);
@@ -110,13 +149,21 @@ void Player_Class::Update(sf::RenderWindow &window, float deltaTime, float delta
 }
 
 void Player_Class::Restart() {
-    Experience = 0;
+    Experience = 25;
     Gauge = 50;
     Stats.RestoreHealth(500.0f);
+    Stats.ResetStats();
+    Blast.ResetStats();
+    Blast.ClearAttackHitboxes();
+    SpiritBall.ResetStats();
+    SpiritBall.ClearAttackHitboxes();
+    Pole.ResetStats();
+    Pole.ClearAttackHitboxes();
 
     Invincibility = false;
     inAttack = false;
     inRangedAttack = false;
+    inRangedBallAttack = false;
     isDodging = false;
 
     ActiveHitboxes.clear();
@@ -133,11 +180,31 @@ void Player_Class::Restart() {
 
 float Player_Class::HandleAttack(Key_Manager& KeyManager) {
     inAttack = false;
-    SpeedMultiplier = 1.f;
+    if (!inRangedBallAttack && !inRangedAttack)
+        SpeedMultiplier = 1.f;
 
     if (isDodging)
         return 0.0f;
 
+    if ((BallRangedCooldown.getElapsedTime() > sf::seconds(SpiritBall.GetCooldown())))
+        inRangedBallAttack = false;
+    if (RangedCooldown.getElapsedTime() > sf::seconds(Blast.GetCooldown()))
+        inRangedAttack = false;
+
+    if (KeyManager.CheckInput("F")) {
+        if (BallRangedCooldown.getElapsedTime() > sf::seconds(SpiritBall.GetCooldown()) && Gauge >= 25) {
+            Gauge -= 25;
+            ActiveHitboxes.clear();
+            inRangedBallAttack = true;
+            if (SpeedMultiplier > 0.9f)
+                SpeedMultiplier = 0.9f;
+            SpiritBall.Attack(Sprite, Rotation);
+            const auto& spirit_hits = SpiritBall.GetAttackHitboxes();
+            ActiveHitboxes.insert(ActiveHitboxes.end(), spirit_hits.begin(), spirit_hits.end());
+            BallRangedCooldown.restart();
+            return 0.0f;
+        }
+    }
     if (KeyManager.CheckInput("LeftMouseButton")) {
         if (Gauge < 96) Gauge += 5;
         float cooldown_time;
@@ -150,8 +217,7 @@ float Player_Class::HandleAttack(Key_Manager& KeyManager) {
     }
 
     if (KeyManager.CheckInput("RightMouseButton")) {
-        // Verificarea cooldownului de la distanta + daca are gauge
-        if (RangedCooldown.getElapsedTime() > sf::seconds(0.2f) && Gauge >= 4) {
+        if (RangedCooldown.getElapsedTime() > sf::seconds(Blast.GetCooldown()) && Gauge >= 4) {
             Gauge -= 5;
             ActiveHitboxes.clear();
             inRangedAttack = true;
@@ -164,9 +230,22 @@ float Player_Class::HandleAttack(Key_Manager& KeyManager) {
             return 0.f;
         }
     }
-    else if (!(RangedCooldown.getElapsedTime() > sf::seconds(0.2f) && Gauge >= 4))
-            inRangedAttack = false;
     return 0.0f;
+}
+
+void Player_Class::UpgradeWeapon(const std::string &Name, float Bonus_Damage, float Damage_Multiplier) {
+    if (Name == "Melee") {
+        Pole.AddStat("Damage", Bonus_Damage);
+        Pole.AddStat("Damage_Multiplier", Damage_Multiplier);
+    }
+    if (Name == "Ranged") {
+        Blast.AddStat("Damage", Bonus_Damage);
+        Blast.AddStat("Damage_Multiplier", Damage_Multiplier);
+    }
+    if (Name == "SpiritBall") {
+        SpiritBall.AddStat("Damage", Bonus_Damage);
+        SpiritBall.AddStat("Damage_Multiplier", Damage_Multiplier);
+    }
 }
 
 void Player_Class::HandleMovement(sf::RenderWindow &window, float deltaTime, float deltaTimeMultiplier) {
@@ -178,6 +257,7 @@ void Player_Class::HandleMovement(sf::RenderWindow &window, float deltaTime, flo
 
     if (inAttack && SpeedMultiplier == 0.f)
         return;
+
 
     if (isDodging) {
         if (ClockDodgeDuration.getElapsedTime() >= DodgeDuration) {
@@ -233,7 +313,7 @@ void Player_Class::UpdateAnimation(float dt) {
     else if (inAttack) {
         VisualID = 3; // Melee stance
     }
-    else if (inRangedAttack) {
+    else if (inRangedAttack || inRangedBallAttack) {
         VisualID = 4; // Ranged stance
     }
     else if (SpeedMultiplier > 0.1f && (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) ||

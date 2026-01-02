@@ -106,6 +106,20 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         src/Spawn_Warning.h
         src/Enemy_Ambidextrous.cpp
         src/Enemy_Ambidextrous.h
+        src/Tool_Factory.cpp
+        src/Tool_Factory.h
+        src/Enemy_Builder.cpp
+        src/Enemy_Builder.h
+        src/Random_Value_Generator.cpp
+        src/Random_Value_Generator.h
+        src/Enemy_AgileBoss.cpp
+        src/Enemy_AgileBoss.h
+        src/GUI_UpgradeMenu.cpp
+        src/GUI_UpgradeMenu.h
+        src/Random_Value_Generator_impl.cpp
+        src/template_function.h
+        src/Template_Function.cpp
+        src/Template_Function_impl.cpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

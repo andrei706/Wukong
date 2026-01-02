@@ -3,7 +3,6 @@
     "Wave": 1,
     "MaxEnemiesOnDisplay": 2,
     "Enemies": {
-      "Zombie": 1,
       "Ghoul": 1,
       "Ranger": 1,
       "Fiend": 1
@@ -20,11 +19,26 @@
   },
   {
     "Wave": 3,
+    "MaxEnemiesOnDisplay": 10,
+    "Enemies": {
+      "Zombie": 10,
+      "Ghoul": 10
+    }
+  },
+  {
+    "Wave": 4,
     "MaxEnemiesOnDisplay": 2,
     "Enemies": {
       "Zombie": 5,
       "Ranger": 1,
       "Machine": 1
+    }
+  },
+  {
+    "Wave": 5,
+    "MaxEnemiesOnDisplay": 1,
+    "Enemies": {
+      "Smurf": 1
     }
   }
 ]

@@ -10,13 +10,13 @@ GUI_Button::GUI_Button(std::string Name_, const std::string &TexturePath_, sf::V
         throw AssetMissingException(TexturePath_);
     }
 
-    Sprite.setTexture(&Texture); // texture is a sf::Texture
-    Sprite.setTextureRect(sf::IntRect({0, 0}, {200, 80}));
+    Sprite.setTexture(&Texture);
+
+    sf::Vector2u textureSize = Texture.getSize();
+    Sprite.setTextureRect(sf::IntRect({0, 0}, sf::Vector2i(textureSize)));
+
     Sprite.setPosition(InitialPosition);
     Sprite.setSize(InitialSize);
-
-    InitialSize.x = (float)Texture.getSize().x;
-    InitialSize.y = (float)Texture.getSize().y;
 }
 
 const std::string& GUI_Button::GetName() const {

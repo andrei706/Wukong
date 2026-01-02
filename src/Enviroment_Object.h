@@ -1,17 +1,23 @@
-
 #ifndef OOP_ENVIROMENT_OBJECT_H
 #define OOP_ENVIROMENT_OBJECT_H
 
-#include <iostream>
+#include "Game_Exceptions.h"
 
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include <string>
 
 class Enviroment_Object {
-    bool isDestructable;
-    float Health;
+    sf::Texture Texture;
+    sf::RectangleShape Sprite;
+
 public:
-    Enviroment_Object(bool isDestructable_, float Health_);
+    Enviroment_Object(sf::Vector2f pos, sf::Vector2f size,
+                      const std::string& texturePath);
+
+    void ShowSprite(sf::RenderWindow& window) const;
 
     friend std::ostream & operator<<(std::ostream & out, const Enviroment_Object & object);
 };
 
-#endif //OOP_ENVIROMENT_OBJECT_H
+#endif

@@ -14,6 +14,7 @@ void Enemy_Ambidextrous::HandleActions(const sf::Vector2f &PlayerPosition, float
 
     if (inAttack == false && getAttackReady == false) {
         if (isMeleeMode) {
+            isChargingRanged = false;
             IntendedMovement = unitDir * Stats.GetSpeed() * deltaTime * deltaTimeMultiplier;
             if (distance < 30.0f) HandleMeleeAttack(1, direction);
         }
@@ -44,7 +45,6 @@ void Enemy_Ambidextrous::HandleActions(const sf::Vector2f &PlayerPosition, float
 }
 
 Enemy_Ambidextrous::Enemy_Ambidextrous(const std::string &name): Enemy(name) {
-    Sprite.setFillColor(sf::Color::Magenta);
 }
 
 Enemy_Ambidextrous::Enemy_Ambidextrous(const Enemy_Ambidextrous& other) : Enemy(other) {

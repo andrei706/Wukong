@@ -117,7 +117,7 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         src/GUI_UpgradeMenu.cpp
         src/GUI_UpgradeMenu.h
         src/Random_Value_Generator_impl.cpp
-        src/template_function.h
+        src/Template_Function.h
         src/Template_Function.cpp
         src/Template_Function_impl.cpp
 )

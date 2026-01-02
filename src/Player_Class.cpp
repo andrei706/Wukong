@@ -178,6 +178,25 @@ void Player_Class::Restart() {
     ClockInvincibilityTime.restart();
 }
 
+void Player_Class::PauseClocks(bool Pause) {
+    if (Pause) {
+        ClockDodgeDuration.stop();
+        ClockInvincibilityTime.stop();
+        AttackCooldown.stop();
+        RangedCooldown.stop();
+        ClockDodgeCooldown.stop();
+        BallRangedCooldown.stop();
+    }
+    else {
+        ClockDodgeDuration.start();
+        ClockInvincibilityTime.start();
+        AttackCooldown.start();
+        RangedCooldown.start();
+        ClockDodgeCooldown.start();
+        BallRangedCooldown.start();
+    }
+}
+
 float Player_Class::HandleAttack(Key_Manager& KeyManager) {
     inAttack = false;
     if (!inRangedBallAttack && !inRangedAttack)

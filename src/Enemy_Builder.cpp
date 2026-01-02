@@ -4,15 +4,6 @@
 
 #include "Enemy_Builder.h"
 
-Enemy_Builder & Enemy_Builder::StartNew(const std::string &type, const std::string &name) {
-    if (type == "Walker") enemy = std::make_shared<Enemy_Walker>(name);
-    else if (type == "Ranged") enemy = std::make_shared<Enemy_Ranger>(name);
-    else if (type == "Rotator") enemy = std::make_shared<Enemy_Rotator>(name, 1.0f, true);
-    else if (type == "Ambidextrous") enemy = std::make_shared<Enemy_Ambidextrous>(name);
-    else if (type == "AgileBoss") enemy = std::make_shared<Enemy_AgileBoss>(name);
-    return *this;
-}
-
 Enemy_Builder & Enemy_Builder::startNew(const nlohmann::json &data) {
     std::string type = data.at("Type").get<std::string>();
     std::string name = data.at("Name").get<std::string>();

@@ -11,7 +11,7 @@
 #include "Key_Manager.h"
 
 class GUI_UpgradeMenu {
-    bool isActive = true;
+    //bool isActive = true;
     sf::RectangleShape menuBackground;
 
     std::unique_ptr<GUI_TextLabel> menuTitle;
@@ -33,7 +33,7 @@ class GUI_UpgradeMenu {
         "Enhances blast projectile power.",
         "Gives you more life points.",
         "Reduces incoming enemy damage.",
-        "Increases max spirit energy.",
+        "Increases Spirit Ball damage.",
         "Restores a fraction of your current health."
     };
     std::vector<float> baseValues;
@@ -43,7 +43,6 @@ class GUI_UpgradeMenu {
 public:
     GUI_UpgradeMenu();
 
-    void Toggle();
     void HandleInput(sf::Vector2f mousePos, Key_Manager& km, Player_Class& player);
     void RevertChanges();
     void UpdateLabels(const Player_Class& player);

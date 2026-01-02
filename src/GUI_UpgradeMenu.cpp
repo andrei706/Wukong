@@ -8,11 +8,11 @@ int GUI_UpgradeMenu::CalculateCost(int currentPoints, const std::string &name) {
     return 10 + (currentPoints * 5);
 }
 
-GUI_UpgradeMenu::GUI_UpgradeMenu() {
+GUI_UpgradeMenu::GUI_UpgradeMenu() :
 
-    applyButton = std::make_shared<GUI_Button>("Apply", "data/textures/buttons/Apply_Button.png", sf::Vector2f(430, 490));
-    revertButton = std::make_shared<GUI_Button>("Revert", "data/textures/buttons/Revert_Button.png", sf::Vector2f(680, 490));
-
+    applyButton(std::make_shared<GUI_Button>("Apply", "data/textures/buttons/Apply_Button.png", sf::Vector2f(430, 490))),
+    revertButton(std::make_shared<GUI_Button>("Revert", "data/textures/buttons/Revert_Button.png", sf::Vector2f(680, 490)))
+{
     menuBackground.setPosition({315.f, 50.f});
     menuBackground.setSize(sf::Vector2f(650.f, 510.f));
     menuBackground.setFillColor(sf::Color(218, 160, 109, 245));
@@ -53,10 +53,8 @@ GUI_UpgradeMenu::GUI_UpgradeMenu() {
     }
 }
 
-void GUI_UpgradeMenu::Toggle() { isActive = !isActive; }
-
 void GUI_UpgradeMenu::HandleInput(sf::Vector2f mousePos, Key_Manager &km, Player_Class &player) {
-    if (!isActive) return;
+    //if (!isActive) return;
 
     int totalPendingCost = 0;
     for (int i = 0; i < 6; ++i) {
@@ -92,12 +90,12 @@ void GUI_UpgradeMenu::HandleInput(sf::Vector2f mousePos, Key_Manager &km, Player
 void GUI_UpgradeMenu::RevertChanges() { for (auto& pair : pendingUpgrades) pair.second = 0.0f; }
 
 void GUI_UpgradeMenu::UpdateLabels(const Player_Class &player) {
-    if (!isActive) return;
+    //if (!isActive) return;
 
     int totalPendingCost = 0;
     for (int i = 0; i < 6; ++i) {
         for (int j = 0; j < (int)pendingUpgrades[i].second; ++j) {
-            totalPendingCost += CalculateCost((int)baseValues[i] + j);
+            totalPendingCost += CalculateCost((int)baseValues[i] + j, statNames[i]);
         }
     }
 
@@ -115,16 +113,16 @@ void GUI_UpgradeMenu::UpdateLabels(const Player_Class &player) {
 }
 
 void GUI_UpgradeMenu::Render(sf::RenderWindow &window) const {
-    if (!isActive) return;
+    //if (!isActive) return;
     window.draw(menuBackground);
     menuTitle->ShowSprite(window);
     expLabel->ShowSprite(window);
 
-    for (auto& l : statLabels) l.ShowSprite(window);
-    for (auto& d : descriptionLabels) d.ShowSprite(window);
-    for (auto& l : valueLabels) l.ShowSprite(window);
-    for (auto& c : costLabels) c.ShowSprite(window);
-    for (auto& b : plusButtons) b->ShowSprite(window);
+    for (const auto& l : statLabels) l.ShowSprite(window);
+    for (const auto& d : descriptionLabels) d.ShowSprite(window);
+    for (const auto& l : valueLabels) l.ShowSprite(window);
+    for (const auto& c : costLabels) c.ShowSprite(window);
+    for (const auto& b : plusButtons) b->ShowSprite(window);
     applyButton->ShowSprite(window);
     revertButton->ShowSprite(window);
 }
@@ -136,4 +134,4 @@ void GUI_UpgradeMenu::Reset() {
     RevertChanges();
 }
 
-bool GUI_UpgradeMenu::IsActive() const { return isActive; }
+//bool GUI_UpgradeMenu::IsActive() const { return isActive; }

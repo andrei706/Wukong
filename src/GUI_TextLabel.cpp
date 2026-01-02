@@ -44,17 +44,13 @@ void GUI_TextLabel::SetPosition(sf::Vector2f Position_) {
     TextValue.setPosition(Position_);
 }
 
-void GUI_TextLabel::SetColor(sf::Color TextColor) {
-    TextValue.setFillColor(TextColor);
-}
+// void GUI_TextLabel::SetColor(sf::Color TextColor) {
+//     TextValue.setFillColor(TextColor);
+// }
 
-void GUI_TextLabel::SetSize(int Size_) {
-    TextValue.setCharacterSize(Size_);
-}
-
-void GUI_TextLabel::SetName(const std::string &Name_) {
-    Name = Name_;
-}
+// void GUI_TextLabel::SetSize(int Size_) {
+//     TextValue.setCharacterSize(Size_);
+// }
 
 const std::string & GUI_TextLabel::GetName() const {
     return Name;

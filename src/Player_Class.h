@@ -20,7 +20,7 @@ class Player_Class {
     Character_Stats Stats{150, 2.5, 0};
     Tool Pole{"Pole", 5, 0.5f, 40, 2};
     Tool_Ranged Blast{"Blast", 5, 0.2f, 1, 10, 1, 1.0f, 30, 15, 4, true};
-    Tool_Ranged SpiritBall{"SpiritBall", 5, 1.5f, 100, 10, 1, 0.5, 75,
+    Tool_Ranged SpiritBall{"SpiritBall", 3, 1.5f, 100, 10, 1, 0.5, 75,
     1.5f, 10, false};
 
     sf::RectangleShape Sprite;
@@ -65,6 +65,7 @@ public:
     sf::RectangleShape& GetSprite();
     sf::Vector2f GetPosition() const;
     void Restart();
+    void PauseClocks(bool Pause = true);
     float GetHealth() const;
     int GetGauge() const;
     void AddExperience(int Value);

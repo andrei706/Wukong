@@ -329,6 +329,18 @@ void Game_Class::WindowRendering() {
 
         if (KeyManager.CheckInput("Escape")) {
             isPaused = !isPaused;
+            if (isPaused) {
+                player.PauseClocks();
+                for (auto &i : SpawnedEnemies) {
+                    i->PauseClocks();
+                }
+            }
+            else {
+                player.PauseClocks(false);
+                for (auto &i : SpawnedEnemies) {
+                    i->PauseClocks(false);
+                }
+            }
         }
         if (isPaused || PlayerLost)
             PauseHandler();

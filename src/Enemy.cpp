@@ -348,13 +348,12 @@ void Enemy::HandleRangedAttack(bool canAttack, sf::Vector2f direction, float wai
     if (RangedWeapon == NULL) throw InvalidActionException("Cannot attack without a weapon");
 
     if (canAttack) {
-        float radians = std::atan2(direction.y, direction.x);
-        float angleDegrees = radians * 180.0f / 3.14159f;
-
         if (CooldownClock.getElapsedTime().asSeconds() < RangedWeapon->GetCooldown()) {
             isChargingRanged = true;
         }
         else if (CooldownClock.getElapsedTime().asSeconds() > RangedWeapon->GetCooldown() && !isRangedAttacking) {
+            float radians = std::atan2(direction.y, direction.x);
+            float angleDegrees = radians * 180.0f / 3.14159f;
             float weaponCooldown = RangedWeapon->Attack(Sprite, sf::degrees(angleDegrees));
             nextAttackDelay = weaponCooldown + waitTime;
             isChargingRanged = false;

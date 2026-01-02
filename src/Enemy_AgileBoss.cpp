@@ -66,6 +66,8 @@ void Enemy_AgileBoss::HandleActions(const sf::Vector2f &PlayerPosition, float de
 
         if (phaseTimer > 8.0f && !isRangedAttacking) {
             isMeleePhase = true;
+            isRangedAttacking = false;
+            isChargingRanged = false;
             phaseTimer = 0.0f;
         }
     }

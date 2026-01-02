@@ -17,7 +17,6 @@ class Enemy_Builder {
 public:
     Enemy_Builder() = default;
 
-    Enemy_Builder& StartNew(const std::string& type, const std::string& name);
     Enemy_Builder& startNew(const nlohmann::json& data);
     Enemy_Builder& SetStats(float hp, float speed, int mana);
     Enemy_Builder& SetStats(const nlohmann::json& data);

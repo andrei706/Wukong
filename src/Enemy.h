@@ -59,49 +59,41 @@ protected:
 public:
 
     explicit Enemy(const std::string& name_);
-
     Enemy(const Enemy& other);
-
     virtual ~Enemy();
-
+    void PauseClocks(bool Pause = true) {
+        if (Pause) {
+            ActionClock.stop();
+            AttackWarningClock.stop();
+            CooldownClock.stop();
+            DamagedClock.stop();
+        }
+        else {
+            ActionClock.start();
+            AttackWarningClock.start();
+            CooldownClock.start();
+            DamagedClock.start();
+        }
+    }
     friend std::ostream & operator<<(std::ostream & out, const Enemy & object);
-
     virtual std::shared_ptr<Enemy> clone() const;
-
     friend void swap(Enemy& first, Enemy& second) noexcept;
-
     Enemy& operator=(Enemy other);
-
     sf::FloatRect GetEnemyHitbox();
-
     const std::vector<std::shared_ptr<Attack_Hitbox>>& GetHitboxes();
-
     void ChangeDamagedStatus(bool Value = true, float Seconds = 0.5f);
-
     const std::string& GetName() const;
-
     int GetLocalId() const;
-
     int GetExperience() const;
-
     sf::Vector2f GetPosition() const;
-
     bool TakeDamage (float Damage_Points);
-
     void AssignWeapon (const std::shared_ptr<Tool>& toolPtr, bool Melee = true);
-
     void AssignStats (const Character_Stats& other);
-
     void SetPosition(float x, float y);
-
     void ShowSprite(sf::RenderWindow& window) const;
-
     void RenderHitboxes(sf::RenderWindow& window) const;
-
     void Update(const sf::Vector2f& PlayerPosition, float deltaTime, float deltaTimeMultiplier, const std::vector<std::shared_ptr<Enemy>>& otherEnemies);
-
     void DisplayInfo(std::ostream &out) const;
-
     static void AssignID(const std::shared_ptr<Enemy> &enemy);
 };
 

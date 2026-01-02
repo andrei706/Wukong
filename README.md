@@ -1,22 +1,45 @@
 # Wukong
 
 ### Descriere
-Wukong este un joc top-down action adventure despre o maimuță care dorește să găsească comoara dintr-un ținut uitat ca să o adauge la colecția sa. Folosește-te de bățul maimuței pentru a dezlănțui atacuri cu scopul de a distruge inamicii sau obiectele care îți stau în cale. Încarcă bara de putere la maxim atacând inamici pentru a declanșa unul dintre cele două atacuri speciale, laserul cu putere devastatoare sau schimbarea temporară a atacurilor rapide cu rază de acțiune scurtă
-în atacuri cu rază de acțiune lungă. Utilizează tot arsenalul de abilități ale personajului pentru a îndeplini misiunea.
+
+Wukong este un joc top-down action adventure despre o maimuță care dorește să-și înfrângă inamicii pentru a găsi o comoară dintr-un ținut uitat. Folosește-te de bățul maimuței pentru a dezlănțui atacuri cu scopul de a distruge inamicii care îți stau în cale. Încarcă bara de energie atacând inamici pentru a putea declanșa atacuri la distanță sau ferește-te de asalturi în situații critice. Utilizează tot arsenalul de abilități ale personajului pentru a copleși valurile de inamici și pentru a-ți îndeplini misiunea.
 
 Inspirație: [The Legend of Zelda: The Minish Cap](https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_The_Minish_Cap), [Dragon Ball Z: The Legacy of Goku](https://en.wikipedia.org/wiki/Dragon_Ball_Z:_The_Legacy_of_Goku)
 
-### Caracteristicile implementate până acum (v0.1.1)
-- Player și Enemy movement
-- Un atac simplu care are hitbox-ul unde este orientat mouse-ul
-- Condiții temporare de câștig (dacă mor toți inamicii) sau pierdere (dacă numai ai viață)
-- Meniu de pauză pentru a da replay și exit
-- Interfață grafică folosind SFML
+### Caracteristicile implementate (v0.2)
+- Sistem de Wave-uri:
+
+    -Jucătorul trebuie să înfrângă toate valurile de inamici
+  
+    -Dacă jucătorul nu reușește, trebuie să o ia de la capăt
+- Inamici de tipuri diferite care pot folosi arme de tipuri diferite
+- Abilitățile jucătorului care sunt:
+
+    -Atacarea de la apropiere, generând astfel și niște energie
+  
+    -Atacarea de la distanță dacă are destulă energie
+  
+    -Eschivarea atacurilor
+- Meniu de pauză pentru a da replay sau exit
 
 ### Controls
 - WASD pentru mișcare
-- Left Mouse Button pentru atac
+- Left Mouse Button pentru atac la apropiere
+- Right Mouse Button pentru atac la distanță
+- Space pentru Dodge
 - Esc pentru meniul de pauză
+
+### Tema 3 Goals
+- Sistem de upgrade: folosirea experience-ului dobândit pentru a-ți îmbunătăți statisticile
+- Sprite-uri pentru toți inamicii
+- Damage counter (cât damage și-a luat inamicul sau tu)
+- Un Boss Fight pentru ultimul Wave
+- Set de mișcări ale jucătorului extins:
+  
+    -Pararea atacurilor (probabil)
+  
+    -Spirit Ball: Un proiectil care consumă multă energie și care dă damage în continuu la inamic atâta timp cât stă în raza mingii
+- Infinite Mode (probabil)
   
 ### Important!
 
@@ -65,7 +88,7 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
 
 #### Cerințe
 - [x] separarea codului din clase în `.h` (sau `.hpp`) și `.cpp`
-- [ ] moșteniri:
+- [x] moșteniri:
   - minim o clasă de bază și **3 clase derivate** din aceeași ierarhie
       Aceasta o să fie clasa **Enemy** cu derivatele **Enemy_Walker**, **Enemy_Ranger** și **Enemy_Rotator**.
   - ierarhia trebuie să fie cu bază proprie, nu derivată dintr-o clasă predefinită
@@ -76,7 +99,7 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
   - [x] apelarea constructorului din clasa de bază din constructori din derivate
   - [x] clasă cu atribut de tip pointer la o clasă de bază cu derivate; aici apelați funcțiile virtuale prin pointer de bază, eventual prin interfața non-virtuală din bază
     - [x] suprascris cc/op= pentru copieri/atribuiri corecte, copy and swap
-    - [ ] `dynamic_cast`/`std::dynamic_pointer_cast` pentru downcast cu sens
+    - [x] `dynamic_cast`/`std::dynamic_pointer_cast` pentru downcast cu sens (vezi functia ToggleRotatorRotation din Game_Class)
     - [x] smart pointers (recomandat, opțional)
 - [x] excepții
   - [x] ierarhie proprie cu baza `std::exception` sau derivată din `std::exception`; minim **3** clase pentru erori specifice distincte
@@ -86,12 +109,12 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
 - [x] funcții și atribute `static`
 - [x] STL
 - [x] cât mai multe `const`
-- [ ] funcții *de nivel înalt*, de eliminat cât mai mulți getters/setters/funcții low-level
+- [x] funcții *de nivel înalt*, de eliminat cât mai mulți getters/setters/funcții low-level
 - [x] minim 75-80% din codul propriu să fie C++
-- [ ] la sfârșit: commit separat cu adăugarea unei noi clase derivate fără a modifica restul codului, **pe lângă cele 3 derivate deja adăugate** din aceeași ierarhie
+- [x] la sfârșit: commit separat cu adăugarea unei noi clase derivate fără a modifica restul codului, **pe lângă cele 3 derivate deja adăugate** din aceeași ierarhie
   - noua derivată nu poate fi una existentă care a fost ștearsă și adăugată din nou
   - noua derivată va fi integrată în codul existent (adică va fi folosită, nu adăugată doar ca să fie)
-- [ ] tag de `git` pe commit cu **toate bifele**: de exemplu `v0.2`
+- [x] tag de `git` pe commit cu **toate bifele**: de exemplu `v0.2`
 - [ ] code review #2 2 proiecte
 
 ## Tema 3

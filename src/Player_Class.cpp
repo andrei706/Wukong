@@ -77,14 +77,13 @@ int Player_Class::GetExperience() const {
     return Experience;
 }
 
-bool Player_Class::TakeDamage(float Value) {
+float Player_Class::TakeDamage(float Value) {
     if (!Invincibility) {
         //std::cout<<Value;
-        Stats.ReduceHealth(Value);
         MakeInvincible(0.5f);
-        return true;
+        return Stats.ReduceHealth(Value);
     }
-    return false;
+    return 0;
 }
 
 void Player_Class::RestoreHealth(float Value) {
@@ -111,7 +110,7 @@ void Player_Class::ApplyUpgrades(const std::vector<std::pair<std::string, float>
         if (value <= 0) continue;
 
         if (statName == "MaxHealth") {
-            Stats.AddStat("MaxHealth", value);
+            Stats.AddStat("MaxHealth", 20);
         }
         else if (statName == "Defense") {
             Stats.AddStat("Defense", value);

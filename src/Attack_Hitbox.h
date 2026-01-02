@@ -30,19 +30,12 @@ public:
         , float Lifetime_ = 0.1, float Cooldown_ = 0.5f, const std::string &TexturePath = "data/textures/attack_assets/slash_sprite.png");
 
     virtual ~Attack_Hitbox() = default;
-
     friend std::ostream & operator<<(std::ostream & out, const Attack_Hitbox & object);
-
     float GetDamageValue(int EnemyId);
-
     sf::FloatRect GetBounds() const;
-
     void ShowSprite(sf::RenderWindow& window) const;
-
     virtual void UpdateBehavior(float deltaTime);
-
     bool IsActive() const;
-
     bool Update(float deltaTime);
 };
 

@@ -14,14 +14,14 @@ float Character_Stats::GetSpeed() const {
     return Speed;
 }
 
-bool Character_Stats::ReduceHealth(float DamagePoints) {
+float Character_Stats::ReduceHealth(float DamagePoints) {
     float CalculatedDamage = DamagePoints - DamagePoints * DamageReduction / 100 - Defense;
     if (Health - CalculatedDamage <= 0) {
         Health = 0;
-        return false; //Alive state
+        return 0; //Alive state
     }
     Health -= CalculatedDamage;
-    return true;
+    return CalculatedDamage + 0.0000000000001;
 }
 
 void Character_Stats::RestoreHealth(float HealthPoints) {

@@ -70,7 +70,7 @@ public:
     int GetGauge() const;
     void AddExperience(int Value);
     int GetExperience() const;
-    bool TakeDamage(float Value);
+    float TakeDamage(float Value);
     void RestoreHealth(float Value);
     const std::vector<std::shared_ptr<Attack_Hitbox>>& GetHitboxes();
     void ApplyUpgrades(const std::vector<std::pair<std::string, float>>& upgrades);

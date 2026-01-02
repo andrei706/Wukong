@@ -249,9 +249,9 @@ void Game_Class::EventHandler() {
         for (auto &j : EnemyAttackHitbox) {
             if (j->GetBounds().findIntersection(PlayerBounds)) {
                 //std::cout<<"Intersection"<<std::endl;
-                float Damage = j->GetDamageValue(-1);
-                if (player.TakeDamage(Damage)) {
-                    AddDamageCounter(Damage, player.GetPosition(), sf::Color(139, 0, 0));
+                float DamageCount = player.TakeDamage(j->GetDamageValue(-1));
+                if (DamageCount > 0) {
+                    AddDamageCounter(DamageCount, player.GetPosition(), sf::Color(139, 0, 0));
                 }
             }
         }

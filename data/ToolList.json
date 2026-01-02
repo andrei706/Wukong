@@ -24,7 +24,7 @@
   {
     "Type": "Ranged",
     "WeaponName": "Ranger_Gun",
-    "Damage": 3.0,
+    "Damage": 4.0,
     "Cooldown": 1.4,
     "Range": 10,
     "Critical_Chance": 20,
@@ -38,7 +38,7 @@
   {
     "Type": "Ranged",
     "WeaponName": "Machine_Gun",
-    "Damage": 3.0,
+    "Damage": 8.0,
     "Cooldown": 0.2,
     "Range": 10,
     "Critical_Chance": 20,

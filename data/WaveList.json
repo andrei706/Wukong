@@ -30,8 +30,9 @@
     "MaxEnemiesOnDisplay": 6,
     "Enemies": {
       "Machine": 2,
-      "Zombie": 5,
+      "Zombie": 3,
       "Ghoul": 3,
+      "Fiend": 2,
       "Ranger": 2
     }
   },

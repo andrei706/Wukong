@@ -10,7 +10,7 @@ Attack_Projectile::Attack_Projectile(
     float Lifetime_,
     float Cooldown_,
     bool DestroyOnHit_)
-: Attack_Hitbox(DamageValue_, Size_, Position_, Angle_, Lifetime_, Cooldown_, "data/textures/attack_assets/projectile_sprite.png"),
+: Attack(DamageValue_, Size_, Position_, Angle_, Lifetime_, Cooldown_, "data/textures/attack_assets/projectile_sprite.png"),
   Velocity(Velocity_), DestroyOnHit(DestroyOnHit_)
 {
     Sprite.setSize(Size_);

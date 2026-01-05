@@ -45,7 +45,7 @@
   {
     "Type": "AgileBoss",
     "Name": "Smurf",
-    "MaxHealth": 125.0,
+    "MaxHealth": 175.0,
     "Speed": 7.0,
     "Mana": 67,
     "MeleeWeaponName": "Ghoul_Punch",

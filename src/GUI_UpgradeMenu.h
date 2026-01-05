@@ -7,7 +7,7 @@
 #include <string>
 #include "GUI_Button.h"
 #include "GUI_TextLabel.h"
-#include "Player_Class.h"
+#include "Player.h"
 #include "Key_Manager.h"
 
 class GUI_UpgradeMenu {
@@ -43,9 +43,9 @@ class GUI_UpgradeMenu {
 public:
     GUI_UpgradeMenu();
 
-    void HandleInput(sf::Vector2f mousePos, Key_Manager& km, Player_Class& player);
+    void HandleInput(sf::Vector2f mousePos, Key_Manager& km, Player& player);
     void RevertChanges();
-    void UpdateLabels(const Player_Class& player);
+    void UpdateLabels(const Player& player);
     void Render(sf::RenderWindow& window) const;
     void Reset();
     bool IsActive() const;

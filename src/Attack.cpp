@@ -1,9 +1,9 @@
 
-#include "Attack_Hitbox.h"
+#include "Attack.h"
 
 #include "Enemy.h"
 
-Attack_Hitbox::Attack_Hitbox(float DamageValue_, sf::Vector2f Size_, sf::Vector2f Position_, sf::Angle Angle_, float Lifetime_, float Cooldown_,
+Attack::Attack(float DamageValue_, sf::Vector2f Size_, sf::Vector2f Position_, sf::Angle Angle_, float Lifetime_, float Cooldown_,
                              const std::string &TexturePath)
     : DamageValue(DamageValue_), Size(Size_), Position(Position_), Rotation(Angle_), Lifetime(Lifetime_), Cooldown(Cooldown_) {
 
@@ -22,7 +22,7 @@ Attack_Hitbox::Attack_Hitbox(float DamageValue_, sf::Vector2f Size_, sf::Vector2
 
 
 
-float Attack_Hitbox::GetDamageValue(int EnemyId) {
+float Attack::GetDamageValue(int EnemyId) {
     if (EnemyId == -1 ) { // This is the player ID
         Attacked.emplace_back(-1, 0.0f);
         return DamageValue;
@@ -43,15 +43,15 @@ float Attack_Hitbox::GetDamageValue(int EnemyId) {
     return DamageValue;
 }
 
-sf::FloatRect Attack_Hitbox::GetBounds() const {
+sf::FloatRect Attack::GetBounds() const {
     return Sprite.getGlobalBounds();
 }
 
-void Attack_Hitbox::ShowSprite(sf::RenderWindow &window) const {
+void Attack::ShowSprite(sf::RenderWindow &window) const {
     window.draw(Sprite);
 }
 
-void Attack_Hitbox::UpdateBehavior(float deltaTime) {
+void Attack::UpdateBehavior(float deltaTime) {
     if (Cooldown - Lifetime > 0.1f)
         canDamage = false;
 
@@ -73,11 +73,11 @@ void Attack_Hitbox::UpdateBehavior(float deltaTime) {
     Lifetime -= deltaTime;
 }
 
-bool Attack_Hitbox::IsActive() const {
+bool Attack::IsActive() const {
     return isActive;
 }
 
-bool Attack_Hitbox::Update(float deltaTime) {
+bool Attack::Update(float deltaTime) {
     UpdateBehavior(deltaTime);
     for (auto it = Attacked.begin(); it != Attacked.end(); ) {
         it->second -= deltaTime;
@@ -90,7 +90,7 @@ bool Attack_Hitbox::Update(float deltaTime) {
     return isActive;
 }
 
-std::ostream & operator<<(std::ostream &out, const Attack_Hitbox &object) {
+std::ostream & operator<<(std::ostream &out, const Attack &object) {
     out<<object.DamageValue<<"\n";
     return out;
 }

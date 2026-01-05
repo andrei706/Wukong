@@ -17,7 +17,7 @@ public:
     [[nodiscard]] float GetSpeed() const;
     [[nodiscard]] float GetHealth() const;
     [[nodiscard]] int GetMana() const;
-    float ReduceHealth(float DamagePoints);
+    bool ReduceHealth(float DamagePoints);
     void RestoreHealth(float HealthPoints);
     void AddStat(const std::string &StatName, float Value);
     void ResetStats();

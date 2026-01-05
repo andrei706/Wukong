@@ -12,7 +12,7 @@ std::shared_ptr<Tool> Tool_Punch::clone() const {
 void Tool_Punch::CreateAttackHitbox(sf::Vector2f Position, sf::Vector2f Offset, sf::Angle Degrees) {
     Degrees = sf::degrees(0);
 
-    auto new_hitbox = std::make_shared<Attack_Hitbox>(
+    auto new_hitbox = std::make_shared<::Attack>(
         DamageCalculation(),
         sf::Vector2f{PunchRadius, PunchRadius},
         Position + Offset,

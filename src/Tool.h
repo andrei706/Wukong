@@ -1,7 +1,7 @@
 #ifndef OOP_TOOL_H
 #define OOP_TOOL_H
 
-#include "Attack_Hitbox.h"
+#include "Attack.h"
 #include "Game_Exceptions.h"
 #include "Random_Value_Generator.h"
 
@@ -10,8 +10,6 @@
 #include <cmath>
 
 class Tool {
-
-
 
 protected:
     std::string Name;
@@ -28,7 +26,7 @@ protected:
     sf::Angle m_lastAngle;
     const sf::RectangleShape* m_sourceSprite = nullptr;
 
-    std::vector<std::shared_ptr<Attack_Hitbox>> Attacks;
+    std::vector<std::shared_ptr<Attack>> Attacks;
 
     [[nodiscard]] float DamageCalculation() const;
 
@@ -37,7 +35,7 @@ public:
     Tool(const std::string& name_, float Damage_, float Cooldown_, float Range_ = 10000.0f, int Critical_Chance_ = 0, int Burst_Count_ = 1, float Burst_Delay_ = 0.5f);
     friend std::ostream & operator<<(std::ostream & out, const Tool & object);
     const std::string& GetName();
-    [[nodiscard]] const std::vector<std::shared_ptr<Attack_Hitbox>>& GetAttackHitboxes() const;
+    [[nodiscard]] const std::vector<std::shared_ptr<Attack>>& GetAttackHitboxes() const;
     void ShowHitboxes(sf::RenderWindow& window) const;
     float GetCooldown() const;
     [[nodiscard]] virtual std::shared_ptr<Tool> clone() const;

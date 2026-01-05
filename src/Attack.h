@@ -8,7 +8,7 @@
 #include <SFML/System.hpp>
 
 
-class Attack_Hitbox {
+class Attack {
 protected:
     float DamageValue;
 
@@ -26,11 +26,11 @@ protected:
     bool canDamage = true;
     bool isActive = true;
 public:
-    explicit Attack_Hitbox(float DamageValue_, sf::Vector2f Size_ = {100, 20}, sf::Vector2f Position_ = {0, 0}, sf::Angle Angle_ = sf::degrees(0)
+    explicit Attack(float DamageValue_, sf::Vector2f Size_ = {100, 20}, sf::Vector2f Position_ = {0, 0}, sf::Angle Angle_ = sf::degrees(0)
         , float Lifetime_ = 0.1, float Cooldown_ = 0.5f, const std::string &TexturePath = "data/textures/attack_assets/slash_sprite.png");
 
-    virtual ~Attack_Hitbox() = default;
-    friend std::ostream & operator<<(std::ostream & out, const Attack_Hitbox & object);
+    virtual ~Attack() = default;
+    friend std::ostream & operator<<(std::ostream & out, const Attack & object);
     float GetDamageValue(int EnemyId);
     sf::FloatRect GetBounds() const;
     void ShowSprite(sf::RenderWindow& window) const;

@@ -1,9 +1,9 @@
 #ifndef OOP_ATTACK_PROJECTILE_H
 #define OOP_ATTACK_PROJECTILE_H
 
-#include "Attack_Hitbox.h"
+#include "Attack.h"
 
-class Attack_Projectile : public Attack_Hitbox {
+class Attack_Projectile : public Attack {
     sf::Vector2f Velocity;
     bool DestroyOnHit = false;
 public:

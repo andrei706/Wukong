@@ -1,10 +1,23 @@
 
-#include "Game_Class.h"
+#include "Game_Manager.h"
 
 
-void Game_Class::RenderEntities() const {
+void Game_Manager::RenderEntities() const {
     //map rendering
     RenderCollection(window, MapBlocks);
+    //Difficulty screen rendering
+    if (isSelectingDifficulty) {
+        window.draw(PauseTint);
+        for (const auto &button : DifficultyButtons) {
+            button.ShowSprite(window);
+        }
+        for (const auto &label : TextLabelList) {
+            if (label.GetName() == "DiffTitle" || label.GetName() == "EasyDesc") {
+                label.ShowSprite(window);
+            }
+        }
+        return;
+    }
     //Render Player
     if (!PlayerLost)
         player.ShowSprite(window);
@@ -25,10 +38,6 @@ void Game_Class::RenderEntities() const {
     for (const auto& pair : DamageCounter) {
         pair.first.ShowSprite(window);
     }
-    for (const auto &i : TextLabelList) {
-        if (i.GetStatus())
-            i.ShowSprite(window);
-    }
     if (isPaused || PlayerLost) {
         window.draw(PauseTint);
 
@@ -42,8 +51,12 @@ void Game_Class::RenderEntities() const {
             UpgradeMenu.Render(window);
         }
     }
+    for (const auto &i : TextLabelList) {
+        if (i.GetStatus() && !(i.GetName() == "DiffTitle" || i.GetName() == "EasyDesc"))
+            i.ShowSprite(window);
+    }
 }
-void Game_Class::ReadData() {
+void Game_Manager::ReadData() {
     std::ifstream toolFile("data/ToolList.json");
     if (!toolFile.is_open()) {
         throw AssetMissingException("data/ToolList.json");
@@ -121,22 +134,59 @@ void Game_Class::ReadData() {
     }
 }
 
-void Game_Class::UpdateHealthbar() {
+void Game_Manager::UpdateHealthbar() {
+    float currentHealth = player.GetHealth();
+    int currentGauge = player.GetGauge();
+
+    if (currentHealth < lastHealth) {
+        healthFlashTimer = 0.4f;
+        healthFlashColor = sf::Color(139, 0, 0);
+    }
+    else if (currentHealth > lastHealth) {
+        healthFlashTimer = 0.4f;
+        healthFlashColor = sf::Color::Green;
+    }
+    if (currentGauge < lastGauge) {
+        gaugeFlashTimer = 0.4f;
+        gaugeFlashColor = sf::Color(0, 0, 220 - lastGauge + currentGauge);
+    }
+    else if (currentGauge > lastGauge) {
+        gaugeFlashTimer = 0.4f;
+        gaugeFlashColor = sf::Color(28, 118, 255);
+    }
+    lastGauge = currentGauge;
+    lastHealth = currentHealth;
+
+    if (healthFlashTimer > 0.f) healthFlashTimer -= dt;
+    if (gaugeFlashTimer > 0.f) gaugeFlashTimer -= dt;
+
     for (auto &i : TextLabelList) {
         if (i.GetName() == "Health") {
-            i.SetText("Health: " + std::to_string(player.GetHealth()));
+            i.SetText("Health: " + std::to_string(currentHealth));
+
+            if (healthFlashTimer > 0.f) {
+                i.SetColor(healthFlashColor);
+            } else {
+                i.SetColor(sf::Color::Red);
+            }
         }
         if (i.GetName() == "GaugeLabel") {
-            i.SetText("Gauge: " + std::to_string(static_cast<int>(player.GetGauge())));
+            i.SetText("Gauge: " + std::to_string(player.GetGauge()));
+            if (gaugeFlashTimer > 0.f) {
+                i.SetColor(gaugeFlashColor);
+            } else {
+                i.SetColor(sf::Color::Blue);
+            }
         }
     }
 }
 
-void Game_Class::Replay() {
+void Game_Manager::Replay() {
     SpawnedEnemies.clear();
     ActiveSpawnWarnings.clear();
     PlayerAttackHitbox.clear();
 
+    isSelectingDifficulty = true;
     ToggleRotatorRotation();
     WaveManager.Reset("data/WaveList.json");
 
@@ -144,6 +194,7 @@ void Game_Class::Replay() {
     isPaused = false;
     player.Restart();
     UpgradeMenu.Reset();
+    lastHealth = player.GetHealth();
 
     totalRunTime = 0.f;
     gameBeaten = false;
@@ -166,14 +217,33 @@ void Game_Class::Replay() {
     GameClock.restart();
 }
 
-std::string Game_Class::CalculateRank() const {
+std::string Game_Manager::CalculateRank() const {
     if (totalRunTime < 120.f) return "S";
     if (totalRunTime < 240.f) return "A";
     if (totalRunTime < 360.f) return "B";
     return "C";
 }
 
-void Game_Class::PauseHandler() {
+void Game_Manager::HandleDifficultySelection() {
+    sf::Vector2i MousePos = sf::Mouse::getPosition(window);
+    sf::Vector2f MouseWorldPos = window.mapPixelToCoords(MousePos);
+
+    for (auto &button : DifficultyButtons) {
+        if (button.isClicked(MouseWorldPos, KeyManager)) {
+            if (button.GetName() == "Easy") difficultyMultiplier = 2.0f;
+            else if (button.GetName() == "Hard") difficultyMultiplier = 1.0f;
+
+            for (auto &label : TextLabelList) {
+                if (label.GetName() == "DiffTitle") label.ToggleActive();
+            }
+
+            isSelectingDifficulty = false;
+            GameClock.restart();
+        }
+    }
+}
+
+void Game_Manager::PauseHandler() {
     sf::Vector2i MousePos = sf::Mouse::getPosition(window);
     sf::Vector2f MouseWorldPos = window.mapPixelToCoords(MousePos);
 
@@ -181,8 +251,12 @@ void Game_Class::PauseHandler() {
         if (i.isClicked(MouseWorldPos, KeyManager)) {
             if (i.GetName() == "Exit")
                 window.close();
-            else if (i.GetName() == "Resume")
+            else if (i.GetName() == "Resume") {
                 isPaused = false;
+                player.PauseClocks(false);
+                for (auto &i : SpawnedEnemies)
+                    i->PauseClocks(false);
+            }
             else if (i.GetName() == "Replay")
                 Replay();
         }
@@ -192,9 +266,10 @@ void Game_Class::PauseHandler() {
         UpgradeMenu.UpdateLabels(player);
         UpgradeMenu.HandleInput(MouseWorldPos, KeyManager, player);
     }
+    UpdateHealthbar();
 }
 
-void Game_Class::SpawnEnemy(const std::string &Name, sf::Vector2f Position) {
+void Game_Manager::SpawnEnemy(const std::string &Name, sf::Vector2f Position) {
     for (auto const &EnemyPtr : EnemyList) {
         if (EnemyPtr->GetName() == Name) {
             std::shared_ptr<Enemy> newEnemy = EnemyPtr->clone();
@@ -207,7 +282,7 @@ void Game_Class::SpawnEnemy(const std::string &Name, sf::Vector2f Position) {
     throw InvalidDataException("Enemy prototype not found: " + Name, 0);
 }
 
-void Game_Class::AdjustView(unsigned int newWidth, unsigned int newHeight) {
+void Game_Manager::AdjustView(unsigned int newWidth, unsigned int newHeight) {
     float targetWidth = 1280.0f;
     float targetHeight = 720.0f;
 
@@ -238,20 +313,21 @@ void Game_Class::AdjustView(unsigned int newWidth, unsigned int newHeight) {
 
 }
 
-void Game_Class::EventHandler() {
+void Game_Manager::EventHandler() {
     UpdateSpawnWarnings();
 
     //Check if the player is getting damaged
     sf::FloatRect PlayerBounds = player.GetSprite().getGlobalBounds();
     for (auto &i : SpawnedEnemies) {
-        std::vector<std::shared_ptr<Attack_Hitbox>> EnemyAttackHitbox = i->GetHitboxes();
+        std::vector<std::shared_ptr<Attack>> EnemyAttackHitbox = i->GetHitboxes();
 
         for (auto &j : EnemyAttackHitbox) {
             if (j->GetBounds().findIntersection(PlayerBounds)) {
                 //std::cout<<"Intersection"<<std::endl;
-                float DamageCount = player.TakeDamage(j->GetDamageValue(-1));
-                if (DamageCount > 0) {
-                    AddDamageCounter(DamageCount, player.GetPosition(), sf::Color(139, 0, 0));
+                float CurrentHealth = player.GetHealth();
+                bool isDamaged = player.TakeDamage(j->GetDamageValue(-1));
+                if (isDamaged) {
+                    AddDamageCounter(CurrentHealth - player.GetHealth(), player.GetPosition(), sf::Color(139, 0, 0));
                 }
             }
         }
@@ -272,10 +348,9 @@ void Game_Class::EventHandler() {
                         i->ChangeDamagedStatus(true, 0.5f);
                         AddDamageCounter(DamageCount, i->GetPosition(), sf::Color::Red);
                         if (!isDead) {
-                            player.AddExperience(i->GetExperience());
+                            player.AddExperience(i->GetExperience() * difficultyMultiplier);
                             it = SpawnedEnemies.erase(it);
                             EnemyWasKilled = true;
-                            //std::cout<<"Enemy has no health left!\n";
                             break;
                         }
                     }
@@ -286,7 +361,7 @@ void Game_Class::EventHandler() {
             ++it;
     }
 
-    //Update the goated player
+    //Update the player
     player.Update(window, dt, dtMultiplier, KeyManager);
 
     //Update enemies behavior
@@ -310,7 +385,7 @@ void Game_Class::EventHandler() {
     }
 }
 
-void Game_Class::WindowRendering() {
+void Game_Manager::WindowRendering() {
     window.setVerticalSyncEnabled(false);
     window.setFramerateLimit(60);
     while (window.isOpen()) {
@@ -326,31 +401,35 @@ void Game_Class::WindowRendering() {
 
         dt = GameClock.restart().asSeconds();
         dtMultiplier = 1/dt;
-
-        if (KeyManager.CheckInput("Escape")) {
-            isPaused = !isPaused;
-            if (isPaused) {
-                player.PauseClocks();
-                for (auto &i : SpawnedEnemies) {
-                    i->PauseClocks();
-                }
-            }
-            else {
-                player.PauseClocks(false);
-                for (auto &i : SpawnedEnemies) {
-                    i->PauseClocks(false);
-                }
-            }
+        if (isSelectingDifficulty) {
+            HandleDifficultySelection();
         }
-        if (isPaused || PlayerLost)
-            PauseHandler();
-
-        if (!PlayerLost && !isPaused) {
-            if (!gameBeaten) {
-                totalRunTime += dt;
-                WaveHandler();
+        else {
+            if (KeyManager.CheckInput("Escape")) {
+                isPaused = !isPaused;
+                if (isPaused) {
+                    player.PauseClocks();
+                    for (auto &i : SpawnedEnemies) {
+                        i->PauseClocks();
+                    }
+                }
+                else {
+                    player.PauseClocks(false);
+                    for (auto &i : SpawnedEnemies) {
+                        i->PauseClocks(false);
+                    }
+                }
             }
-            EventHandler();
+            if (isPaused || PlayerLost)
+                PauseHandler();
+
+            if (!PlayerLost && !isPaused) {
+                if (!gameBeaten) {
+                    totalRunTime += dt;
+                    WaveHandler();
+                }
+                EventHandler();
+            }
         }
         //Rendering
         window.clear(sf::Color::Black);
@@ -359,7 +438,7 @@ void Game_Class::WindowRendering() {
     }
 }
 
-void Game_Class::UpdateSpawnWarnings() {
+void Game_Manager::UpdateSpawnWarnings() {
     for (auto it = ActiveSpawnWarnings.begin(); it != ActiveSpawnWarnings.end(); ) {
         it->Update(dt);
 
@@ -372,7 +451,7 @@ void Game_Class::UpdateSpawnWarnings() {
     }
 }
 
-void Game_Class::WaveHandler() {
+void Game_Manager::WaveHandler() {
     srand(time(NULL));
     Wave* currentWave = WaveManager.GetCurrentWave();
     int currentCount = static_cast<int>(SpawnedEnemies.size() + ActiveSpawnWarnings.size());
@@ -425,7 +504,7 @@ void Game_Class::WaveHandler() {
     }
 }
 
-void Game_Class::ToggleRotatorRotation() const {
+void Game_Manager::ToggleRotatorRotation() const {
     for (auto& enemyPtr : EnemyList) {
         // convertim pointerul de baza intr-un pointer de tip enemy rotator
         // enemylist are pointeri de tip enemy
@@ -436,7 +515,7 @@ void Game_Class::ToggleRotatorRotation() const {
     }
 }
 
-void Game_Class::AddDamageCounter(float damage, sf::Vector2f position, sf::Color color) {
+void Game_Manager::AddDamageCounter(float damage, sf::Vector2f position, sf::Color color) {
     GUI_TextLabel dmgLabel("Dmg", "data/fonts/Tiny5-Regular.ttf", 25, color);
 
     dmgLabel.SetText("-" + std::to_string(static_cast<int>(damage)));
@@ -444,7 +523,7 @@ void Game_Class::AddDamageCounter(float damage, sf::Vector2f position, sf::Color
 
     DamageCounter.emplace_back(dmgLabel, 1.0f);
 }
-void Game_Class::UpdateDamageCounters() {
+void Game_Manager::UpdateDamageCounters() {
     for (auto it = DamageCounter.begin(); it != DamageCounter.end(); ) {
         it->second -= dt;
 
@@ -459,7 +538,7 @@ void Game_Class::UpdateDamageCounters() {
     }
 }
 
-void Game_Class::AddTextLabel(const std::string &name, const std::string &content, sf::Vector2f position, int size,
+void Game_Manager::AddTextLabel(const std::string &name, const std::string &content, sf::Vector2f position, int size,
                               sf::Color color, bool isActive, bool OutlineEnabled) {
 
     GUI_TextLabel label(name, "data/fonts/Tiny5-Regular.ttf", size, color, OutlineEnabled);
@@ -469,7 +548,7 @@ void Game_Class::AddTextLabel(const std::string &name, const std::string &conten
     TextLabelList.push_back(label);
 }
 
-void Game_Class::SetupMap() {
+void Game_Manager::SetupMap() {
     const float blockSize = 40.f;
     const float screenWidth = 1280.f;
     const float screenHeight = 720.f;
@@ -498,7 +577,7 @@ void Game_Class::SetupMap() {
     }
 }
 
-Game_Class::Game_Class(sf::RenderWindow &window_, Player_Class &player_): window(window_), player(player_) {
+Game_Manager::Game_Manager(sf::RenderWindow &window_, Player &player_): window(window_), player(player_) {
     view.setSize({1280.0f, 720.0f});
     view.setCenter({640.0f, 360.0f});
 
@@ -512,7 +591,7 @@ Game_Class::Game_Class(sf::RenderWindow &window_, Player_Class &player_): window
     window.setView(view);
 }
 
-void Game_Class::Setup() {
+void Game_Manager::Run() {
     ReadData();
     WaveManager.LoadWaves("data/WaveList.json");
     std::cout<<WaveManager;
@@ -541,11 +620,17 @@ void Game_Class::Setup() {
     GUI_Button Button3("Exit", "data/textures/buttons/Exit_Button.png", {50, 600});
     PauseButtonList.push_back(Button3);
 
+    AddTextLabel("DiffTitle", "SELECT DIFFICULTY", {450, 200}, 40, sf::Color::White, true, true);
+    GUI_Button Button4("Easy", "data/textures/buttons/Easy_Button.png", sf::Vector2f(200, 350));
+    AddTextLabel("EasyDesc", "Experience gained is doubled", {185, 460}, 18, sf::Color::Yellow, true, true);
+    DifficultyButtons.emplace_back(Button4);
+    DifficultyButtons.emplace_back("Hard", "data/textures/buttons/Hard_Button.png", sf::Vector2f(800, 350));
+
     SetupMap();
     WindowRendering();
 }
 
-std::ostream & operator<<(std::ostream &out, const Game_Class &object) {
+std::ostream & operator<<(std::ostream &out, const Game_Manager &object) {
     out<<object.dt<<"\n"<<object.dtMultiplier<<"\n";
     for (const auto &i : object.EnemyList) {
         out<<i<<"\n";

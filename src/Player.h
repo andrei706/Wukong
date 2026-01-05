@@ -13,7 +13,7 @@
 
 #include "Tool_Ranged.h"
 
-class Player_Class {
+class Player {
     int Experience, Gauge = 50;
     bool Invincibility = false, inAttack = false, inRangedAttack = false, inRangedBallAttack = false;
     float SpeedMultiplier = 0.f;
@@ -39,11 +39,14 @@ class Player_Class {
 
     sf::Time InvincibilityTime = sf::seconds(1.0f), InAttackTime = sf::seconds(0.0f);
     sf::Clock ClockInvincibilityTime, AttackCooldown, RangedCooldown, BallRangedCooldown;
-    std::vector<std::shared_ptr<Attack_Hitbox>> ActiveHitboxes;
+    std::vector<std::shared_ptr<Attack>> ActiveHitboxes;
 
     bool isDodging = false;
     sf::Vector2f DodgeDirection;
     float DodgeSpeed = 12.f;
+
+    sf::RectangleShape DashCooldownSprite;
+    sf::Texture DashCooldownTexture;
 
     sf::Time DodgeDuration = sf::seconds(0.2f), DodgeCooldown = sf::seconds(1.4f);
     sf::Clock ClockDodgeDuration, ClockDodgeCooldown;
@@ -56,10 +59,11 @@ class Player_Class {
     void HandleDodge(Key_Manager &keyManager);
     float HandleAttack(Key_Manager& KeyManager);
     void UpgradeWeapon(const std::string& Name, float Bonus_Damage, float Damage_Multiplier);
+    void UpdateDashSprite();
 
 public:
-    explicit Player_Class(int Experience_ = 0, float InvincibilityTime_ = 1.0f);
-    friend std::ostream & operator<<(std::ostream & out, const Player_Class & object);
+    explicit Player(int Experience_ = 0, float InvincibilityTime_ = 1.0f);
+    friend std::ostream & operator<<(std::ostream & out, const Player & object);
     void ShowSprite(sf::RenderWindow& window) const;
     void SetPosition(sf::Vector2f position);
     sf::RectangleShape& GetSprite();
@@ -70,9 +74,9 @@ public:
     int GetGauge() const;
     void AddExperience(int Value);
     int GetExperience() const;
-    float TakeDamage(float Value);
+    bool TakeDamage(float Value);
     void RestoreHealth(float Value);
-    const std::vector<std::shared_ptr<Attack_Hitbox>>& GetHitboxes();
+    const std::vector<std::shared_ptr<Attack>>& GetHitboxes();
     void ApplyUpgrades(const std::vector<std::pair<std::string, float>>& upgrades);
     void Update(sf::RenderWindow &window, float deltaTime, float deltaTimeMultiplier, Key_Manager &keyManager);
 };

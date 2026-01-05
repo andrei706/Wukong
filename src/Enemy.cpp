@@ -86,7 +86,7 @@ sf::FloatRect Enemy::GetEnemyHitbox() {
     return Sprite.getGlobalBounds();
 }
 
-const std::vector<std::shared_ptr<Attack_Hitbox>> & Enemy::GetHitboxes() {
+const std::vector<std::shared_ptr<Attack>> & Enemy::GetHitboxes() {
     ActiveHitboxes.clear();
 
     if (MeleeWeapon != nullptr) {

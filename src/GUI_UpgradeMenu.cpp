@@ -53,7 +53,7 @@ GUI_UpgradeMenu::GUI_UpgradeMenu() :
     }
 }
 
-void GUI_UpgradeMenu::HandleInput(sf::Vector2f mousePos, Key_Manager &km, Player_Class &player) {
+void GUI_UpgradeMenu::HandleInput(sf::Vector2f mousePos, Key_Manager &km, Player &player) {
     //if (!isActive) return;
 
     int totalPendingCost = 0;
@@ -89,7 +89,7 @@ void GUI_UpgradeMenu::HandleInput(sf::Vector2f mousePos, Key_Manager &km, Player
 
 void GUI_UpgradeMenu::RevertChanges() { for (auto& pair : pendingUpgrades) pair.second = 0.0f; }
 
-void GUI_UpgradeMenu::UpdateLabels(const Player_Class &player) {
+void GUI_UpgradeMenu::UpdateLabels(const Player &player) {
     //if (!isActive) return;
 
     int totalPendingCost = 0;

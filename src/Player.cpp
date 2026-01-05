@@ -1,6 +1,6 @@
-#include "Player_Class.h"
+#include "Player.h"
 
-void Player_Class::UpdateInvincibility() {
+void Player::UpdateInvincibility() {
     if (Invincibility) {
         if (!isDodging) {
             if ((int)(ClockInvincibilityTime.getElapsedTime().asMilliseconds() / 100) % 2 == 0) {
@@ -16,13 +16,13 @@ void Player_Class::UpdateInvincibility() {
     }
 }
 
-void Player_Class::MakeInvincible(float Seconds) {
+void Player::MakeInvincible(float Seconds) {
     Invincibility = true;
     InvincibilityTime = sf::seconds(Seconds); // Set how long this specific invincibility lasts
     ClockInvincibilityTime.restart();
 }
 
-Player_Class::Player_Class(int Experience_, float InvincibilityTime_): Experience(Experience_), InvincibilityTime(sf::seconds(InvincibilityTime_)) {
+Player::Player(int Experience_, float InvincibilityTime_): Experience(Experience_), InvincibilityTime(sf::seconds(InvincibilityTime_)) {
 
     if (!PlayerTexture.loadFromFile("data/textures/player/Monkey_Sprite_Sheet.png")) {
         throw AssetMissingException("data/textures/player/Monkey_Sprite_Sheet.png");
@@ -34,6 +34,17 @@ Player_Class::Player_Class(int Experience_, float InvincibilityTime_): Experienc
     Sprite.setTextureRect(sf::IntRect({0, 0}, FrameSize));
     Sprite.setPosition(Position);
 
+    //sf::IntRect rechargingRect({0, 0}, {50, 50});
+
+    if (!DashCooldownTexture.loadFromFile("data/textures/player/dash_icon.png")) {
+        throw AssetMissingException("data/textures/player/dash_icon.png");
+    }
+    DashCooldownSprite.setTexture(&DashCooldownTexture);
+    DashCooldownSprite.setPosition({20.f, 80.f});
+    DashCooldownSprite.setOrigin({12.5f, 12.5f});
+    DashCooldownSprite.setTextureRect(sf::IntRect({0, 0}, {50, 50}));
+    DashCooldownSprite.setSize({25.f, 25.f});
+
     RangedCooldown.start();
     ClockDodgeCooldown.restart();
     BallRangedCooldown.start();
@@ -43,54 +54,55 @@ Player_Class::Player_Class(int Experience_, float InvincibilityTime_): Experienc
 
 }
 
-void Player_Class::ShowSprite(sf::RenderWindow &window) const {
+void Player::ShowSprite(sf::RenderWindow &window) const {
     window.draw(Sprite);
+    window.draw(DashCooldownSprite);
     Pole.ShowHitboxes(window);
 }
 
-void Player_Class::SetPosition(sf::Vector2f position) {
+void Player::SetPosition(sf::Vector2f position) {
     Sprite.setPosition(position);
     Position = position;
 }
 
-sf::RectangleShape & Player_Class::GetSprite() {
+sf::RectangleShape & Player::GetSprite() {
     return Sprite;
 }
 
-sf::Vector2f Player_Class::GetPosition() const {
+sf::Vector2f Player::GetPosition() const {
     return Sprite.getPosition();
 }
 
-float Player_Class::GetHealth() const {
+float Player::GetHealth() const {
     return Stats.GetHealth();
 }
 
-int Player_Class::GetGauge() const {
+int Player::GetGauge() const {
     return Gauge;
 }
 
-void Player_Class::AddExperience(int Value) {
+void Player::AddExperience(int Value) {
     Experience += Value;
 }
 
-int Player_Class::GetExperience() const {
+int Player::GetExperience() const {
     return Experience;
 }
 
-float Player_Class::TakeDamage(float Value) {
+bool Player::TakeDamage(float Value) {
     if (!Invincibility) {
-        //std::cout<<Value;
         MakeInvincible(0.5f);
-        return Stats.ReduceHealth(Value);
+        Stats.ReduceHealth(Value);
+        return 1;
     }
     return 0;
 }
 
-void Player_Class::RestoreHealth(float Value) {
+void Player::RestoreHealth(float Value) {
     Stats.RestoreHealth(Value);
 }
 
-const std::vector<std::shared_ptr<Attack_Hitbox>>& Player_Class::GetHitboxes(){
+const std::vector<std::shared_ptr<Attack>>& Player::GetHitboxes(){
     ActiveHitboxes.clear();
     const auto& pole_hits = Pole.GetAttackHitboxes();
     ActiveHitboxes.insert(ActiveHitboxes.end(), pole_hits.begin(), pole_hits.end());
@@ -102,7 +114,7 @@ const std::vector<std::shared_ptr<Attack_Hitbox>>& Player_Class::GetHitboxes(){
     return ActiveHitboxes;
 }
 
-void Player_Class::ApplyUpgrades(const std::vector<std::pair<std::string, float>> &upgrades) {
+void Player::ApplyUpgrades(const std::vector<std::pair<std::string, float>> &upgrades) {
     for (const auto& upgrade : upgrades) {
         const std::string& statName = upgrade.first;
         float value = upgrade.second;
@@ -130,7 +142,7 @@ void Player_Class::ApplyUpgrades(const std::vector<std::pair<std::string, float>
     }
 }
 
-void Player_Class::Update(sf::RenderWindow &window, float deltaTime, float deltaTimeMultiplier, Key_Manager &keyManager) {
+void Player::Update(sf::RenderWindow &window, float deltaTime, float deltaTimeMultiplier, Key_Manager &keyManager) {
     UpdateInvincibility();
     Pole.Update(deltaTime);
     Blast.Update(deltaTime);
@@ -145,9 +157,10 @@ void Player_Class::Update(sf::RenderWindow &window, float deltaTime, float delta
     }
     HandleMovement(window, deltaTime, deltaTimeMultiplier);
     UpdateAnimation(deltaTime);
+    UpdateDashSprite();
 }
 
-void Player_Class::Restart() {
+void Player::Restart() {
     Experience = 25;
     Gauge = 50;
     Stats.RestoreHealth(500.0f);
@@ -177,7 +190,7 @@ void Player_Class::Restart() {
     ClockInvincibilityTime.restart();
 }
 
-void Player_Class::PauseClocks(bool Pause) {
+void Player::PauseClocks(bool Pause) {
     if (Pause) {
         ClockDodgeDuration.stop();
         ClockInvincibilityTime.stop();
@@ -196,7 +209,7 @@ void Player_Class::PauseClocks(bool Pause) {
     }
 }
 
-float Player_Class::HandleAttack(Key_Manager& KeyManager) {
+float Player::HandleAttack(Key_Manager& KeyManager) {
     inAttack = false;
     if (!inRangedBallAttack && !inRangedAttack)
         SpeedMultiplier = 1.f;
@@ -227,7 +240,7 @@ float Player_Class::HandleAttack(Key_Manager& KeyManager) {
         if (Gauge < 96) Gauge += 5;
         float cooldown_time;
         inAttack = true;
-        SpeedMultiplier = 0.f;
+        SpeedMultiplier = 0.2f;
         cooldown_time = Pole.Attack(Sprite, Rotation);
         const auto& pole_hits = Pole.GetAttackHitboxes();
         ActiveHitboxes.insert(ActiveHitboxes.end(), pole_hits.begin(), pole_hits.end());
@@ -239,7 +252,7 @@ float Player_Class::HandleAttack(Key_Manager& KeyManager) {
             Gauge -= 5;
             ActiveHitboxes.clear();
             inRangedAttack = true;
-            SpeedMultiplier = 0.3f;
+            SpeedMultiplier = 0.4f;
             Blast.Attack(Sprite, Rotation);
             const auto& blast_hits = Blast.GetAttackHitboxes();
             ActiveHitboxes.insert(ActiveHitboxes.end(), blast_hits.begin(), blast_hits.end());
@@ -251,7 +264,7 @@ float Player_Class::HandleAttack(Key_Manager& KeyManager) {
     return 0.0f;
 }
 
-void Player_Class::UpgradeWeapon(const std::string &Name, float Bonus_Damage, float Damage_Multiplier) {
+void Player::UpgradeWeapon(const std::string &Name, float Bonus_Damage, float Damage_Multiplier) {
     if (Name == "Melee") {
         Pole.AddStat("Damage", Bonus_Damage);
         Pole.AddStat("Damage_Multiplier", Damage_Multiplier);
@@ -266,7 +279,34 @@ void Player_Class::UpgradeWeapon(const std::string &Name, float Bonus_Damage, fl
     }
 }
 
-void Player_Class::HandleMovement(sf::RenderWindow &window, float deltaTime, float deltaTimeMultiplier) {
+void Player::UpdateDashSprite() {
+    if (isDodging) {
+        DashCooldownSprite.setFillColor(sf::Color::Transparent);
+        return;
+    }
+    DashCooldownSprite.setPosition({Sprite.getPosition().x, Sprite.getPosition().y - 40});
+    float elapsed = ClockDodgeCooldown.getElapsedTime().asSeconds();
+    float cooldown = DodgeCooldown.asSeconds();
+    float lingerTime = 0.4f;
+    if (elapsed < cooldown) {
+        float ratio = elapsed / cooldown;
+        int alpha = static_cast<int>(ratio * 255);
+        DashCooldownSprite.setTextureRect(sf::IntRect({0, 0}, {50, 50}));
+        DashCooldownSprite.setScale({1.0f, 1.0f});
+        DashCooldownSprite.setFillColor(sf::Color(255, 255, 255, alpha));
+    }
+    else if (elapsed < cooldown + lingerTime) {
+        DashCooldownSprite.setTextureRect(sf::IntRect({50, 0}, {50, 50}));
+        DashCooldownSprite.setScale({1.2f, 1.2f});
+        DashCooldownSprite.setFillColor(sf::Color(255, 255, 255, 255));
+    }
+    else {
+        DashCooldownSprite.setFillColor(sf::Color::Transparent);
+        DashCooldownSprite.setScale({1.0f, 1.0f});
+    }
+}
+
+void Player::HandleMovement(sf::RenderWindow &window, float deltaTime, float deltaTimeMultiplier) {
 
     const float minX = 50.f;
     const float maxX = 1230.f;
@@ -325,7 +365,7 @@ void Player_Class::HandleMovement(sf::RenderWindow &window, float deltaTime, flo
     Rotation = sf::degrees(angleDegrees);
 }
 
-void Player_Class::UpdateAnimation(float dt) {
+void Player::UpdateAnimation(float dt) {
     if (isDodging)
         VisualID = 5;
     else if (inAttack) {
@@ -355,7 +395,7 @@ void Player_Class::UpdateAnimation(float dt) {
     else Sprite.setScale({-1.f, 1.f});
 }
 
-void Player_Class::StartDodge(sf::Vector2f inputDirection) {
+void Player::StartDodge(sf::Vector2f inputDirection) {
     isDodging = true;
     ClockDodgeDuration.restart();
     ClockDodgeCooldown.restart();
@@ -372,9 +412,13 @@ void Player_Class::StartDodge(sf::Vector2f inputDirection) {
     MakeInvincible(DodgeDuration.asSeconds());
 }
 
-void Player_Class::HandleDodge(Key_Manager &keyManager) {
+void Player::HandleDodge(Key_Manager &keyManager) {
     if (keyManager.CheckInput("Space")) {
         if (ClockDodgeCooldown.getElapsedTime() >= DodgeCooldown && !isDodging) {
+            if (inAttack) {
+                inAttack = false;
+                //Pole.ClearAttackHitboxes();
+            }
             MakeInvincible(0.5f);
             sf::Vector2f inputDir(0.f, 0.f);
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) inputDir.y -= 1.f;
@@ -389,7 +433,7 @@ void Player_Class::HandleDodge(Key_Manager &keyManager) {
     }
 }
 
-std::ostream & operator<<(std::ostream &out, const Player_Class &object) {
+std::ostream & operator<<(std::ostream &out, const Player &object) {
     out<<object.Experience<<"\n"<<object.Gauge<<"\n"<<object.inAttack<<"\n"<<object.Invincibility<<object.Pole;
     return out;
 }

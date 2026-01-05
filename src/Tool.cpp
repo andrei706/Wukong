@@ -99,7 +99,7 @@ void Tool::ClearAttackHitboxes() {
 }
 
 void Tool::CreateAttackHitbox(sf::Vector2f Position, sf::Vector2f Offset, sf::Angle Degrees) {
-    auto new_hitbox = std::make_shared<Attack_Hitbox>(
+    auto new_hitbox = std::make_shared<::Attack>(
         DamageCalculation(),
         sf::Vector2f{30.0f, 100.0f},
         Position + Offset,
@@ -121,7 +121,7 @@ const std::string & Tool::GetName() {
     return Name;
 }
 
-const std::vector<std::shared_ptr<Attack_Hitbox>> & Tool::GetAttackHitboxes() const {
+const std::vector<std::shared_ptr<Attack>> & Tool::GetAttackHitboxes() const {
     return Attacks;
 }
 

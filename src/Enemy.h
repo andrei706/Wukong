@@ -23,7 +23,7 @@ class Enemy {
     static int id;
     int LocalId;
 
-    std::vector<std::shared_ptr<Attack_Hitbox>> ActiveHitboxes;
+    std::vector<std::shared_ptr<Attack>> ActiveHitboxes;
 
     void MoveSafely(const std::vector<std::shared_ptr<Enemy>>& otherEnemies);
 
@@ -80,7 +80,7 @@ public:
     friend void swap(Enemy& first, Enemy& second) noexcept;
     Enemy& operator=(Enemy other);
     sf::FloatRect GetEnemyHitbox();
-    const std::vector<std::shared_ptr<Attack_Hitbox>>& GetHitboxes();
+    const std::vector<std::shared_ptr<Attack>>& GetHitboxes();
     void ChangeDamagedStatus(bool Value = true, float Seconds = 0.5f);
     const std::string& GetName() const;
     int GetLocalId() const;

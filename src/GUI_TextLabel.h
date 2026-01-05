@@ -29,7 +29,7 @@ public:
     friend std::ostream & operator<<(std::ostream & out, const GUI_TextLabel & object);
     void SetText(const std::string &TextValue_);
     void SetPosition(sf::Vector2f Position_);
-    //void SetColor(sf::Color TextColor);
+    void SetColor(sf::Color TextColor);
     //void SetSize(int Size_);
     const std::string& GetName() const;
     bool GetStatus() const;

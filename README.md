@@ -7,7 +7,7 @@ Wukong este un joc top-down action adventure despre o maimuță care dorește s�
 
 Inspirație: [The Legend of Zelda: The Minish Cap](https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_The_Minish_Cap), [Dragon Ball Z: The Legacy of Goku](https://en.wikipedia.org/wiki/Dragon_Ball_Z:_The_Legacy_of_Goku)
 
-### Caracteristicile implementate (v0.3)
+### Caracteristicile implementate (v0.3.1)
 - Sistem de Wave-uri:
 
     -Jucătorul trebuie să înfrângă toate valurile de inamici
@@ -16,6 +16,7 @@ Inspirație: [The Legend of Zelda: The Minish Cap](https://en.wikipedia.org/wiki
 
     -În funcție de cât de repede bați jocul, vei primi un rank
 - Meniu de pauză pentru a da replay sau exit
+- Două dificultăți: Easy și Hard
 - Îmbunătățirea abilităților în meniul de pauză
 - Inamici de tipuri diferite care pot folosi arme de tipuri diferite
 - Abilitățile jucătorului care sunt:

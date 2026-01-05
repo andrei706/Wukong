@@ -1,45 +1,39 @@
 # Wukong
 
-### Descriere
+![gif_gameplay](https://github.com/user-attachments/assets/97be0cab-7570-455b-969c-500f251330ed)
 
+### Descriere
 Wukong este un joc top-down action adventure despre o maimuță care dorește să-și înfrângă inamicii pentru a găsi o comoară dintr-un ținut uitat. Folosește-te de bățul maimuței pentru a dezlănțui atacuri cu scopul de a distruge inamicii care îți stau în cale. Încarcă bara de energie atacând inamici pentru a putea declanșa atacuri la distanță sau ferește-te de asalturi în situații critice. Utilizează tot arsenalul de abilități ale personajului pentru a copleși valurile de inamici și pentru a-ți îndeplini misiunea.
 
 Inspirație: [The Legend of Zelda: The Minish Cap](https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_The_Minish_Cap), [Dragon Ball Z: The Legacy of Goku](https://en.wikipedia.org/wiki/Dragon_Ball_Z:_The_Legacy_of_Goku)
 
-### Caracteristicile implementate (v0.2)
+### Caracteristicile implementate (v0.3)
 - Sistem de Wave-uri:
 
     -Jucătorul trebuie să înfrângă toate valurile de inamici
   
     -Dacă jucătorul nu reușește, trebuie să o ia de la capăt
+
+    -În funcție de cât de repede bați jocul, vei primi un rank
+- Meniu de pauză pentru a da replay sau exit
+- Îmbunătățirea abilităților în meniul de pauză
 - Inamici de tipuri diferite care pot folosi arme de tipuri diferite
 - Abilitățile jucătorului care sunt:
 
     -Atacarea de la apropiere, generând astfel și niște energie
   
-    -Atacarea de la distanță dacă are destulă energie
+    -Atacarea de la distanță folosind blast-uri mici sau mari
   
     -Eschivarea atacurilor
-- Meniu de pauză pentru a da replay sau exit
+
 
 ### Controls
 - WASD pentru mișcare
 - Left Mouse Button pentru atac la apropiere
-- Right Mouse Button pentru atac la distanță
+- Right Mouse Button pentru Blast
+- F pentru Spirit Ball
 - Space pentru Dodge
 - Esc pentru meniul de pauză
-
-### Tema 3 Goals
-- Sistem de upgrade: folosirea experience-ului dobândit pentru a-ți îmbunătăți statisticile
-- Sprite-uri pentru toți inamicii
-- Damage counter (cât damage și-a luat inamicul sau tu)
-- Un Boss Fight pentru ultimul Wave
-- Set de mișcări ale jucătorului extins:
-  
-    -Pararea atacurilor (probabil)
-  
-    -Spirit Ball: Un proiectil care consumă multă energie și care dă damage în continuu la inamic atâta timp cât stă în raza mingii
-- Infinite Mode (probabil)
   
 ### Important!
 
@@ -120,12 +114,12 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
 ## Tema 3
 
 #### Cerințe
-- [ ] 2 șabloane de proiectare (design patterns)
-- [ ] o clasă șablon cu sens; minim **2 instanțieri**
-  - [ ] preferabil și o funcție șablon (template) cu sens; minim 2 instanțieri
-- [ ] minim 85% din codul propriu să fie C++
+- [x] 2 șabloane de proiectare (design patterns): a fost implementat design pattern-ul Builder pentru inamici (Enemy_Builder) și design pattern-ul Factory pentru arme (Tool_Factory)
+- [x] o clasă șablon cu sens; minim **2 instanțieri** (Vezi clasa Random_Value_Generator)
+  - [x] preferabil și o funcție șablon (template) cu sens; minim 2 instanțieri (Vezi Template_Function.h)
+- [x] minim 85% din codul propriu să fie C++
 <!-- - [ ] o specializare pe funcție/clasă șablon -->
-- [ ] tag de `git` pe commit cu **toate bifele**: de exemplu `v0.3` sau `v1.0`
+- [x] tag de `git` pe commit cu **toate bifele**: de exemplu `v0.3` sau `v1.0`
 - [ ] code review #3 2 proiecte
 
 ## Instrucțiuni de compilare

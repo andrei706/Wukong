@@ -254,8 +254,8 @@ void Game_Manager::PauseHandler() {
             else if (i.GetName() == "Resume") {
                 isPaused = false;
                 player.PauseClocks(false);
-                for (auto &i : SpawnedEnemies)
-                    i->PauseClocks(false);
+                for (auto &j : SpawnedEnemies)
+                    j->PauseClocks(false);
             }
             else if (i.GetName() == "Replay")
                 Replay();

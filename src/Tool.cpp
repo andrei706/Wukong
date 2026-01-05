@@ -21,7 +21,7 @@ float Tool::DamageCalculation() const {
     return CalculatedDamage * Damage_Multiplier;
 }
 
-float Tool::Attack(const sf::RectangleShape &Sprite, sf::Angle Degrees){
+float Tool::CreateAttack(const sf::RectangleShape &Sprite, sf::Angle Degrees){
     float angleDegrees = (float)Degrees.asDegrees();
     float angleRadians = angleDegrees * (3.14 / 180.0);
 

@@ -229,7 +229,7 @@ float Player::HandleAttack(Key_Manager& KeyManager) {
             inRangedBallAttack = true;
             if (SpeedMultiplier > 0.9f)
                 SpeedMultiplier = 0.9f;
-            SpiritBall.Attack(Sprite, Rotation);
+            SpiritBall.CreateAttack(Sprite, Rotation);
             const auto& spirit_hits = SpiritBall.GetAttackHitboxes();
             ActiveHitboxes.insert(ActiveHitboxes.end(), spirit_hits.begin(), spirit_hits.end());
             BallRangedCooldown.restart();
@@ -241,7 +241,7 @@ float Player::HandleAttack(Key_Manager& KeyManager) {
         float cooldown_time;
         inAttack = true;
         SpeedMultiplier = 0.2f;
-        cooldown_time = Pole.Attack(Sprite, Rotation);
+        cooldown_time = Pole.CreateAttack(Sprite, Rotation);
         const auto& pole_hits = Pole.GetAttackHitboxes();
         ActiveHitboxes.insert(ActiveHitboxes.end(), pole_hits.begin(), pole_hits.end());
         return cooldown_time;
@@ -253,7 +253,7 @@ float Player::HandleAttack(Key_Manager& KeyManager) {
             ActiveHitboxes.clear();
             inRangedAttack = true;
             SpeedMultiplier = 0.4f;
-            Blast.Attack(Sprite, Rotation);
+            Blast.CreateAttack(Sprite, Rotation);
             const auto& blast_hits = Blast.GetAttackHitboxes();
             ActiveHitboxes.insert(ActiveHitboxes.end(), blast_hits.begin(), blast_hits.end());
 
@@ -415,10 +415,8 @@ void Player::StartDodge(sf::Vector2f inputDirection) {
 void Player::HandleDodge(Key_Manager &keyManager) {
     if (keyManager.CheckInput("Space")) {
         if (ClockDodgeCooldown.getElapsedTime() >= DodgeCooldown && !isDodging) {
-            if (inAttack) {
-                inAttack = false;
-                //Pole.ClearAttackHitboxes();
-            }
+            inAttack = false;
+            //Pole.ClearAttackHitboxes();
             MakeInvincible(0.5f);
             sf::Vector2f inputDir(0.f, 0.f);
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) inputDir.y -= 1.f;

@@ -335,7 +335,7 @@ void Enemy::HandleMeleeAttack(bool canAttack, sf::Vector2f direction) {
             float radians = std::atan2(direction.y, direction.x);
             float angleDegrees = radians * 180.0f / 3.14f;
 
-            MeleeWeapon->Attack(Sprite, sf::degrees(angleDegrees));
+            MeleeWeapon->CreateAttack(Sprite, sf::degrees(angleDegrees));
 
             CooldownClock.restart();
             inAttack = true;
@@ -354,7 +354,7 @@ void Enemy::HandleRangedAttack(bool canAttack, sf::Vector2f direction, float wai
         else if (CooldownClock.getElapsedTime().asSeconds() > RangedWeapon->GetCooldown() && !isRangedAttacking) {
             float radians = std::atan2(direction.y, direction.x);
             float angleDegrees = radians * 180.0f / 3.14159f;
-            float weaponCooldown = RangedWeapon->Attack(Sprite, sf::degrees(angleDegrees));
+            float weaponCooldown = RangedWeapon->CreateAttack(Sprite, sf::degrees(angleDegrees));
             nextAttackDelay = weaponCooldown + waitTime;
             isChargingRanged = false;
             isRangedAttacking = true;

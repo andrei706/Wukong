@@ -213,4 +213,4 @@ Comanda este aceeași ca la pasul 1 sau 2. Nu merge combinat cu Valgrind.
 - [Tiny5 Font](https://fonts.google.com/specimen/Tiny5?query=pixel)
 - [SFML](https://github.com/SFML/SFML/tree/3.0.2) (zlib)
 - [SFML Youtube Tutorials](https://www.youtube.com/playlist?list=PL6xSOsbVA1eaJnHo_O6uB4qU8LZWzzKdo)
-- adăugați trimiteri **detaliate** către resursele externe care v-au ajutat sau pe care le-ați folosit
+- [Nlohmann Json](https://github.com/nlohmann/json) folosit pentru citirea datelor

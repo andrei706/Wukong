@@ -2,215 +2,134 @@
 
 ![gif_gameplay](https://github.com/user-attachments/assets/97be0cab-7570-455b-969c-500f251330ed)
 
-### Descriere
-Wukong este un joc top-down action adventure despre o maimuță care dorește să-și înfrângă inamicii pentru a găsi o comoară dintr-un ținut uitat. Folosește-te de bățul maimuței pentru a dezlănțui atacuri cu scopul de a distruge inamicii care îți stau în cale. Încarcă bara de energie atacând inamici pentru a putea declanșa atacuri la distanță sau ferește-te de asalturi în situații critice. Utilizează tot arsenalul de abilități ale personajului pentru a copleși valurile de inamici și pentru a-ți îndeplini misiunea.
+## Description
+Wukong is a top-down action-adventure game about a monkey who wants to defeat his enemies to find a treasure in a forgotten land. Use the monkey's staff to unleash attacks in order to destroy the enemies standing in your way. Charge your energy bar by attacking enemies to trigger ranged attacks or dodge assaults in critical situations. Utilize the character's full arsenal of abilities to overwhelm waves of enemies and complete your mission.
 
-Inspirație: [The Legend of Zelda: The Minish Cap](https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_The_Minish_Cap), [Dragon Ball Z: The Legacy of Goku](https://en.wikipedia.org/wiki/Dragon_Ball_Z:_The_Legacy_of_Goku)
+Inspiration: [The Legend of Zelda: The Minish Cap](https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_The_Minish_Cap), [Dragon Ball Z: The Legacy of Goku](https://en.wikipedia.org/wiki/Dragon_Ball_Z:_The_Legacy_of_Goku)
 
-### Caracteristicile implementate (v0.3.1)
-- Sistem de Wave-uri:
+## Implemented Features (v0.3.1)
+- Wave System:
+  - The player must defeat all waves of enemies
+  - If the player fails, they must start over from the beginning
+  - Depending on how fast you beat the game, you will receive a rank
+- Pause menu to replay or exit
+- Two difficulties: Easy and Hard
+- Ability upgrades in the pause menu
+- Different types of enemies that can use different types of weapons
+- Player abilities which include:
+  - Melee attacking, which also generates energy
+  - Ranged attacking using small or large blasts
+  - Dodging attacks
 
-    -Jucătorul trebuie să înfrângă toate valurile de inamici
+## Controls
+
+| Key / Button | Action |
+| :--- | :--- |
+| **WASD** | for movement |
+| **Left Mouse Button** | for melee attack |
+| **Right Mouse Button** | for Blast |
+| **F** | for Spirit Ball |
+| **Space** | for Dodge |
+| **Esc** | for the pause menu |
   
-    -Dacă jucătorul nu reușește, trebuie să o ia de la capăt
+## Technical Details
 
-    -În funcție de cât de repede bați jocul, vei primi un rank
-- Meniu de pauză pentru a da replay sau exit
-- Două dificultăți: Easy și Hard
-- Îmbunătățirea abilităților în meniul de pauză
-- Inamici de tipuri diferite care pot folosi arme de tipuri diferite
-- Abilitățile jucătorului care sunt:
+The project is developed in **C++** and integrates Object-Oriented Programming concepts and design patterns:
 
-    -Atacarea de la apropiere, generând astfel și niște energie
-  
-    -Atacarea de la distanță folosind blast-uri mici sau mari
-  
-    -Eschivarea atacurilor
+### OOP Concepts Implemented
+* **Inheritance and Polymorphism:** A base class named `Enemy` was created, from which specific enemies derive (`Enemy_Walker`, `Enemy_Ranger`, `Enemy_Rotator`). The attack system works the same way (`Attack` and `Attack_Projectile`). This allows the game to control all entities uniformly, even if they behave differently.
+* **Smart Pointers & Downcasting:** Smart pointers (`std::shared_ptr`) are used so the game automatically deletes dead enemies from memory (without memory leaks). Additionally, `std::dynamic_pointer_cast` is used in `Game_Manager` to activate unique mechanics only for certain enemies (such as rotation for `Enemy_Rotator`).
+* **Error Handling (Exceptions):** If a JSON file or a texture is missing, the game does not hard crash directly; instead, it throws a custom error (e.g., `AssetMissingException`), explicitly explaining the problem that occurred.
+* **Templates:** A reusable class for random numbers (`Random_Value_Generator`) and generic functions (such as `RenderCollection`) were created, which can draw any list of objects on the screen, regardless of their type.
 
+### Design Patterns & Structure
+* **Builder Pattern (`Enemy_Builder`):** Allows configuring and assembling enemies in a structured way.
+* **Factory Pattern (`Tool_Factory`):** Manages the automatic creation of weapons. The game only requests a specific weapon type, and this class builds it on the spot.
+* **Data-Driven Architecture (JSON):** All enemy statistics, weapon details, and wave configurations (managed by `Wave_Manager`) are stored in external JSON files. This allows modifying the difficulty or adding new levels exclusively by editing text files, without needing to modify or recompile the C++ code.
 
-### Controls
-- WASD pentru mișcare
-- Left Mouse Button pentru atac la apropiere
-- Right Mouse Button pentru Blast
-- F pentru Spirit Ball
-- Space pentru Dodge
-- Esc pentru meniul de pauză
-  
-### Important!
+## Compilation Instructions
 
-Aveți voie cu cod generat de modele de limbaj la care nu ați contribuit semnificativ doar dacă documentați riguros acest proces.
-Codul generat pus "ca să fie"/pe care nu îl înțelegeți se punctează doar pentru puncte bonus, doar în contextul
-în care oferă funcționalități ajutătoare și doar dacă are sens.
+The project is configured with CMake.
 
-Codul din proiect trebuie să poată fi ușor de înțeles și de modificat de către altcineva. Pentru detalii, veniți la ore.
+Terminal instructions:
 
-O cerință nu se consideră îndeplinită dacă este realizată doar prin cod generat.
-
-- **Fără cod de umplutură/fără sens!**
-- **Fără copy-paste!**
-- **Fără variabile globale!**
-- **Fără atribute publice!**
-- **Pentru T2 și T3, fără date în cod!** Datele vor fi citite din fișier, aveți exemple destule.
-- **Obligatoriu** fișiere cu date mai multe din care să citiți, obligatoriu cu biblioteci externe: fișiere (local sau server) sau baze de date
-- obligatoriu (TBD) să integrați cel puțin două biblioteci externe pe lângă cele pentru stocare
-
-### Tema 0
-
-- [x] Nume proiect (poate fi schimbat ulterior)
-- [x] Scurtă descriere a temei alese, ce v-ați propus să implementați
-
-## Tema 1
-
-#### Cerințe
-- [x] definirea a minim **3-4 clase** folosind compunere cu clasele definite de voi; moștenirile nu se iau în considerare aici
-- [x] constructori de inițializare cu parametri pentru fiecare clasă
-- [x] pentru o aceeași (singură) clasă: constructor de copiere, `operator=` de copiere, destructor (vezi clasa Enemy)
-<!-- - [ ] pentru o altă clasă: constructor de mutare, `operator=` de mutare, destructor -->
-<!-- - [ ] pentru o altă clasă: toate cele 5 funcții membru speciale -->
-- [x] `operator<<` pentru **toate** clasele pentru afișare (`std::ostream`) folosind compunere de apeluri cu `operator<<`
-- [x] cât mai multe `const` (unde este cazul) și funcții `private`
-- [x] implementarea a minim 3 funcții membru publice pentru funcționalități netriviale specifice temei alese, dintre care cel puțin 1-2 funcții mai complexe
-  - nu doar citiri/afișări sau adăugat/șters elemente într-un/dintr-un vector
-- [x] scenariu de utilizare **cu sens** a claselor definite:
-  - crearea de obiecte și apelarea tuturor funcțiilor membru publice în main
-  - vor fi adăugate în fișierul `tastatura.txt` DOAR exemple de date de intrare de la tastatură (dacă există); dacă aveți nevoie de date din fișiere, creați alte fișiere separat
-- [x] minim 50-55% din codul propriu să fie C++, `.gitattributes` configurat corect
-- [x] tag de `git`: de exemplu `v0.1`
-- [x] serviciu de integrare continuă (CI) cu **toate bifele**; exemplu: GitHub Actions
-- [ ] code review #1 2 proiecte
-
-## Tema 2
-
-#### Cerințe
-- [x] separarea codului din clase în `.h` (sau `.hpp`) și `.cpp`
-- [x] moșteniri:
-  - minim o clasă de bază și **3 clase derivate** din aceeași ierarhie
-      Aceasta o să fie clasa **Enemy** cu derivatele **Enemy_Walker**, **Enemy_Ranger** și **Enemy_Rotator**.
-  - ierarhia trebuie să fie cu bază proprie, nu derivată dintr-o clasă predefinită
-  - [x] funcții virtuale (pure) apelate prin pointeri de bază din clasa care conține atributul de tip pointer de bază
-    - minim o funcție virtuală va fi **specifică temei** (i.e. nu simple citiri/afișări sau preluate din biblioteci i.e. draw/update/render)
-    - constructori virtuali (clone): sunt necesari, dar nu se consideră funcții specifice temei
-    - afișare virtuală, interfață non-virtuală
-  - [x] apelarea constructorului din clasa de bază din constructori din derivate
-  - [x] clasă cu atribut de tip pointer la o clasă de bază cu derivate; aici apelați funcțiile virtuale prin pointer de bază, eventual prin interfața non-virtuală din bază
-    - [x] suprascris cc/op= pentru copieri/atribuiri corecte, copy and swap
-    - [x] `dynamic_cast`/`std::dynamic_pointer_cast` pentru downcast cu sens (vezi functia ToggleRotatorRotation din Game_Class)
-    - [x] smart pointers (recomandat, opțional)
-- [x] excepții
-  - [x] ierarhie proprie cu baza `std::exception` sau derivată din `std::exception`; minim **3** clase pentru erori specifice distincte
-    - clasele de excepții trebuie să trateze categorii de erori distincte (exemplu de erori echivalente: citire fișiere cu diverse extensii)
-  - [x] utilizare cu sens: de exemplu, `throw` în constructor (sau funcție care întoarce un obiect), `try`/`catch` în `main`
-  - această ierarhie va fi complet independentă de ierarhia cu funcții virtuale
-- [x] funcții și atribute `static`
-- [x] STL
-- [x] cât mai multe `const`
-- [x] funcții *de nivel înalt*, de eliminat cât mai mulți getters/setters/funcții low-level
-- [x] minim 75-80% din codul propriu să fie C++
-- [x] la sfârșit: commit separat cu adăugarea unei noi clase derivate fără a modifica restul codului, **pe lângă cele 3 derivate deja adăugate** din aceeași ierarhie
-  - noua derivată nu poate fi una existentă care a fost ștearsă și adăugată din nou
-  - noua derivată va fi integrată în codul existent (adică va fi folosită, nu adăugată doar ca să fie)
-- [x] tag de `git` pe commit cu **toate bifele**: de exemplu `v0.2`
-- [ ] code review #2 2 proiecte
-
-## Tema 3
-
-#### Cerințe
-- [x] 2 șabloane de proiectare (design patterns): a fost implementat design pattern-ul Builder pentru inamici (Enemy_Builder) și design pattern-ul Factory pentru arme (Tool_Factory)
-- [x] o clasă șablon cu sens; minim **2 instanțieri** (Vezi clasa Random_Value_Generator)
-  - [x] preferabil și o funcție șablon (template) cu sens; minim 2 instanțieri (Vezi Template_Function.h)
-- [x] minim 85% din codul propriu să fie C++
-<!-- - [ ] o specializare pe funcție/clasă șablon -->
-- [x] tag de `git` pe commit cu **toate bifele**: de exemplu `v0.3` sau `v1.0`
-- [ ] code review #3 2 proiecte
-
-## Instrucțiuni de compilare
-
-Proiectul este configurat cu CMake.
-
-Instrucțiuni pentru terminal:
-
-1. Pasul de configurare
+1. Configuration step
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-# sau ./scripts/cmake.sh configure
+# or ./scripts/cmake.sh configure
 ```
 
-Sau pe Windows cu GCC folosind Git Bash:
+Or on Windows with GCC using Git Bash:
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -G Ninja
-# sau ./scripts/cmake.sh configure -g Ninja
+# or ./scripts/cmake.sh configure -g Ninja
 ```
 
-Pentru a configura cu ASan, avem opțiunea `-DUSE_ASAN=ON` (nu merge pe Windows cu GCC):
+To configure with ASan, we have the option `-DUSE_ASAN=ON` (does not work on Windows with GCC):
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DUSE_ASAN=ON
-# sau ./scripts/cmake.sh configure -e "-DUSE_ASAN=ON"
+# or ./scripts/cmake.sh configure -e "-DUSE_ASAN=ON"
 ```
 
+At this step, we can request to generate project files for various development environments.
 
-La acest pas putem cere să generăm fișiere de proiect pentru diverse medii de lucru.
-
-
-2. Pasul de compilare
+2. Compilation Step
 ```sh
 cmake --build build --config Debug --parallel 6
-# sau ./scripts/cmake.sh build
+# or ./scripts/cmake.sh build
 ```
+With the `parallel` option, we specify the number of files compiled in parallel.
 
-Cu opțiunea `parallel` specificăm numărul de fișiere compilate în paralel.
-
-
-3. Pasul de instalare (opțional)
+3. Installation step (optional)
 ```sh
 cmake --install build --config Debug --prefix install_dir
-# sau ./scripts/cmake.sh install
+# or ./scripts/cmake.sh install
 ```
 
-Vezi și [`scripts/cmake.sh`](scripts/cmake.sh).
+See also [`scripts/cmake.sh`](scripts/cmake.sh).
 
-Observație: folderele `build/` și `install_dir/` sunt adăugate în fișierul `.gitignore` deoarece
-conțin fișiere generate și nu ne ajută să le versionăm.
+Note: the `build/` and `install_dir/` folders are added to the .gitignore file because they contain generated files and there is no need to version them.
 
+## Instructions To Run The Executable
 
-## Instrucțiuni pentru a rula executabilul
+There are multiple variants:
 
-Există mai multe variante:
-
-1. Din directorul de build (implicit `build`). Executabilul se află la locația `./build/oop` după ce a fost rulat pasul de compilare al proiectului (`./scripts/cmake.sh build` - pasul 2 de mai sus).
+1. From the build directory (default `build`). The executable is located at `./build/oop` after running the project compilation step (`./scripts/cmake.sh build` - step 2 above).
 
 ```sh
 ./build/oop
 ```
 
-2. Din directorul `install_dir`. Executabilul se află la locația `./install_dir/bin/oop` după ce a fost rulat pasul de instalare (`./scripts/cmake.sh install` - pasul 3 de mai sus).
+2. From the install directory `install_dir`. The executable is located at `./install_dir/bin/oop` after running the installation step (`./scripts/cmake.sh install` - step 3 above).
 
 ```sh
 ./install_dir/bin/oop
 ```
 
-3. Rularea programului folosind Valgrind se poate face executând script-ul `./scripts/run_valgrind.sh` din rădăcina proiectului. Pe Windows acest script se poate rula folosind WSL (Windows Subsystem for Linux). Valgrind se poate rula în modul interactiv folosind: `RUN_INTERACTIVE=true ./scripts/run_valgrind.sh`
+3. Running the program using Valgrind can be done by executing the script `./scripts/run_valgrind.sh` from the root of the project. On Windows, this script can be run using WSL (Windows Subsystem for Linux). Valgrind can be run in interactive mode using: `RUN_INTERACTIVE=true ./scripts/run_valgrind.sh`
 
-Implicit, nu se rulează interactiv, iar datele pentru `std::cin` sunt preluate din fișierul `tastatura.txt`.
+By default, it does not run interactively, and data for `std::cin` is taken from the file `tastatura.txt`.
 
 ```sh
 RUN_INTERACTIVE=true ./scripts/run_valgrind.sh
-# sau
+# or
 ./scripts/run_valgrind.sh
 ```
 
-4. Pentru a rula executabilul folosind ASan, este nevoie ca la pasul de configurare (vezi mai sus) să fie activat acest sanitizer. Ar trebui să meargă pe macOS și Linux. Pentru Windows, ar merge doar cu MSVC (nerecomandat).
+4. To run the executable using ASan, it is required that this sanitizer is enabled during the configuration step (see above). It should work on macOS and Linux. For Windows, it would only work with MSVC (not recommended).
 
-Comanda este aceeași ca la pasul 1 sau 2. Nu merge combinat cu Valgrind.
+The command is the same as in step 1 or 2. It cannot be combined with Valgrind.
 
 ```sh
 ./build/oop
-# sau
+# or
 ./install_dir/bin/oop
 ```
 
-## Resurse
+## Resources
 - [Arial Font](https://github.com/kavin808/arial.ttf)
 - [Tiny5 Font](https://fonts.google.com/specimen/Tiny5?query=pixel)
 - [SFML](https://github.com/SFML/SFML/tree/3.0.2) (zlib)
 - [SFML Youtube Tutorials](https://www.youtube.com/playlist?list=PL6xSOsbVA1eaJnHo_O6uB4qU8LZWzzKdo)
-- [Nlohmann Json](https://github.com/nlohmann/json) folosit pentru citirea datelor
+- [Nlohmann Json](https://github.com/nlohmann/json) used for data reading
+
